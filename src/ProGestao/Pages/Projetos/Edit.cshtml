@@ -1,0 +1,233 @@
+﻿@page "{id:int}"
+@model ProGestao.Pages.Projetos.EditModel
+@{
+    ViewData["Title"] = "Editar Projeto";
+}
+
+<div class="header-blue">
+    <div class="container">
+        <h2 class="mb-0">
+            <i class="fas fa-edit me-2"></i>Editar Projeto
+        </h2>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            @if (Model.Projeto != null)
+            {
+                <form method="post">
+                    <input type="hidden" asp-for="Projeto.Id" />
+                    <input type="hidden" asp-for="Projeto.DataCriacao" />
+
+                    <!-- Card Principal -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-project-diagram me-2"></i>Informações do Projeto
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <!-- Nome do Projeto -->
+                                <div class="col-md-8 mb-3">
+                                    <label asp-for="Projeto.Nome" class="form-label">
+                                        <i class="fas fa-tag me-1"></i>Nome do Projeto *
+                                    </label>
+                                    <input asp-for="Projeto.Nome" class="form-control" placeholder="Digite o nome do projeto" />
+                                    <span asp-validation-for="Projeto.Nome" class="text-danger"></span>
+                                </div>
+
+                                <!-- Status -->
+                                <div class="col-md-4 mb-3">
+                                    <label asp-for="Projeto.StatusId" class="form-label">
+                                        <i class="fas fa-flag me-1"></i>Status *
+                                    </label>
+                                    <select asp-for="Projeto.StatusId" class="form-select" asp-items="Model.StatusSelectList">
+                                        <option value="">Selecione um status</option>
+                                    </select>
+                                    <span asp-validation-for="Projeto.StatusId" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <!-- Responsável -->
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="Projeto.ResponsavelId" class="form-label">
+                                        <i class="fas fa-user me-1"></i>Responsável *
+                                    </label>
+                                    <select asp-for="Projeto.ResponsavelId" class="form-select" asp-items="Model.ResponsaveisSelectList">
+                                        <option value="">Selecione um responsável</option>
+                                    </select>
+                                    <span asp-validation-for="Projeto.ResponsavelId" class="text-danger"></span>
+                                </div>
+
+                                <!-- Link do Projeto -->
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="Projeto.LinkProjeto" class="form-label">
+                                        <i class="fas fa-link me-1"></i>Link do Projeto
+                                    </label>
+                                    <input asp-for="Projeto.LinkProjeto" class="form-control" type="url" placeholder="https://..." />
+                                    <span asp-validation-for="Projeto.LinkProjeto" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <!-- Descrição -->
+                            <div class="mb-3">
+                                <label asp-for="Projeto.Descricao" class="form-label">
+                                    <i class="fas fa-align-left me-1"></i>Descrição
+                                </label>
+                                <textarea asp-for="Projeto.Descricao" class="form-control" rows="4" placeholder="Descreva os objetivos e detalhes do projeto"></textarea>
+                                <span asp-validation-for="Projeto.Descricao" class="text-danger"></span>
+                            </div>
+
+                            <div class="row">
+                                <!-- Data de Início -->
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="Projeto.DataInicio" class="form-label">
+                                        <i class="fas fa-calendar-plus me-1"></i>Data de Início *
+                                    </label>
+                                    <input asp-for="Projeto.DataInicio" class="form-control" type="datetime-local" />
+                                    <span asp-validation-for="Projeto.DataInicio" class="text-danger"></span>
+                                </div>
+
+                                <!-- Data de Fim Prevista -->
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="Projeto.DataFimPrevista" class="form-label">
+                                        <i class="fas fa-calendar-check me-1"></i>Data de Fim Prevista
+                                    </label>
+                                    <input asp-for="Projeto.DataFimPrevista" class="form-control" type="datetime-local" />
+                                    <span asp-validation-for="Projeto.DataFimPrevista" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <!-- Observações -->
+                            <div class="mb-3">
+                                <label asp-for="Projeto.Observacoes" class="form-label">
+                                    <i class="fas fa-sticky-note me-1"></i>Observações
+                                </label>
+                                <textarea asp-for="Projeto.Observacoes" class="form-control" rows="3" placeholder="Observações adicionais sobre o projeto"></textarea>
+                                <span asp-validation-for="Projeto.Observacoes" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card de Informações Adicionais -->
+                    <div class="card mt-4">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="fas fa-info-circle me-2"></i>Informações do Sistema
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <strong><i class="fas fa-plus me-1"></i>Criado em:</strong>
+                                    <br>@Model.Projeto.DataCriacao.ToString("dd/MM/yyyy HH:mm")
+                                </div>
+                                <div class="col-md-6">
+                                    <strong><i class="fas fa-hashtag me-1"></i>ID do Projeto:</strong>
+                                    <br>#@Model.Projeto.Id
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botões de Ação -->
+                    <div class="card mt-4">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <a href="/Projetos" class="btn btn-outline-secondary">
+                                        <i class="fas fa-arrow-left me-1"></i>Cancelar
+                                    </a>
+                                    <a href="/Projetos/Details/@Model.Projeto.Id" class="btn btn-outline-info ms-2">
+                                        <i class="fas fa-eye me-1"></i>Visualizar
+                                    </a>
+                                </div>
+
+                                <div>
+                                    <a href="/Projetos/Delete/@Model.Projeto.Id" class="btn btn-outline-danger me-2">
+                                        <i class="fas fa-trash me-1"></i>Excluir
+                                    </a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save me-1"></i>Salvar Alterações
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            }
+            else
+            {
+                <!-- Estado de Erro - Projeto não encontrado -->
+                <div class="card border-danger">
+                    <div class="card-header bg-danger text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-exclamation-triangle me-2"></i>Erro
+                        </h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                        <h4 class="text-danger">Projeto não encontrado</h4>
+                        <p class="text-muted">O projeto que você está tentando editar não foi encontrado.</p>
+                        <a href="/Projetos" class="btn btn-primary">
+                            <i class="fas fa-arrow-left me-1"></i>Voltar à Lista de Projetos
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Validação de data fim não pode ser menor que data início
+            const dataInicio = document.querySelector('input[name="Projeto.DataInicio"]');
+            const dataFim = document.querySelector('input[name="Projeto.DataFimPrevista"]');
+
+            function validarDatas() {
+                if (dataInicio.value && dataFim.value) {
+                    const inicio = new Date(dataInicio.value);
+                    const fim = new Date(dataFim.value);
+
+                    if (fim < inicio) {
+                        dataFim.setCustomValidity('A data de fim não pode ser anterior à data de início');
+                    } else {
+                        dataFim.setCustomValidity('');
+                    }
+                }
+            }
+
+            if (dataInicio && dataFim) {
+                dataInicio.addEventListener('change', validarDatas);
+                dataFim.addEventListener('change', validarDatas);
+            }
+
+            // Auto-resize textareas
+            const textareas = document.querySelectorAll('textarea');
+            textareas.forEach(textarea => {
+                textarea.addEventListener('input', function() {
+                    this.style.height = 'auto';
+                    this.style.height = this.scrollHeight + 'px';
+                });
+            });
+
+            // Validação de URL
+            const linkInput = document.querySelector('input[name="Projeto.LinkProjeto"]');
+            if (linkInput) {
+                linkInput.addEventListener('blur', function() {
+                    if (this.value && !this.value.startsWith('http://') && !this.value.startsWith('https://')) {
+                        this.value = 'https://' + this.value;
+                    }
+                });
+            }
+        });
+    </script>
+}
+
+<partial name="_ValidationScriptsPartial" />

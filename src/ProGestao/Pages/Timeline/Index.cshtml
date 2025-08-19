@@ -1,0 +1,282 @@
+﻿@page
+@model ProGestao.Pages.Timeline.IndexModel
+@{
+    ViewData["Title"] = "Timeline de Atividades";
+}
+
+<div class="header-blue">
+    <div class="container">
+        <h2 class="mb-0">
+            <i class="fas fa-timeline me-2"></i>Timeline de Atividades
+        </h2>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Filtros -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header card-header-blue">
+                    <h5 class="mb-0">Filtros da Timeline</h5>
+                </div>
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label">Período</label>
+                            <select name="periodo" class="form-select">
+                                <option value="7" selected="@(Model.PeriodoDias == 7)">Últimos 7 dias</option>
+                                <option value="15" selected="@(Model.PeriodoDias == 15)">Últimos 15 dias</option>
+                                <option value="30" selected="@(Model.PeriodoDias == 30)">Últimos 30 dias</option>
+                                <option value="60" selected="@(Model.PeriodoDias == 60)">Últimos 60 dias</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Usuários</label>
+                            <select name="usuarioIds" class="form-select" multiple>
+                                @foreach (var usuario in Model.Usuarios)
+                                {
+                                    <option value="@usuario.Id"
+                                            selected="@(Model.UsuariosSelecionados.Contains(usuario.Id))">
+                                        @usuario.Nome
+                                    </option>
+                                }
+                            </select>
+                            <small class="text-muted">Ctrl+clique para múltipla seleção</small>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Projetos</label>
+                            <select name="projetoIds" class="form-select" multiple>
+                                @foreach (var projeto in Model.Projetos)
+                                {
+                                    <option value="@projeto.Id"
+                                            selected="@(Model.ProjetosSelecionados.Contains(projeto.Id))">
+                                        @projeto.Nome
+                                    </option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button type="submit" class="btn btn-search me-2">
+                                <i class="fas fa-search me-1"></i>Filtrar
+                            </button>
+                            <a href="/Timeline" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-1"></i>Limpar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Timeline -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-clock me-2"></i>Timeline - @Model.AtividadesTimeline.Count() atividades encontradas
+                    </h6>
+                </div>
+                <div class="card-body">
+                    @if (Model.AtividadesTimeline.Any())
+                    {
+                        <div class="timeline">
+                            @foreach (var grupo in Model.AtividadesTimeline.GroupBy(a => a.DataReferencia.Date).OrderByDescending(g => g.Key))
+                            {
+                                <div class="timeline-date">
+                                    <h6 class="text-primary mb-3">
+                                        <i class="fas fa-calendar me-2"></i>
+                                        @grupo.Key.ToString("dddd, dd 'de' MMMM 'de' yyyy", new System.Globalization.CultureInfo("pt-BR"))
+                                    </h6>
+                                </div>
+
+                                @foreach (var atividade in grupo.OrderBy(a => a.DataReferencia))
+                                {
+                                    <div class="timeline-item">
+                                        <div class="timeline-marker timeline-marker-@atividade.TipoEvento.ToLower()">
+                                            @switch (atividade.TipoEvento)
+                                            {
+                                                case "Criacao":
+                                                    <i class="fas fa-plus"></i>
+                                                    break;
+                                                case "Inicio":
+                                                    <i class="fas fa-play"></i>
+                                                    break;
+                                                case "Conclusao":
+                                                    <i class="fas fa-check"></i>
+                                                    break;
+                                                case "Atualizacao":
+                                                    <i class="fas fa-edit"></i>
+                                                    break;
+                                                default:
+                                                    <i class="fas fa-circle"></i>
+                                                    break;
+                                            }
+                                        </div>
+                                        <div class="timeline-content">
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                <div>
+                                                    <h6 class="mb-1">@atividade.AtividadeNome</h6>
+                                                    <small class="text-muted">
+                                                        <i class="fas fa-project-diagram me-1"></i>@atividade.ProjetoNome
+                                                    </small>
+                                                </div>
+                                                <div class="text-end">
+                                                    <span class="badge" style="background-color: @atividade.StatusCor">
+                                                        @atividade.StatusNome
+                                                    </span>
+                                                    <br>
+                                                    <small class="text-muted">@atividade.DataReferencia.ToString("HH:mm")</small>
+                                                </div>
+                                            </div>
+
+                                            <div class="timeline-details">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <small class="text-muted">
+                                                            <i class="fas fa-user me-1"></i>
+                                                            <strong>Responsável:</strong> @atividade.UsuarioNome
+                                                        </small>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <small class="text-muted">
+                                                            <i class="fas fa-tag me-1"></i>
+                                                            <strong>Tipo:</strong> @atividade.TipoAtividadeNome
+                                                        </small>
+                                                    </div>
+                                                </div>
+
+                                                @if (!string.IsNullOrEmpty(atividade.Descricao))
+                                                {
+                                                    <p class="small text-muted mt-2 mb-0">@atividade.Descricao</p>
+                                                }
+
+                                                <div class="mt-2">
+                                                    <span class="badge bg-@atividade.PrioridadeCor me-2">
+                                                        @atividade.PrioridadeTexto
+                                                    </span>
+                                                    <span class="badge bg-secondary">
+                                                        @atividade.TipoEventoTexto
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-timeline fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">Nenhuma atividade encontrada no período selecionado.</p>
+                            <a href="/Atividades/Create" class="btn btn-primary">
+                                <i class="fas fa-plus me-1"></i>Criar Nova Atividade
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .timeline {
+        position: relative;
+        padding: 0;
+    }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 30px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #dee2e6;
+        }
+
+    .timeline-date {
+        margin-bottom: 2rem;
+        padding-left: 70px;
+    }
+
+    .timeline-item {
+        position: relative;
+        margin-bottom: 2rem;
+        padding-left: 70px;
+    }
+
+    .timeline-marker {
+        position: absolute;
+        left: 20px;
+        top: 5px;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 10px;
+        z-index: 1;
+    }
+
+    .timeline-marker-criacao {
+        background-color: #28a745;
+    }
+
+    .timeline-marker-inicio {
+        background-color: #007bff;
+    }
+
+    .timeline-marker-conclusao {
+        background-color: #17a2b8;
+    }
+
+    .timeline-marker-atualizacao {
+        background-color: #ffc107;
+    }
+
+    .timeline-content {
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+        .timeline-content:hover {
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+            transition: all 0.3s ease;
+        }
+
+    .timeline-details {
+        border-top: 1px solid #f8f9fa;
+        margin-top: 0.5rem;
+        padding-top: 0.5rem;
+    }
+
+    @@media (max-width: 768px) {
+        .timeline::before
+
+    {
+        left: 15px;
+    }
+
+    .timeline-marker {
+        left: 5px;
+    }
+
+    .timeline-item,
+    .timeline-date {
+        padding-left: 40px;
+    }
+
+    }
+</style>

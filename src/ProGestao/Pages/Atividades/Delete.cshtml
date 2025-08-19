@@ -1,0 +1,303 @@
+﻿@page "{id:int}"
+@model ProGestao.Pages.Atividades.DeleteModel
+@{
+    ViewData["Title"] = "Excluir Atividade";
+}
+
+<div class="header-blue">
+    <div class="container">
+        <h2 class="mb-0">
+            <i class="fas fa-trash me-2"></i>Excluir Atividade
+        </h2>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            @if (Model.Atividade != null)
+            {
+                <!-- Card de Confirmação -->
+                <div class="card border-danger">
+                    <div class="card-header bg-danger text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-exclamation-triangle me-2"></i>Confirmação de Exclusão
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-warning" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Atenção!</strong> Esta ação não pode ser desfeita. A atividade será permanentemente removida do sistema.
+                        </div>
+
+                        <!-- Informações da Atividade -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-danger">Tem certeza que deseja excluir esta atividade?</h6>
+                            </div>
+                        </div>
+
+                        <!-- Detalhes da Atividade -->
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <h5 class="card-title text-primary">@Model.Atividade.Nome</h5>
+                                        @if (!string.IsNullOrEmpty(Model.Atividade.Descricao))
+                                        {
+                                            <p class="card-text text-muted">@Model.Atividade.Descricao</p>
+                                        }
+                                    </div>
+                                    <div class="col-md-4 text-end">
+                                        @if (Model.Atividade.Status != null)
+                                        {
+                                            <span class="badge status-badge" style="background-color: @Model.Atividade.Status.Cor">
+                                                @Model.Atividade.Status.Nome
+                                            </span>
+                                            <br>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">Status não definido</span>
+                                            <br>
+                                        }
+                                        <span class="badge bg-@GetPrioridadeCor(Model.Atividade.Prioridade) mt-1">
+                                            @GetPrioridadeTexto(Model.Atividade.Prioridade)
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <hr>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <strong><i class="fas fa-project-diagram me-1"></i>Projeto:</strong>
+                                        <br>
+                                        @if (Model.Atividade.Projeto != null)
+                                        {
+                                            <span>📁 @Model.Atividade.Projeto.Nome</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted fst-italic">⚪ Sem projeto específico</span>
+                                        }
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong><i class="fas fa-user me-1"></i>Responsável:</strong>
+                                        <br>
+                                        @if (Model.Atividade.Usuario != null)
+                                        {
+                                            <span>👤 @Model.Atividade.Usuario.Nome</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Usuário não encontrado</span>
+                                        }
+                                    </div>
+                                </div>
+
+                                <div class="row mt-3">
+                                    <div class="col-md-6">
+                                        <strong><i class="fas fa-tag me-1"></i>Tipo:</strong>
+                                        <br>
+                                        @if (Model.Atividade.TipoAtividade != null)
+                                        {
+                                            <span>@Model.Atividade.TipoAtividade.Nome</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Tipo não definido</span>
+                                        }
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong><i class="fas fa-calendar me-1"></i>Data de Início:</strong>
+                                        <br>@Model.Atividade.DataInicio.ToString("dd/MM/yyyy HH:mm")
+                                    </div>
+                                </div>
+
+                                @if (Model.Atividade.DataFimPrevista.HasValue)
+                                {
+                                    <div class="row mt-3">
+                                        <div class="col-md-6">
+                                            <strong><i class="fas fa-calendar-check me-1"></i>Fim Previsto:</strong>
+                                            <br>@Model.Atividade.DataFimPrevista.Value.ToString("dd/MM/yyyy HH:mm")
+                                        </div>
+                                        @if (Model.Atividade.DataFimReal.HasValue)
+                                        {
+                                            <div class="col-md-6">
+                                                <strong><i class="fas fa-flag-checkered me-1"></i>Fim Real:</strong>
+                                                <br>@Model.Atividade.DataFimReal.Value.ToString("dd/MM/yyyy HH:mm")
+                                            </div>
+                                        }
+                                    </div>
+                                }
+
+                                @if (Model.Atividade.HorasEstimadas.HasValue || Model.Atividade.HorasReais.HasValue)
+                                {
+                                    <div class="row mt-3">
+                                        @if (Model.Atividade.HorasEstimadas.HasValue)
+                                        {
+                                            <div class="col-md-6">
+                                                <strong><i class="fas fa-clock me-1"></i>Horas Estimadas:</strong>
+                                                <br>@Model.Atividade.HorasEstimadas.Value.ToString("F1")h
+                                            </div>
+                                        }
+                                        @if (Model.Atividade.HorasReais.HasValue)
+                                        {
+                                            <div class="col-md-6">
+                                                <strong><i class="fas fa-stopwatch me-1"></i>Horas Reais:</strong>
+                                                <br>@Model.Atividade.HorasReais.Value.ToString("F1")h
+                                            </div>
+                                        }
+                                    </div>
+                                }
+
+                                @if (!string.IsNullOrEmpty(Model.Atividade.Observacoes))
+                                {
+                                    <div class="row mt-3">
+                                        <div class="col-12">
+                                            <strong><i class="fas fa-sticky-note me-1"></i>Observações:</strong>
+                                            <br>@Model.Atividade.Observacoes
+                                        </div>
+                                    </div>
+                                }
+
+                                <div class="row mt-3">
+                                    <div class="col-md-6">
+                                        <strong><i class="fas fa-plus me-1"></i>Criada em:</strong>
+                                        <br>@Model.Atividade.DataCriacao.ToString("dd/MM/yyyy HH:mm")
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong><i class="fas fa-edit me-1"></i>Última atualização:</strong>
+                                        <br>@Model.Atividade.DataAtualizacao.ToString("dd/MM/yyyy HH:mm")
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Formulário de Confirmação -->
+                        <form method="post" class="mt-4">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a href="/Atividades" class="btn btn-outline-secondary">
+                                    <i class="fas fa-arrow-left me-1"></i>Cancelar
+                                </a>
+
+                                <div>
+                                    <a href="/Atividades/Edit/@Model.Atividade.Id" class="btn btn-outline-warning me-2">
+                                        <i class="fas fa-edit me-1"></i>Editar em vez de Excluir
+                                    </a>
+                                    <button type="submit" class="btn btn-danger" onclick="return confirmarExclusao()">
+                                        <i class="fas fa-trash me-1"></i>Confirmar Exclusão
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Card de Informações Adicionais -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-info-circle me-2"></i>Informações Importantes
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="text-warning">⚠️ O que será removido:</h6>
+                                <ul class="small">
+                                    <li>Todos os dados da atividade</li>
+                                    <li>Histórico de alterações</li>
+                                    <li>Relacionamentos com o projeto</li>
+                                    <li>Métricas de produtividade relacionadas</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-info">💡 Alternativas:</h6>
+                                <ul class="small">
+                                    <li>Marcar como "Cancelada" em vez de excluir</li>
+                                    <li>Arquivar para consulta futura</li>
+                                    <li>Transferir para outro projeto</li>
+                                    <li>Editar e reutilizar</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <!-- Estado de Erro - Atividade não encontrada -->
+                <div class="card border-danger">
+                    <div class="card-header bg-danger text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-exclamation-triangle me-2"></i>Erro
+                        </h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                        <h4 class="text-danger">Atividade não encontrada</h4>
+                        <p class="text-muted">A atividade que você está tentando excluir não foi encontrada ou já foi removida.</p>
+                        <a href="/Atividades" class="btn btn-primary">
+                            <i class="fas fa-arrow-left me-1"></i>Voltar à Lista de Atividades
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function confirmarExclusao() {
+            @{
+                var nomeAtividade = Model.Atividade?.Nome ?? "Atividade";
+            }
+            var nomeAtividade = @Html.Raw(Json.Serialize(nomeAtividade));
+            
+            return confirm('⚠️ CONFIRMAÇÃO FINAL\n\nTem ABSOLUTA CERTEZA que deseja excluir esta atividade?\n\n"' + nomeAtividade + '"\n\nEsta ação NÃO PODE ser desfeita!');
+        }
+
+        // Adicionar efeito visual no botão de exclusão
+        document.addEventListener('DOMContentLoaded', function() {
+            const deleteBtn = document.querySelector('button[type="submit"]');
+            if (deleteBtn) {
+                deleteBtn.addEventListener('mouseenter', function() {
+                    this.innerHTML = '<i class="fas fa-skull-crossbones me-1"></i>EXCLUIR PERMANENTEMENTE';
+                });
+
+                deleteBtn.addEventListener('mouseleave', function() {
+                    this.innerHTML = '<i class="fas fa-trash me-1"></i>Confirmar Exclusão';
+                });
+            }
+        });
+    </script>
+}
+
+@functions {
+    string GetPrioridadeTexto(int prioridade)
+    {
+        return prioridade switch
+        {
+            1 => "Baixa",
+            2 => "Normal",
+            3 => "Alta",
+            4 => "Crítica",
+            _ => "Normal"
+        };
+    }
+
+    string GetPrioridadeCor(int prioridade)
+    {
+        return prioridade switch
+        {
+            1 => "success",
+            2 => "info",
+            3 => "warning",
+            4 => "danger",
+            _ => "info"
+        };
+    }
+}

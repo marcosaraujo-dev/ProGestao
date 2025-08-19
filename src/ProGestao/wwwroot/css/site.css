@@ -1,0 +1,482 @@
+/* ProGestao - Estilos Customizados */
+
+:root {
+    --primary-color: #2c5aa0;
+    --primary-dark: #1a4480;
+    --secondary-color: #f8f9fc;
+    --success-color: #28a745;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --info-color: #17a2b8;
+    --light-color: #f8f9fa;
+    --dark-color: #343a40;
+    --muted-color: #6c757d;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+}
+
+/* ========================================
+   HEADER E NAVEGAÇÃO
+   ======================================== */
+
+.header-blue {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    color: white;
+    padding: 2rem 0;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+
+.header-blue h1,
+.header-blue h2,
+.header-blue h3 {
+    color: white;
+    margin-bottom: 0;
+}
+
+/* ========================================
+   CARDS E CONTAINERS
+   ======================================== */
+
+.card {
+    border: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+    .card:hover {
+        box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+        transform: translateY(-2px);
+    }
+
+.card-header-blue {
+    background: var(--secondary-color);
+    border-bottom: 2px solid var(--primary-color);
+    font-weight: 600;
+}
+
+.card-header-blue h5,
+.card-header-blue h6 {
+    color: white;
+    margin-bottom: 0;
+}
+
+/* ========================================
+   BOTÕES PERSONALIZADOS
+   ======================================== */
+
+
+.btn-search {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+    .btn-search:hover {
+        background: var(--primary-dark);
+        border-color: var(--primary-dark);
+        color: white;
+    }
+
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    border-color: var(--primary-color);
+}
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%);
+        border-color: var(--primary-dark);
+        transform: translateY(-1px);
+    }
+
+/* ========================================
+   TABELAS RESPONSIVAS
+   ======================================== */
+.table-hover tbody tr {
+    transition: all 0.2s ease;
+}
+
+    .table-hover tbody tr:hover {
+        background-color: rgba(44, 90, 160, 0.05);
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: rgba(44, 90, 160, 0.05);
+    }
+
+
+
+/* Classes para prioridades */
+.priority-high {
+    border-left: 4px solid var(--danger-color);
+}
+
+.priority-normal {
+    border-left: 4px solid var(--success-color);
+}
+
+.priority-low {
+    border-left: 4px solid var(--info-color);
+}
+
+.priority-critical {
+    border-left: 4px solid #fd7e14;
+}
+
+
+
+/* ========================================
+   BADGES E STATUS
+   ======================================== */
+
+.status-badge {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-weight: 500;
+}
+
+.badge {
+    font-weight: 500;
+}
+
+
+/* ========================================
+   AVATARS E PERFIS
+   ======================================== */
+
+
+.avatar-circle {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+    text-transform: uppercase;
+}
+
+.avatar-sm {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+}
+
+.avatar-md {
+    width: 48px;
+    height: 48px;
+    font-size: 1.1rem;
+}
+
+.avatar-lg {
+    width: 64px;
+    height: 64px;
+    font-size: 1.5rem;
+}
+
+/* ========================================
+   Progress bar
+   ======================================== */
+
+.progress {
+    border-radius: 10px;
+    background-color: #e9ecef;
+}
+
+.progress-bar {
+    border-radius: 10px;
+}
+
+
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.5rem;
+}
+
+.btn {
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+    .btn:hover {
+        transform: translateY(-1px);
+    }
+
+/* ========================================
+   FORMULÁRIOS
+   ======================================== */
+
+.form-control, .form-select {
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+    transition: all 0.3s ease;
+}
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(44, 90, 160, 0.25);
+    }
+
+.form-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+
+.is-invalid {
+    border-color: var(--danger-color);
+}
+
+.invalid-feedback {
+    color: var(--danger-color);
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+.text-primary {
+    color: var(--primary-color) !important;
+}
+
+.bg-primary {
+    background-color: var(--primary-color) !important;
+}
+
+.border-primary {
+    border-color: var(--primary-color) !important;
+}
+
+.sem-projeto {
+    border-left: 3px solid #6c757d;
+    background-color: rgba(108, 117, 125, 0.05);
+}
+
+.com-projeto {
+    border-left: 3px solid #007bff;
+}
+
+.projeto-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .header-blue {
+        padding: 1.5rem 0;
+    }
+
+        .header-blue h1 {
+            font-size: 2rem;
+        }
+
+    .card-body .row.text-center > div {
+        margin-bottom: 1rem;
+    }
+}
+
+
+/* ========================================
+   ALERTAS PERSONALIZADOS
+   ======================================== */
+.alert {
+    border-radius: 0.5rem;
+    border: none;
+    padding: 1rem 1.25rem;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+    border-left: 4px solid var(--success-color);
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-left: 4px solid var(--danger-color);
+}
+
+.alert-warning {
+    background-color: #fff3cd;
+    color: #856404;
+    border-left: 4px solid var(--warning-color);
+}
+
+.alert-info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border-left: 4px solid var(--info-color);
+}
+
+/* ========================================
+   ESTADOS VAZIOS
+   ======================================== */
+.empty-state {
+    padding: 3rem 1rem;
+    text-align: center;
+}
+
+    .empty-state i {
+        opacity: 0.5;
+    }
+
+
+
+/* ========================================
+   ANIMAÇÕES E TRANSIÇÕES
+   ======================================== */
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+.slide-up {
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(10px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+
+.card {
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* Loading States */
+.btn.loading {
+    position: relative;
+    color: transparent;
+}
+
+    .btn.loading::after {
+        content: '';
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        top: 50%;
+        left: 50%;
+        margin-left: -8px;
+        margin-top: -8px;
+        border: 2px solid currentColor;
+        border-radius: 50%;
+        border-top-color: transparent;
+        animation: spin 1s linear infinite;
+    }
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ========================================
+   RESPONSIVIDADE
+   ======================================== */
+@media (max-width: 768px) {
+    .header-blue {
+        padding: 1.5rem 0;
+    }
+
+    .card {
+        margin-bottom: 1rem;
+    }
+
+    .btn-group {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+        .btn-group .btn {
+            margin-left: 0;
+            font-size: 0.8rem;
+        }
+
+    .table-responsive {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .header-blue h1,
+    .header-blue h2 {
+        font-size: 1.5rem;
+    }
+
+    .card-body {
+        padding: 1rem;
+    }
+
+    .btn {
+        font-size: 0.875rem;
+        padding: 0.5rem 1rem;
+    }
+}
+
+/* ========================================
+   IMPRESSÃO
+   ======================================== */
+@media print {
+    .header-blue,
+    .btn,
+    .dropdown,
+    .card-header,
+    .alert {
+        display: none !important;
+    }
+
+    .card {
+        border: 1px solid #000;
+        box-shadow: none;
+    }
+
+    .table {
+        font-size: 0.8rem;
+    }
+
+    .container {
+        max-width: 100%;
+        padding: 0;
+    }
+}

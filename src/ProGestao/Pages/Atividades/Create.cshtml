@@ -1,0 +1,252 @@
+﻿@page
+@model ProGestao.Pages.Atividades.CreateModel
+@{
+    ViewData["Title"] = "Nova Atividade";
+}
+
+<div class="header-blue">
+    <div class="container">
+        <h2 class="mb-0">
+            <i class="fas fa-plus me-2"></i>Nova Atividade
+        </h2>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header card-header-blue">
+                    <h5 class="mb-0">Informações da Atividade</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-8">
+                                <label asp-for="Atividade.Nome" class="form-label">Nome da Atividade *</label>
+                                <input asp-for="Atividade.Nome" class="form-control" placeholder="Digite o nome da atividade">
+                                <span asp-validation-for="Atividade.Nome" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="Atividade.Prioridade" class="form-label">Prioridade *</label>
+                                <select asp-for="Atividade.Prioridade" class="form-select">
+                                    <option value="1">🟢 Baixa</option>
+                                    <option value="2">🔵 Normal</option>
+                                    <option value="3" selected>🟡 Alta</option>
+                                    <option value="4">🔴 Crítica</option>
+                                </select>
+                                <span asp-validation-for="Atividade.Prioridade" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Atividade.Descricao" class="form-label">Descrição</label>
+                            <textarea asp-for="Atividade.Descricao" class="form-control" rows="3"
+                                      placeholder="Descreva os detalhes da atividade"></textarea>
+                            <span asp-validation-for="Atividade.Descricao" class="text-danger"></span>
+                        </div>
+
+                        <div class="row mb-3">
+                            <!-- ALTERAÇÃO: Projeto agora é opcional -->
+                            <div class="col-md-6">
+                                <label asp-for="Atividade.ProjetoId" class="form-label">
+                                    Projeto
+                                    <small class="text-muted">(opcional)</small>
+                                </label>
+                                <select asp-for="Atividade.ProjetoId" class="form-select" id="selectProjeto">
+                                    <option value="">⚪ Sem projeto específico</option>
+                                    @foreach (var projeto in Model.Projetos)
+                                    {
+                                        <option value="@projeto.Id">📁 @projeto.Nome</option>
+                                    }
+                                </select>
+                                <small class="text-muted">
+                                    Para atividades como férias, treinamentos ou reuniões gerais, deixe sem projeto.
+                                </small>
+                                <span asp-validation-for="Atividade.ProjetoId" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Atividade.UsuarioId" class="form-label">Responsável *</label>
+                                <select asp-for="Atividade.UsuarioId" class="form-select">
+                                    <option value="">Selecione um usuário</option>
+                                    @foreach (var usuario in Model.Usuarios)
+                                    {
+                                        <option value="@usuario.Id">👤 @usuario.Nome - @usuario.Cargo</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="Atividade.UsuarioId" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="Atividade.TipoAtividadeId" class="form-label">Tipo de Atividade *</label>
+                                <select asp-for="Atividade.TipoAtividadeId" class="form-select" id="selectTipoAtividade">
+                                    <option value="">Selecione o tipo</option>
+                                    @foreach (var tipo in Model.TiposAtividade)
+                                    {
+                                        <option value="@tipo.Id" data-tipo="@tipo.Nome">
+                                            @GetIconeTipoAtividade(tipo.Nome) @tipo.Nome
+                                        </option>
+                                    }
+                                </select>
+                                <span asp-validation-for="Atividade.TipoAtividadeId" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Atividade.StatusId" class="form-label">Status *</label>
+                                <select asp-for="Atividade.StatusId" class="form-select">
+                                    @foreach (var status in Model.StatusAtividades)
+                                    {
+                                        <option value="@status.Id" selected="@(status.Nome == "Pendente")">
+                                            ⚫ @status.Nome
+                                        </option>
+                                    }
+                                </select>
+                                <span asp-validation-for="Atividade.StatusId" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label asp-for="Atividade.DataInicio" class="form-label">Data de Início *</label>
+                                <input asp-for="Atividade.DataInicio" type="datetime-local" class="form-control">
+                                <span asp-validation-for="Atividade.DataInicio" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="Atividade.DataFimPrevista" class="form-label">Data Fim Prevista</label>
+                                <input asp-for="Atividade.DataFimPrevista" type="datetime-local" class="form-control">
+                                <span asp-validation-for="Atividade.DataFimPrevista" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="Atividade.HorasEstimadas" class="form-label">Horas Estimadas</label>
+                                <input asp-for="Atividade.HorasEstimadas" type="number" step="0.5" class="form-control"
+                                       placeholder="Ex: 8.5">
+                                <span asp-validation-for="Atividade.HorasEstimadas" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Atividade.Observacoes" class="form-label">Observações</label>
+                            <textarea asp-for="Atividade.Observacoes" class="form-control" rows="2"
+                                      placeholder="Observações adicionais"></textarea>
+                            <span asp-validation-for="Atividade.Observacoes" class="text-danger"></span>
+                        </div>
+
+                        <!-- Exemplos de Atividades Sem Projeto -->
+                        <div class="alert alert-light border" id="exemplosSemProjeto" style="display: none;">
+                            <h6 class="alert-heading">💡 Exemplos de atividades sem projeto:</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <ul class="small mb-0">
+                                        <li>🏖️ Férias</li>
+                                        <li>🤒 Atestado médico</li>
+                                        <li>📚 Treinamento</li>
+                                        <li>🎓 Capacitação</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <ul class="small mb-0">
+                                        <li>🤝 Reunião geral</li>
+                                        <li>📋 Processo seletivo</li>
+                                        <li>⚙️ Manutenção do sistema</li>
+                                        <li>📊 Relatórios mensais</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="/Atividades" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>Voltar
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save me-1"></i>Salvar Atividade
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Definir data atual como padrão para data de início
+            const dataInicio = document.querySelector('input[name="Atividade.DataInicio"]');
+            if (!dataInicio.value) {
+                const agora = new Date();
+                agora.setMinutes(agora.getMinutes() - agora.getTimezoneOffset());
+                dataInicio.value = agora.toISOString().slice(0, 16);
+            }
+
+            // Mostrar/ocultar exemplos quando selecionar "Sem projeto"
+            const selectProjeto = document.getElementById('selectProjeto');
+            const exemplosSemProjeto = document.getElementById('exemplosSemProjeto');
+
+            selectProjeto.addEventListener('change', function() {
+                if (this.value === '') {
+                    exemplosSemProjeto.style.display = 'block';
+                } else {
+                    exemplosSemProjeto.style.display = 'none';
+                }
+            });
+
+            // Sugerir tipos de atividade baseado no projeto
+            const selectTipo = document.getElementById('selectTipoAtividade');
+            selectProjeto.addEventListener('change', function() {
+                if (this.value === '') {
+                    // Sugerir tipos para atividades sem projeto
+                    sugerirTiposParaSemProjeto();
+                } else {
+                    // Resetar sugestões
+                    resetarSugestoesTipo();
+                }
+            });
+        });
+
+        function sugerirTiposParaSemProjeto() {
+            const selectTipo = document.getElementById('selectTipoAtividade');
+            const options = selectTipo.querySelectorAll('option');
+
+            options.forEach(option => {
+                const tipo = option.getAttribute('data-tipo');
+                if (tipo && (tipo.includes('Férias') || tipo.includes('Treinamento') || tipo.includes('Reunião'))) {
+                    option.style.fontWeight = 'bold';
+                    option.style.backgroundColor = '#e7f3ff';
+                }
+            });
+        }
+
+        function resetarSugestoesTipo() {
+            const selectTipo = document.getElementById('selectTipoAtividade');
+            const options = selectTipo.querySelectorAll('option');
+
+            options.forEach(option => {
+                option.style.fontWeight = 'normal';
+                option.style.backgroundColor = '';
+            });
+        }
+    </script>
+}
+
+@functions {
+    string GetIconeTipoAtividade(string tipo)
+    {
+        return tipo.ToLower() switch
+        {
+            "desenvolvimento" => "💻",
+            "teste" => "🧪",
+            "documentação" => "📝",
+            "reunião" => "🤝",
+            "férias" => "🏖️",
+            "treinamento" => "📚",
+            "deploy" => "🚀",
+            _ => "📋"
+        };
+    }
+}

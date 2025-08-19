@@ -1,0 +1,561 @@
+﻿@page
+@model ProGestao.Pages.Atividades.IndexModel
+@{
+    ViewData["Title"] = "Gestão de Atividades";
+}
+
+<div class="header-blue">
+    <div class="container">
+        <h2 class="mb-0">
+            <i class="fas fa-tasks me-2"></i>Gestão de Atividades
+        </h2>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Mensagens de Sucesso/Erro -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>@TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Filtros de Pesquisa - SEÇÃO CORRIGIDA -->
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">Projeto</label>
+                <select name="FiltroProjetoId" class="form-select">
+                    <option value="">Todos</option>
+                    <option value="0" selected="@(Model.FiltroProjetoId == "0")">⚪ Sem projeto</option>
+                    @foreach (var projeto in Model.Projetos)
+                    {
+                        <option value="@projeto.Id" selected="@(projeto.Id.ToString() == Model.FiltroProjetoId)">
+                            📁 @projeto.Nome
+                        </option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Usuário</label>
+                <select name="FiltroUsuarioId" class="form-select">
+                    <option value="">Todos os usuários</option>
+                    @foreach (var usuario in Model.Usuarios)
+                    {
+                        <option value="@usuario.Id" selected="@(usuario.Id.ToString() == Model.FiltroUsuarioId)">
+                            @usuario.Nome
+                        </option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Status</label>
+                <select name="FiltroStatusId" class="form-select">
+                    <option value="">Todos os status</option>
+                    @foreach (var status in Model.StatusAtividades)
+                    {
+                        <option value="@status.Id" selected="@(status.Id.ToString() == Model.FiltroStatusId)">
+                            @status.Nome
+                        </option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-search me-2">
+                    <i class="fas fa-search me-1"></i>Buscar
+                </button>
+                <a href="/Atividades" class="btn btn-outline-secondary">
+                    <i class="fas fa-times me-1"></i>Limpar
+                </a>
+            </div>
+        </form>
+    </div>
+    <!-- Resumo dos Resultados -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="text-muted">
+                        <i class="fas fa-list me-1"></i>
+                        Exibindo <strong>@Model.Atividades.Count()</strong> atividade(s)
+                        @if (!string.IsNullOrEmpty(Model.FiltroProjetoId) || !string.IsNullOrEmpty(Model.FiltroUsuarioId) || !string.IsNullOrEmpty(Model.FiltroStatusId))
+                        {
+                            <span class="badge bg-info ms-2">Filtros aplicados</span>
+                        }
+                    </span>
+                </div>
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-download me-1"></i>Exportar
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#" onclick="exportarCSV()"><i class="fas fa-file-csv me-2"></i>CSV</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="exportarExcel()"><i class="fas fa-file-excel me-2"></i>Excel</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="imprimirLista()"><i class="fas fa-print me-2"></i>Imprimir</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabela de Atividades -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-table me-2"></i>Lista de Atividades
+                    </h6>
+                </div>
+                <div class="card-body p-0">
+                    @if (Model.Atividades.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0" id="tabelaAtividades">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>
+                                            <i class="fas fa-tasks me-1"></i>Atividade
+                                        </th>
+                                        <th>
+                                            <i class="fas fa-project-diagram me-1"></i>Projeto
+                                        </th>
+                                        <th>
+                                            <i class="fas fa-user me-1"></i>Usuário
+                                        </th>
+                                        <th>
+                                            <i class="fas fa-tag me-1"></i>Tipo
+                                        </th>
+                                        <th>
+                                            <i class="fas fa-circle me-1"></i>Status
+                                        </th>
+                                        <th>
+                                            <i class="fas fa-calendar-start me-1"></i>Início
+                                        </th>
+                                        <th>
+                                            <i class="fas fa-calendar-check me-1"></i>Fim Previsto
+                                        </th>
+                                        <th>
+                                            <i class="fas fa-exclamation me-1"></i>Prioridade
+                                        </th>
+                                        <th width="140" class="text-center">
+                                            <i class="fas fa-cogs me-1"></i>Ações
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var atividade in Model.Atividades)
+                                    {
+                                        <tr class="@GetPriorityClass(atividade.Prioridade)" data-atividade-id="@atividade.Id">
+                                            <td>
+                                                <div class="d-flex align-items-start">
+                                                    <div class="flex-grow-1">
+                                                        <strong class="atividade-nome">@atividade.Nome</strong>
+                                                        @if (!string.IsNullOrEmpty(atividade.Descricao))
+                                                        {
+                                                            <br>
+                                                            <small class="text-muted">
+                                                                @atividade.Descricao.Substring(0, Math.Min(60, atividade.Descricao.Length))@(atividade.Descricao.Length > 60 ? "..." : "")
+                                                            </small>
+                                                        }
+                                                        
+                                                        @if (atividade.EstaAtrasada)
+                                                        {
+                                                            <br>
+                                                            <small class="badge bg-danger">
+                                                                <i class="fas fa-clock me-1"></i>Atrasada
+                                                            </small>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="projeto-info">
+                                                    @if (atividade.TemProjeto)
+                                                    {
+                                                        <span class="fw-medium">📁 @atividade.ProjetoNome</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted fst-italic">⚪ Sem projeto</span>
+                                                    }
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="avatar-sm me-2">
+                                                        @atividade.UsuarioNome?.Substring(0, 1).ToUpper()
+                                                    </div>
+                                                    <span>@atividade.UsuarioNome</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="tipo-atividade">@atividade.TipoAtividadeNome</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge status-badge" style="background-color: @atividade.StatusCor">
+                                                    @atividade.StatusNome
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <small>@atividade.DataInicio.ToString("dd/MM/yyyy")</small>
+                                                <br>
+                                                <small class="text-muted">@atividade.DataInicio.ToString("HH:mm")</small>
+                                            </td>
+                                            <td>
+                                                @if (atividade.DataFimPrevista.HasValue)
+                                                {
+                                                    <small>@atividade.DataFimPrevista.Value.ToString("dd/MM/yyyy")</small>
+                                                    <br>
+                                                    <small class="text-muted">@atividade.DataFimPrevista.Value.ToString("HH:mm")</small>
+                                                    
+                                                    @if (atividade.DiasRestantes <= 1 && !atividade.EstaConcluida)
+                                                    {
+                                                        <br>
+                                                        <small class="badge bg-warning text-dark">
+                                                            @atividade.DiasRestantes dia(s)
+                                                        </small>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <small class="text-muted">Não definido</small>
+                                                }
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-@atividade.PrioridadeCor">
+                                                    @atividade.PrioridadeTexto
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm" role="group">
+                                                    <!-- Botão Ver Detalhes -->
+                                                    <a href="/Atividades/Details/@atividade.Id" 
+                                                       class="btn btn-outline-info" 
+                                                       title="Ver Detalhes"
+                                                       data-bs-toggle="tooltip">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    
+                                                    <!-- Botão Editar -->
+                                                    <a href="/Atividades/Edit/@atividade.Id" 
+                                                       class="btn btn-outline-primary" 
+                                                       title="Editar Atividade"
+                                                       data-bs-toggle="tooltip">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    
+                                                    <!-- Botão Excluir -->
+                                                    <button type="button" 
+                                                            class="btn btn-outline-danger" 
+                                                            title="Excluir Atividade"
+                                                            data-bs-toggle="tooltip"
+                                                            onclick="confirmarExclusao(@atividade.Id, '@atividade.Nome')">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Paginação (se necessária no futuro) -->
+                        @if (Model.Atividades.Count() > 50)
+                        {
+                            <div class="card-footer">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="text-muted">
+                                        Mostrando @Model.Atividades.Count() de @Model.Atividades.Count() atividades
+                                    </span>
+                                    <!-- Implementar paginação no futuro -->
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <!-- Estado Vazio -->
+                        <div class="text-center py-5">
+                            <div class="empty-state">
+                                <i class="fas fa-tasks fa-4x text-muted mb-4"></i>
+                                <h4 class="text-muted">Nenhuma atividade encontrada</h4>
+                                <p class="text-muted mb-4">
+                                    @if (!string.IsNullOrEmpty(Model.FiltroProjetoId) || !string.IsNullOrEmpty(Model.FiltroUsuarioId) || !string.IsNullOrEmpty(Model.FiltroStatusId))
+                                    {
+                                        <span>Não há atividades que correspondam aos filtros aplicados.</span>
+                                        <br>
+                                        <a href="/Atividades" class="btn btn-outline-secondary mt-2">
+                                            <i class="fas fa-times me-1"></i>Limpar Filtros
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <span>Você ainda não possui atividades cadastradas.</span>
+                                    }
+                                </p>
+                                <a href="/Atividades/Create" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-plus me-2"></i>Criar Primeira Atividade
+                                </a>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ações em Lote (futuro) -->
+    @if (Model.Atividades.Any())
+    {
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-0">
+                                    <i class="fas fa-magic me-2"></i>Ações Rápidas
+                                </h6>
+                                <small class="text-muted">Realize ações em múltiplas atividades</small>
+                            </div>
+                            <div>
+                                <button type="button" class="btn btn-outline-primary btn-sm me-2" onclick="selecionarTodas()">
+                                    <i class="fas fa-check-square me-1"></i>Selecionar Todas
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="alterarStatusLote()">
+                                    <i class="fas fa-edit me-1"></i>Alterar Status
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        // Função para confirmar exclusão
+        function confirmarExclusao(id, nome) {
+            if (confirm(`⚠️ Tem certeza que deseja excluir a atividade "${nome}"?\n\nEsta ação não pode ser desfeita.`)) {
+                window.location.href = `/Atividades/Delete/${id}`;
+            }
+        }
+
+        // Inicializar tooltips do Bootstrap
+        document.addEventListener('DOMContentLoaded', function() {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+
+            // Auto-hide alerts após 5 segundos
+            setTimeout(function() {
+                var alerts = document.querySelectorAll('.alert');
+                alerts.forEach(function(alert) {
+                    var bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 5000);
+        });
+
+        // Função para exportar CSV
+        function exportarCSV() {
+            // Implementar exportação CSV
+            alert('Funcionalidade de exportação CSV será implementada em breve!');
+        }
+
+        // Função para exportar Excel
+        function exportarExcel() {
+            // Implementar exportação Excel
+            alert('Funcionalidade de exportação Excel será implementada em breve!');
+        }
+
+        // Função para imprimir lista
+        function imprimirLista() {
+            window.print();
+        }
+
+        // Função para selecionar todas as atividades
+        function selecionarTodas() {
+            var checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(function(checkbox) {
+                checkbox.checked = true;
+            });
+        }
+
+        // Função para alterar status em lote
+        function alterarStatusLote() {
+            alert('Funcionalidade de alteração em lote será implementada em breve!');
+        }
+
+        // Busca em tempo real (opcional)
+        function filtrarTabela() {
+            var input = document.getElementById('buscarAtividade');
+            var filter = input.value.toLowerCase();
+            var table = document.getElementById('tabelaAtividades');
+            var rows = table.getElementsByTagName('tr');
+
+            for (var i = 1; i < rows.length; i++) {
+                var nome = rows[i].querySelector('.atividade-nome');
+                if (nome) {
+                    var txtValue = nome.textContent || nome.innerText;
+                    if (txtValue.toLowerCase().indexOf(filter) > -1) {
+                        rows[i].style.display = '';
+                    } else {
+                        rows[i].style.display = 'none';
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Estilos personalizados para a tabela */
+        .priority-high { 
+            border-left: 4px solid #dc3545; 
+        }
+        .priority-normal { 
+            border-left: 4px solid #28a745; 
+        }
+        .priority-low { 
+            border-left: 4px solid #17a2b8; 
+        }
+        .priority-critical { 
+            border-left: 4px solid #fd7e14; 
+        }
+
+        .sem-projeto {
+            border-left: 3px solid #6c757d;
+            background-color: rgba(108, 117, 125, 0.05);
+        }
+
+        .com-projeto {
+            border-left: 3px solid #007bff;
+        }
+
+        .projeto-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .alert-light {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+        }
+
+        .fst-italic {
+            font-style: italic;
+        }
+
+        .avatar-sm {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .status-badge {
+            font-size: 0.8rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        .empty-state {
+            padding: 3rem 1rem;
+        }
+
+        .btn-group .btn {
+            border-radius: 0.375rem !important;
+            margin-left: 2px;
+        }
+
+        .btn-group .btn:first-child {
+            margin-left: 0;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: rgba(44, 90, 160, 0.05);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
+        }
+
+        .atividade-nome {
+            color: #2c5aa0;
+            text-decoration: none;
+        }
+
+        .atividade-nome:hover {
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        .tipo-atividade {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            background-color: #f8f9fa;
+            font-size: 0.9rem;
+        }
+
+        /* Responsividade */
+        @@media (max-width: 768px) {
+            .btn-group {
+                display: flex;
+                flex-direction: column;
+                gap: 2px;
+            }
+            
+            .btn-group .btn {
+                margin-left: 0;
+                font-size: 0.8rem;
+            }
+        }
+
+        /* Print styles */
+        @@media print {
+            .btn, .dropdown, .card-header {
+                display: none !important;
+            }
+            
+            .table {
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+}
+
+@functions {
+    string GetPriorityClass(int prioridade)
+    {
+        return prioridade switch
+        {
+            1 => "priority-low",
+            2 => "priority-normal", 
+            3 => "priority-high",
+            4 => "priority-critical",
+            _ => "priority-normal"
+        };
+    }
+}

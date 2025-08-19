@@ -555,15 +555,4 @@ FodyWeavers.xsd
 *.msi
 *.msix
 *.msm
-*.mspdotnet
-
-#locals
-# Configurações sensíveis
-appsettings.Development.json
-appsettings.Production.json
-appsettings.Local.json
-appsettings.*.json
-!appsettings.json
-secrets.json
-.env
-.env.*
+*.mspdotnet 

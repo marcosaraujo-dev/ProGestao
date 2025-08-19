@@ -1,0 +1,331 @@
+﻿@page "{id:int}"
+@model ProGestao.Pages.Projetos.DeleteModel
+@{
+    ViewData["Title"] = "Excluir Projeto";
+}
+
+<div class="header-blue">
+    <div class="container">
+        <h2 class="mb-0">
+            <i class="fas fa-trash me-2"></i>Excluir Projeto
+        </h2>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            @if (Model.Projeto != null)
+            {
+                <!-- Card de Confirmação -->
+                <div class="card border-danger">
+                    <div class="card-header bg-danger text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-exclamation-triangle me-2"></i>Confirmação de Exclusão
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-warning" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>ATENÇÃO!</strong> Esta ação não pode ser desfeita. O projeto e todas as suas atividades relacionadas serão permanentemente removidos do sistema.
+                        </div>
+
+                        <!-- Informações do Projeto -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-danger">Tem certeza que deseja excluir este projeto?</h6>
+                                @if (Model.AtividadesRelacionadas > 0)
+                                {
+                                    <div class="alert alert-danger mt-2">
+                                        <i class="fas fa-exclamation-circle me-2"></i>
+                                        <strong>Este projeto possui @Model.AtividadesRelacionadas atividade(s) relacionada(s) que também serão excluídas!</strong>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Detalhes do Projeto -->
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <h5 class="card-title text-primary">
+                                            <i class="fas fa-project-diagram me-2"></i>@Model.Projeto.Nome
+                                        </h5>
+                                        @if (!string.IsNullOrEmpty(Model.Projeto.Descricao))
+                                        {
+                                            <p class="card-text text-muted">@Model.Projeto.Descricao</p>
+                                        }
+                                    </div>
+                                    <div class="col-md-4 text-end">
+                                        @if (Model.Projeto.Status != null)
+                                        {
+                                            <span class="badge status-badge" style="background-color: @Model.Projeto.Status.Cor">
+                                                @Model.Projeto.Status.Nome
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">Status não definido</span>
+                                        }
+                                    </div>
+                                </div>
+
+                                <hr>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <strong><i class="fas fa-user me-1"></i>Responsável:</strong>
+                                        <br>
+                                        @if (Model.Projeto.Responsavel != null)
+                                        {
+                                            <span>👤 @Model.Projeto.Responsavel.Nome</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Responsável não encontrado</span>
+                                        }
+                                    </div>
+                                    <div class="col-md-6">
+                                        @if (!string.IsNullOrEmpty(Model.Projeto.LinkProjeto))
+                                        {
+                                            <strong><i class="fas fa-link me-1"></i>Link:</strong>
+                                            <br>
+                                            <a href="@Model.Projeto.LinkProjeto" target="_blank" class="text-decoration-none">
+                                                <i class="fas fa-external-link-alt me-1"></i>Acessar Projeto
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <strong><i class="fas fa-link me-1"></i>Link:</strong>
+                                            <br>
+                                            <span class="text-muted">Não informado</span>
+                                        }
+                                    </div>
+                                </div>
+
+                                <div class="row mt-3">
+                                    <div class="col-md-6">
+                                        <strong><i class="fas fa-calendar-plus me-1"></i>Data de Início:</strong>
+                                        <br>@Model.Projeto.DataInicio.ToString("dd/MM/yyyy HH:mm")
+                                    </div>
+                                    @if (Model.Projeto.DataFimPrevista.HasValue)
+                                    {
+                                        <div class="col-md-6">
+                                            <strong><i class="fas fa-calendar-check me-1"></i>Fim Previsto:</strong>
+                                            <br>@Model.Projeto.DataFimPrevista.Value.ToString("dd/MM/yyyy HH:mm")
+                                        </div>
+                                    }
+                                </div>
+
+                                @if (!string.IsNullOrEmpty(Model.Projeto.Observacoes))
+                                {
+                                    <div class="row mt-3">
+                                        <div class="col-12">
+                                            <strong><i class="fas fa-sticky-note me-1"></i>Observações:</strong>
+                                            <br>@Model.Projeto.Observacoes
+                                        </div>
+                                    </div>
+                                }
+
+                                <div class="row mt-3">
+                                    <div class="col-md-6">
+                                        <strong><i class="fas fa-plus me-1"></i>Criado em:</strong>
+                                        <br>@Model.Projeto.DataCriacao.ToString("dd/MM/yyyy HH:mm")
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong><i class="fas fa-hashtag me-1"></i>ID do Projeto:</strong>
+                                        <br>#@Model.Projeto.Id
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Atividades Relacionadas -->
+                        @if (Model.AtividadesRelacionadas > 0)
+                        {
+                            <div class="card mt-3 border-warning">
+                                <div class="card-header bg-warning text-dark">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-tasks me-2"></i>Atividades que serão excluídas
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="text-center">
+                                                <h4 class="text-warning mb-0">@Model.AtividadesRelacionadas</h4>
+                                                <small class="text-muted">Total de atividades</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-9">
+                                            <div class="row">
+                                                @if (Model.AtividadesEmAndamento > 0)
+                                                {
+                                                    <div class="col-md-4">
+                                                        <span class="badge bg-info">@Model.AtividadesEmAndamento Em Andamento</span>
+                                                    </div>
+                                                }
+                                                @if (Model.AtividadesConcluidas > 0)
+                                                {
+                                                    <div class="col-md-4">
+                                                        <span class="badge bg-success">@Model.AtividadesConcluidas Concluídas</span>
+                                                    </div>
+                                                }
+                                                @if (Model.AtividadesPendentes > 0)
+                                                {
+                                                    <div class="col-md-4">
+                                                        <span class="badge bg-warning">@Model.AtividadesPendentes Pendentes</span>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Formulário de Confirmação -->
+                        <form method="post" class="mt-4">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a href="/Projetos" class="btn btn-outline-secondary">
+                                    <i class="fas fa-arrow-left me-1"></i>Cancelar
+                                </a>
+
+                                <div>
+                                    <a href="/Projetos/Edit/@Model.Projeto.Id" class="btn btn-outline-warning me-2">
+                                        <i class="fas fa-edit me-1"></i>Editar em vez de Excluir
+                                    </a>
+                                    <button type="submit" class="btn btn-danger" onclick="return confirmarExclusao()">
+                                        <i class="fas fa-trash me-1"></i>Confirmar Exclusão
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Card de Informações Importantes -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-info-circle me-2"></i>Informações Importantes
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="text-warning">⚠️ O que será removido:</h6>
+                                <ul class="small">
+                                    <li>Todos os dados do projeto</li>
+                                    <li>Todas as atividades relacionadas (@Model.AtividadesRelacionadas)</li>
+                                    <li>Histórico de alterações</li>
+                                    <li>Métricas de produtividade relacionadas</li>
+                                    <li>Documentos e anexos do projeto</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-info">💡 Alternativas:</h6>
+                                <ul class="small">
+                                    <li>Marcar como "Cancelado" em vez de excluir</li>
+                                    <li>Arquivar para consulta futura</li>
+                                    <li>Transferir atividades para outro projeto</li>
+                                    <li>Fazer backup dos dados importantes</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <!-- Estado de Erro - Projeto não encontrado -->
+                <div class="card border-danger">
+                    <div class="card-header bg-danger text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-exclamation-triangle me-2"></i>Erro
+                        </h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                        <h4 class="text-danger">Projeto não encontrado</h4>
+                        <p class="text-muted">O projeto que você está tentando excluir não foi encontrado ou já foi removido.</p>
+                        <a href="/Projetos" class="btn btn-primary">
+                            <i class="fas fa-arrow-left me-1"></i>Voltar à Lista de Projetos
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function confirmarExclusao() {
+            @{
+                var nomeProjeto = Model.Projeto?.Nome ?? "Projeto";
+                var totalAtividades = Model.AtividadesRelacionadas;
+            }
+            var nomeProjeto = @Html.Raw(Json.Serialize(nomeProjeto));
+            var totalAtividades = @totalAtividades;
+            
+            var mensagemAtividades = totalAtividades > 0 ? 
+                `\n\n⚠️ ATENÇÃO: Este projeto possui ${totalAtividades} atividade(s) que também serão EXCLUÍDAS PERMANENTEMENTE!` : '';
+            
+            return confirm('🚨 CONFIRMAÇÃO FINAL\n\nTem ABSOLUTA CERTEZA que deseja excluir este projeto?\n\n"' + nomeProjeto + '"' + mensagemAtividades + '\n\nEsta ação NÃO PODE ser desfeita!\n\nDigite "CONFIRMAR" para prosseguir:') && 
+                   prompt('Digite "CONFIRMAR" em maiúsculas para prosseguir:') === 'CONFIRMAR';
+        }
+
+        // Adicionar efeito visual no botão de exclusão
+        document.addEventListener('DOMContentLoaded', function() {
+            const deleteBtn = document.querySelector('button[type="submit"]');
+            if (deleteBtn) {
+                deleteBtn.addEventListener('mouseenter', function() {
+                    this.innerHTML = '<i class="fas fa-skull-crossbones me-1"></i>EXCLUIR PERMANENTEMENTE';
+                    this.classList.add('btn-danger');
+                    this.classList.remove('btn-outline-danger');
+                });
+
+                deleteBtn.addEventListener('mouseleave', function() {
+                    this.innerHTML = '<i class="fas fa-trash me-1"></i>Confirmar Exclusão';
+                    this.classList.remove('btn-outline-danger');
+                    this.classList.add('btn-danger');
+                });
+            }
+
+            // Contador regressivo para forçar reflexão
+            let countdownActive = false;
+            deleteBtn?.addEventListener('click', function(e) {
+                if (!countdownActive) {
+                    e.preventDefault();
+                    countdownActive = true;
+                    
+                    let seconds = 5;
+                    const originalText = this.innerHTML;
+                    this.disabled = true;
+                    this.classList.add('btn-secondary');
+                    this.classList.remove('btn-danger');
+                    
+                    const interval = setInterval(() => {
+                        this.innerHTML = `<i class="fas fa-clock me-1"></i>Aguarde ${seconds}s para confirmar`;
+                        seconds--;
+                        
+                        if (seconds < 0) {
+                            clearInterval(interval);
+                            this.innerHTML = originalText;
+                            this.disabled = false;
+                            this.classList.remove('btn-secondary');
+                            this.classList.add('btn-danger');
+                            countdownActive = false;
+                        }
+                    }, 1000);
+                }
+            });
+        });
+    </script>
+}
+
+@functions {
+    // Se necessário, adicionar funções auxiliares aqui
+}

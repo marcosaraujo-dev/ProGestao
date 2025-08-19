@@ -1,0 +1,338 @@
+﻿@page
+@model ProGestao.Pages.Projetos.CreateModel
+@{
+    ViewData["Title"] = "Novo Projeto";
+}
+
+<div class="header-blue">
+    <div class="container">
+        <h2 class="mb-0">
+            <i class="fas fa-plus me-2"></i>Novo Projeto
+        </h2>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <form method="post">
+                <!-- Card Principal -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-project-diagram me-2"></i>Informações do Projeto
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                        <div class="row">
+                            <!-- Nome do Projeto -->
+                            <div class="col-md-8 mb-3">
+                                <label asp-for="Projeto.Nome" class="form-label">
+                                    <i class="fas fa-tag me-1"></i>Nome do Projeto *
+                                </label>
+                                <input asp-for="Projeto.Nome" class="form-control" placeholder="Digite o nome do projeto" />
+                                <span asp-validation-for="Projeto.Nome" class="text-danger"></span>
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Máximo 200 caracteres. Não use: &lt; &gt; " ' &amp;
+                                </div>
+                            </div>
+
+                            <!-- Status -->
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="Projeto.StatusId" class="form-label">
+                                    <i class="fas fa-flag me-1"></i>Status *
+                                </label>
+                                <select asp-for="Projeto.StatusId" class="form-select" asp-items="Model.StatusSelectList">
+                                    <option value="">Selecione um status</option>
+                                </select>
+                                <span asp-validation-for="Projeto.StatusId" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Responsável -->
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Projeto.ResponsavelId" class="form-label">
+                                    <i class="fas fa-user me-1"></i>Responsável
+                                </label>
+                                <select asp-for="Projeto.ResponsavelId" class="form-select" asp-items="Model.ResponsaveisSelectList">
+                                    <option value="">Selecione um responsável</option>
+                                </select>
+                                <span asp-validation-for="Projeto.ResponsavelId" class="text-danger"></span>
+                            </div>
+
+                            <!-- Link do Projeto -->
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Projeto.LinkProjeto" class="form-label">
+                                    <i class="fas fa-link me-1"></i>Link do Projeto
+                                </label>
+                                <input asp-for="Projeto.LinkProjeto" class="form-control" type="url" placeholder="https://..." />
+                                <span asp-validation-for="Projeto.LinkProjeto" class="text-danger"></span>
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    URL do repositório, documentação ou ferramenta de gestão
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Descrição -->
+                        <div class="mb-3">
+                            <label asp-for="Projeto.Descricao" class="form-label">
+                                <i class="fas fa-align-left me-1"></i>Descrição
+                            </label>
+                            <textarea asp-for="Projeto.Descricao" class="form-control" rows="4" placeholder="Descreva os objetivos e detalhes do projeto"></textarea>
+                            <span asp-validation-for="Projeto.Descricao" class="text-danger"></span>
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Máximo 1000 caracteres. <span id="descricao-counter">0/1000</span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Data de Início -->
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Projeto.DataInicio" class="form-label">
+                                    <i class="fas fa-calendar-plus me-1"></i>Data de Início *
+                                </label>
+                                <input asp-for="Projeto.DataInicio" class="form-control" type="datetime-local" />
+                                <span asp-validation-for="Projeto.DataInicio" class="text-danger"></span>
+                            </div>
+
+                            <!-- Data de Fim Prevista -->
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Projeto.DataFimPrevista" class="form-label">
+                                    <i class="fas fa-calendar-check me-1"></i>Data de Fim Prevista
+                                </label>
+                                <input asp-for="Projeto.DataFimPrevista" class="form-control" type="datetime-local" />
+                                <span asp-validation-for="Projeto.DataFimPrevista" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <!-- Observações -->
+                        <div class="mb-3">
+                            <label asp-for="Projeto.Observacoes" class="form-label">
+                                <i class="fas fa-sticky-note me-1"></i>Observações
+                            </label>
+                            <textarea asp-for="Projeto.Observacoes" class="form-control" rows="3" placeholder="Observações adicionais sobre o projeto"></textarea>
+                            <span asp-validation-for="Projeto.Observacoes" class="text-danger"></span>
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Máximo 500 caracteres. <span id="observacoes-counter">0/500</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card de Dicas -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-lightbulb me-2"></i>Dicas para um Projeto Bem Estruturado
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="text-primary">✅ Boas Práticas:</h6>
+                                <ul class="small">
+                                    <li>Use nomes descritivos e claros</li>
+                                    <li>Defina prazos realistas</li>
+                                    <li>Atribua um responsável qualificado</li>
+                                    <li>Documente objetivos na descrição</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-warning">💡 Lembre-se:</h6>
+                                <ul class="small">
+                                    <li>Status inicial recomendado: "Planejamento"</li>
+                                    <li>Links facilitam a colaboração da equipe</li>
+                                    <li>Observações podem conter critérios de sucesso</li>
+                                    <li>Você pode editar essas informações depois</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botões de Ação -->
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a href="/Projetos" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>Cancelar
+                            </a>
+
+                            <div>
+                                <button type="button" class="btn btn-outline-info me-2" onclick="previewProjeto()">
+                                    <i class="fas fa-eye me-1"></i>Visualizar
+                                </button>
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-save me-1"></i>Criar Projeto
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Preview -->
+<div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="previewModalLabel">
+                    <i class="fas fa-eye me-2"></i>Preview do Projeto
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="preview-content">
+                    <!-- Conteúdo será preenchido via JavaScript -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-success" onclick="submitForm()">
+                    <i class="fas fa-save me-1"></i>Confirmar e Criar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Validação de data fim não pode ser menor que data início
+            const dataInicio = document.querySelector('input[name="Projeto.DataInicio"]');
+            const dataFim = document.querySelector('input[name="Projeto.DataFimPrevista"]');
+
+            function validarDatas() {
+                if (dataInicio.value && dataFim.value) {
+                    const inicio = new Date(dataInicio.value);
+                    const fim = new Date(dataFim.value);
+
+                    if (fim < inicio) {
+                        dataFim.setCustomValidity('A data de fim não pode ser anterior à data de início');
+                    } else {
+                        dataFim.setCustomValidity('');
+                    }
+                }
+            }
+
+            if (dataInicio && dataFim) {
+                dataInicio.addEventListener('change', validarDatas);
+                dataFim.addEventListener('change', validarDatas);
+            }
+
+            // Contadores de caracteres
+            const descricaoTextarea = document.querySelector('textarea[name="Projeto.Descricao"]');
+            const observacoesTextarea = document.querySelector('textarea[name="Projeto.Observacoes"]');
+            const descricaoCounter = document.getElementById('descricao-counter');
+            const observacoesCounter = document.getElementById('observacoes-counter');
+
+            function atualizarContador(textarea, counter, limite) {
+                const length = textarea.value.length;
+                counter.textContent = `${length}/${limite}`;
+                counter.className = length > limite * 0.9 ? 'text-warning' : length > limite ? 'text-danger' : 'text-muted';
+            }
+
+            if (descricaoTextarea && descricaoCounter) {
+                descricaoTextarea.addEventListener('input', () => atualizarContador(descricaoTextarea, descricaoCounter, 1000));
+                atualizarContador(descricaoTextarea, descricaoCounter, 1000); // Inicial
+            }
+
+            if (observacoesTextarea && observacoesCounter) {
+                observacoesTextarea.addEventListener('input', () => atualizarContador(observacoesTextarea, observacoesCounter, 500));
+                atualizarContador(observacoesTextarea, observacoesCounter, 500); // Inicial
+            }
+
+            // Auto-resize textareas
+            const textareas = document.querySelectorAll('textarea');
+            textareas.forEach(textarea => {
+                textarea.addEventListener('input', function() {
+                    this.style.height = 'auto';
+                    this.style.height = this.scrollHeight + 'px';
+                });
+            });
+
+            // Validação de URL
+            const linkInput = document.querySelector('input[name="Projeto.LinkProjeto"]');
+            if (linkInput) {
+                linkInput.addEventListener('blur', function() {
+                    if (this.value && !this.value.startsWith('http://') && !this.value.startsWith('https://')) {
+                        this.value = 'https://' + this.value;
+                    }
+                });
+            }
+
+            // Verificação de nome duplicado (simples debounce)
+            const nomeInput = document.querySelector('input[name="Projeto.Nome"]');
+            let timeoutId;
+
+            if (nomeInput) {
+                nomeInput.addEventListener('input', function() {
+                    clearTimeout(timeoutId);
+                    timeoutId = setTimeout(() => {
+                        // Aqui você poderia implementar uma verificação AJAX se necessário
+                        console.log('Verificando disponibilidade do nome:', this.value);
+                    }, 500);
+                });
+            }
+        });
+
+        function previewProjeto() {
+            const nome = document.querySelector('input[name="Projeto.Nome"]').value || 'Não informado';
+            const descricao = document.querySelector('textarea[name="Projeto.Descricao"]').value || 'Não informada';
+            const dataInicio = document.querySelector('input[name="Projeto.DataInicio"]').value;
+            const dataFim = document.querySelector('input[name="Projeto.DataFimPrevista"]').value;
+            const statusSelect = document.querySelector('select[name="Projeto.StatusId"]');
+            const responsavelSelect = document.querySelector('select[name="Projeto.ResponsavelId"]');
+            const link = document.querySelector('input[name="Projeto.LinkProjeto"]').value;
+            const observacoes = document.querySelector('textarea[name="Projeto.Observacoes"]').value || 'Não informadas';
+
+            const statusTexto = statusSelect.selectedOptions[0]?.text || 'Não selecionado';
+            const responsavelTexto = responsavelSelect.selectedOptions[0]?.text || 'Não selecionado';
+
+            const dataInicioFormatada = dataInicio ? new Date(dataInicio).toLocaleString('pt-BR') : 'Não informada';
+            const dataFimFormatada = dataFim ? new Date(dataFim).toLocaleString('pt-BR') : 'Não informada';
+
+            const previewContent = `
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title text-primary">${nome}</h5>
+                        <p class="card-text">${descricao}</p>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong>Status:</strong> <span class="badge bg-info">${statusTexto}</span><br>
+                                <strong>Responsável:</strong> ${responsavelTexto}<br>
+                                <strong>Data de Início:</strong> ${dataInicioFormatada}
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Data Fim Prevista:</strong> ${dataFimFormatada}<br>
+                                ${link ? `<strong>Link:</strong> <a href="${link}" target="_blank">${link}</a><br>` : ''}
+                                <strong>Observações:</strong> ${observacoes}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('preview-content').innerHTML = previewContent;
+            new bootstrap.Modal(document.getElementById('previewModal')).show();
+        }
+
+        function submitForm() {
+            document.querySelector('form').submit();
+        }
+    </script>
+}
+
+<partial name="_ValidationScriptsPartial" />

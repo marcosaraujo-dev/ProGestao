@@ -1,0 +1,241 @@
+﻿@page "{id:int}"
+@model ProGestao.Pages.Atividades.DetailsModel
+@{
+    ViewData["Title"] = "Detalhes da Atividade";
+}
+
+<div class="header-blue">
+    <div class="container">
+        <h2 class="mb-0">
+            <i class="fas fa-eye me-2"></i>Detalhes da Atividade
+        </h2>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Card Principal -->
+            <div class="card">
+                <div class="card-header card-header-blue">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">@Model.Atividade.Nome</h5>
+                        <div>
+                            <span class="badge" style="background-color: @Model.Atividade.Status.Cor">
+                                @Model.Atividade.Status.Nome
+                            </span>
+                            <span class="badge bg-@GetPrioridadeCor(Model.Atividade.Prioridade)">
+                                @GetPrioridadeTexto(Model.Atividade.Prioridade)
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (!string.IsNullOrEmpty(Model.Atividade.Descricao))
+                    {
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-primary border-bottom pb-2 mb-3">
+                                    <i class="fas fa-align-left me-2"></i>Descrição
+                                </h6>
+                                <p class="text-muted">@Model.Atividade.Descricao</p>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Informações Gerais -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="text-primary border-bottom pb-2 mb-3">
+                                <i class="fas fa-info-circle me-2"></i>Informações Gerais
+                            </h6>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <strong><i class="fas fa-project-diagram me-1"></i>Projeto:</strong>
+                                <br>
+                                @if (Model.Atividade.Projeto != null)
+                                {
+                                    <span>📁 @Model.Atividade.Projeto.Nome</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted fst-italic">⚪ Atividade sem projeto específico</span>
+                                }
+                            </div>
+                            <div class="mb-3">
+                                <strong><i class="fas fa-user me-1"></i>Responsável:</strong>
+                                <br>👤 @Model.Atividade.Usuario.Nome (@Model.Atividade.Usuario.Cargo)
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <strong><i class="fas fa-tag me-1"></i>Tipo:</strong>
+                                <br>@Model.Atividade.TipoAtividade.Nome
+                            </div>
+                            <div class="mb-3">
+                                <strong><i class="fas fa-users me-1"></i>Equipe:</strong>
+                                <br>@Model.Atividade.Usuario.Equipe.Nome
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cronograma -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="text-primary border-bottom pb-2 mb-3">
+                                <i class="fas fa-calendar me-2"></i>Cronograma
+                            </h6>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center p-3 border rounded">
+                                <i class="fas fa-play-circle fa-2x text-info mb-2"></i>
+                                <h6>Início</h6>
+                                <p class="mb-0">@Model.Atividade.DataInicio.ToString("dd/MM/yyyy HH:mm")</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center p-3 border rounded">
+                                <i class="fas fa-flag-checkered fa-2x text-warning mb-2"></i>
+                                <h6>Fim Previsto</h6>
+                                @if (Model.Atividade.DataFimPrevista.HasValue)
+                                {
+                                    <p class="mb-0">@Model.Atividade.DataFimPrevista.Value.ToString("dd/MM/yyyy HH:mm")</p>
+                                }
+                                else
+                                {
+                                    <p class="mb-0 text-muted">Não definido</p>
+                                }
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center p-3 border rounded">
+                                <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                                <h6>Conclusão</h6>
+                                @if (Model.Atividade.DataFimReal.HasValue)
+                                {
+                                    <p class="mb-0">@Model.Atividade.DataFimReal.Value.ToString("dd/MM/yyyy HH:mm")</p>
+                                }
+                                else
+                                {
+                                    <p class="mb-0 text-muted">Em andamento</p>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Métricas de Horas -->
+                    @if (Model.Atividade.HorasEstimadas.HasValue || Model.Atividade.HorasReais.HasValue)
+                    {
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-primary border-bottom pb-2 mb-3">
+                                    <i class="fas fa-clock me-2"></i>Controle de Horas
+                                </h6>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="text-center p-3 border rounded">
+                                    <i class="fas fa-hourglass-start fa-2x text-primary mb-2"></i>
+                                    <h6>Estimadas</h6>
+                                    <p class="mb-0">@(Model.Atividade.HorasEstimadas?.ToString("F1") ?? "0")h</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="text-center p-3 border rounded">
+                                    <i class="fas fa-hourglass-end fa-2x text-success mb-2"></i>
+                                    <h6>Reais</h6>
+                                    <p class="mb-0">@(Model.Atividade.HorasReais?.ToString("F1") ?? "0")h</p>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Observações -->
+                    @if (!string.IsNullOrEmpty(Model.Atividade.Observacoes))
+                    {
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-primary border-bottom pb-2 mb-3">
+                                    <i class="fas fa-sticky-note me-2"></i>Observações
+                                </h6>
+                                <div class="alert alert-light">
+                                    @Model.Atividade.Observacoes
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Botões de Ação -->
+                    <div class="d-flex justify-content-between align-items-center">
+                        <a href="/Atividades" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>Voltar
+                        </a>
+                        <div>
+                            <a href="/Atividades/Edit/@Model.Atividade.Id" class="btn btn-warning">
+                                <i class="fas fa-edit me-1"></i>Editar
+                            </a>
+                            <button type="button" class="btn btn-danger" onclick="confirmarExclusao(@Model.Atividade.Id, '@Model.Atividade.Nome')">
+                                <i class="fas fa-trash me-1"></i>Excluir
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card de Auditoria -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-history me-2"></i>Informações de Auditoria
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Criada em:</strong> @Model.Atividade.DataCriacao.ToString("dd/MM/yyyy HH:mm")
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Última atualização:</strong> @Model.Atividade.DataAtualizacao.ToString("dd/MM/yyyy HH:mm")
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function confirmarExclusao(id, nome) {
+            if (confirm(`Tem certeza que deseja excluir a atividade "${nome}"?`)) {
+                window.location.href = `/Atividades/Delete/${id}`;
+            }
+        }
+    </script>
+}
+
+@functions {
+    string GetPrioridadeTexto(int prioridade)
+    {
+        return prioridade switch
+        {
+            1 => "Baixa",
+            2 => "Normal",
+            3 => "Alta",
+            4 => "Crítica",
+            _ => "Normal"
+        };
+    }
+
+    string GetPrioridadeCor(int prioridade)
+    {
+        return prioridade switch
+        {
+            1 => "success",
+            2 => "info",
+            3 => "warning",
+            4 => "danger",
+            _ => "info"
+        };
+    }
+}
