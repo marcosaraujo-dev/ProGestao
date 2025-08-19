@@ -1,209 +1,278 @@
 ﻿@page
 @model ProGestao.Pages.Grid.IndexModel
 @{
-    ViewData["Title"] = "Grid de Atividades";
+    ViewData["Title"] = "Grid Semanal";
+    ViewData["PageDescription"] = "Visualização em grid das atividades por semana";
 }
 
-<div class="header-blue">
-    <div class="container">
-        <h2 class="mb-0">
-            <i class="fas fa-th me-2"></i>Grid de Atividades por Membro
-        </h2>
-    </div>
-</div>
+@* CSS específico da página *@
+@section Styles {
+    <link rel="stylesheet" href="~/css/components/dropdown-fix.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/pages/grid.css" asp-append-version="true">
+}
 
 <div class="container-fluid">
-    <!-- Controles de Navegação -->
+    <!-- Page Header -->
     <div class="row mb-4">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-header card-header-blue">
-                    <div class="row align-items-center">
-                        <div class="col-lg-6 col-md-12 mb-2 mb-lg-0">
-                            <h5 class="mb-0">Período: @Model.DataInicio.ToString("dd/MM/yyyy") - @Model.DataFim.ToString("dd/MM/yyyy")</h5>
-                        </div>
-                        <div class="col-lg-6 col-md-12">
-                            <div class="d-flex flex-wrap gap-2 justify-content-lg-end">
-                                <div class="btn-group">
-                                    <a href="@Url.Page("/Grid/Index", new { dataInicio = Model.DataInicio.AddDays(-7), dataFim = Model.DataFim.AddDays(-7) })"
-                                       class="btn btn-outline-primary btn-sm">
-                                        <i class="fas fa-chevron-left"></i> <span class="d-none d-sm-inline">Anterior</span>
-                                    </a>
-                                    <a href="@Url.Page("/Grid/Index", new { dataInicio = DateTime.Today.AddDays(-((int)DateTime.Today.DayOfWeek)), dataFim = DateTime.Today.AddDays(6 - (int)DateTime.Today.DayOfWeek) })"
-                                       class="btn btn-primary btn-sm">
-                                        <span class="d-none d-sm-inline">Semana </span>Atual
-                                    </a>
-                                    <a href="@Url.Page("/Grid/Index", new { dataInicio = Model.DataInicio.AddDays(7), dataFim = Model.DataFim.AddDays(7) })"
-                                       class="btn btn-outline-primary btn-sm">
-                                        <span class="d-none d-sm-inline">Próxima</span> <i class="fas fa-chevron-right"></i>
-                                    </a>
-                                </div>
-                                <div class="btn-group">
-                                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown">
-                                        <i class="fas fa-calendar me-1"></i><span class="d-none d-sm-inline">Período</span>
-                                    </button>
-                                    <ul class="dropdown-menu dropdown-menu-end">
-                                        <li><a class="dropdown-item" href="@Url.Page("/Grid/Index", new { dataInicio = DateTime.Today.AddDays(-7), dataFim = DateTime.Today })">Últimos 7 dias</a></li>
-                                        <li><a class="dropdown-item" href="@Url.Page("/Grid/Index", new { dataInicio = DateTime.Today.AddDays(-15), dataFim = DateTime.Today })">Últimos 15 dias</a></li>
-                                        <li><a class="dropdown-item" href="@Url.Page("/Grid/Index", new { dataInicio = DateTime.Today.AddDays(-30), dataFim = DateTime.Today })">Últimos 30 dias</a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
+        <div class="col-12">
+            <div class="page-header">
+                <h2 class="page-title">
+                    <i class="fas fa-calendar-alt text-primary me-2"></i>
+                    Grid Semanal
+                </h2>
+                <p class="page-subtitle text-muted">
+                    Visualização das atividades da equipe organizadas por semana
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Controls Row -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="grid-controls d-flex justify-content-between align-items-center flex-wrap gap-3">
+                
+                <!-- Week Navigation -->
+                <div class="week-navigation">
+                    <div class="btn-group" role="group" aria-label="Navegação de semanas">
+                        <a href="@Url.Page("./Index", new { semana = Model.SemanaAnterior })" 
+                           class="btn btn-outline-primary">
+                            <i class="fas fa-chevron-left me-1"></i>
+                            Anterior
+                        </a>
+                        <button type="button" class="btn btn-primary position-relative">
+                            Semana Atual
+                            @if (Model.TemAtividadesAtrasadas)
+                            {
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                    @Model.QtdAtividadesAtrasadas
+                                    <span class="visually-hidden">atividades atrasadas</span>
+                                </span>
+                            }
+                        </button>
+                        <a href="@Url.Page("./Index", new { semana = Model.ProximaSemana })" 
+                           class="btn btn-outline-primary">
+                            Próxima
+                            <i class="fas fa-chevron-right ms-1"></i>
+                        </a>
                     </div>
+                </div>
+
+                <!-- Period Dropdown -->
+                <div class="period-controls d-flex align-items-center gap-2">
+                    <!-- Filtros adicionais -->
+                    <select class="form-select form-select-sm" style="width: auto;" 
+                            name="equipeId" onchange="this.form.submit()">
+                        <option value="">Todas as equipes</option>
+                        @foreach (var equipe in Model.Equipes)
+                        {
+                            <option value="@equipe.Id" selected="@(Model.FiltroEquipeId == equipe.Id)">
+                                @equipe.Nome
+                            </option>
+                        }
+                    </select>
+
+                    <!-- Dropdown de Período -->
+                    <div class="dropdown dropdown-period-container" 
+                         data-dropdown-auto 
+                         data-dropdown-id="period-dropdown">
+                        
+                        <button class="btn dropdown-period-toggle dropdown-toggle" 
+                                type="button" 
+                                id="dropdownPeriodo" 
+                                data-bs-toggle="dropdown" 
+                                aria-expanded="false"
+                                aria-haspopup="true"
+                                aria-label="Selecionar período de visualização">
+                            <i class="fas fa-calendar me-2"></i>
+                            <span id="period-label">@Model.PeriodoSelecionado</span>
+                        </button>
+                        
+                        <ul class="dropdown-menu" aria-labelledby="dropdownPeriodo">
+                            @foreach (var periodo in Model.PeriodosDisponiveis)
+                            {
+                                <li>
+                                    <button class="dropdown-period-item @(periodo.Valor == Model.PeriodoAtual ? "active" : "")" 
+                                            type="button"
+                                            data-period-value="@periodo.Valor"
+                                            data-period-label="@periodo.Nome">
+                                        <i class="@periodo.Icone me-2"></i>
+                                        @periodo.Nome
+                                        @if (periodo.Descricao != null)
+                                        {
+                                            <small class="text-muted d-block">@periodo.Descricao</small>
+                                        }
+                                    </button>
+                                </li>
+                            }
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <button class="dropdown-period-item" 
+                                        type="button"
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#customPeriodModal">
+                                    <i class="fas fa-cog me-2"></i>
+                                    Período customizado
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Refresh Button -->
+                    <button type="button" 
+                            class="btn btn-outline-secondary" 
+                            onclick="location.reload()"
+                            title="Atualizar dados">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Grid de Atividades -->
+    <!-- Grid Container -->
     <div class="row">
         <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h6 class="mb-0">
-                        <i class="fas fa-users me-2"></i>Atividades por Membro da Equipe
-                    </h6>
+            <div class="card shadow-sm grid-container">
+                <div class="card-header bg-light">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-th-large me-2"></i>
+                            @Model.TituloSemana
+                        </h5>
+                        <div class="grid-stats">
+                            <span class="badge bg-primary me-2">
+                                @Model.TotalAtividades atividades
+                            </span>
+                            @if (Model.TemAtividadesAtrasadas)
+                            {
+                                <span class="badge bg-danger">
+                                    @Model.QtdAtividadesAtrasadas atrasadas
+                                </span>
+                            }
+                        </div>
+                    </div>
                 </div>
+
                 <div class="card-body p-0">
-                    <div class="table-responsive-grid">
-                        <table class="table table-bordered mb-0 grid-atividades">
-                            <thead class="table-light">
+                    <!-- Grid responsivo -->
+                    <div class="table-responsive grid-wrapper">
+                        <table class="table table-bordered table-hover mb-0 week-grid">
+                            <thead class="table-light sticky-top">
                                 <tr>
-                                    <th class="usuario-column">Membro da Equipe</th>
-                                    @for (var data = Model.DataInicio; data <= Model.DataFim; data = data.AddDays(1))
+                                    <th scope="col" class="user-column">
+                                        <i class="fas fa-user me-1"></i>
+                                        Desenvolvedor
+                                    </th>
+                                    @foreach (var dia in Model.DiasSemana)
                                     {
-                                        <th class="data-column text-center @(data.Date == DateTime.Today ? "hoje" : "")">
-                                            <div class="data-header">
-                                                <div class="dia-semana">@data.ToString("ddd", new System.Globalization.CultureInfo("pt-BR"))</div>
-                                                <div class="dia-numero">@data.Day</div>
-                                                <div class="mes-ano">@data.ToString("MMM", new System.Globalization.CultureInfo("pt-BR"))</div>
+                                        <th scope="col" class="day-column text-center">
+                                            <div class="day-header">
+                                                <div class="day-name">@dia.DiaSemana</div>
+                                                <div class="day-number">@dia.Dia</div>
+                                                <small class="text-muted">@dia.Mes</small>
                                             </div>
                                         </th>
                                     }
                                 </tr>
                             </thead>
                             <tbody>
-                                @if (Model.GridData != null && Model.GridData.Any())
-                                {
-                                    @foreach (var usuario in Model.GridData)
-                                    {
-                                        <tr>
-                                            <td class="usuario-info">
-                                                <div class="d-flex align-items-center">
-                                                    <div class="avatar-circle me-3">
-                                                        @(usuario.Nome?.Substring(0, 1)?.ToUpper() ?? "?")
-                                                    </div>
-                                                    <div class="usuario-details">
-                                                        <div class="fw-bold user-name">@(usuario.Nome ?? "Usuário")</div>
-                                                        <small class="text-muted user-cargo">@(usuario.Cargo ?? "Sem cargo")</small>
-                                                        <br>
-                                                        <small class="text-muted user-equipe">@(usuario.EquipeNome ?? "Sem equipe")</small>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            @for (var data = Model.DataInicio; data <= Model.DataFim; data = data.AddDays(1))
-                                            {
-                                                <td class="atividade-cell @(data.Date == DateTime.Today ? "hoje" : "")"
-                                                    data-usuario="@usuario.Id"
-                                                    data-data="@data.ToString("yyyy-MM-dd")">
-                                                    @{
-                                                        var atividadesDoDia = usuario.AtividadesPorDia?.ContainsKey(data.Date) == true ?
-                                                        usuario.AtividadesPorDia[data.Date] :
-                                                        new List<ProGestao.ViewModels.AtividadeGridViewModel>();
-                                                    }
-
-                                                    @if (atividadesDoDia?.Any() == true)
-                                                    {
-                                                        @foreach (var atividade in atividadesDoDia.Take(3))
-                                                        {
-                                                            <div class="atividade-item atividade-@(atividade.StatusClasse ?? "pendente")"
-                                                                 title="@(atividade.Nome ?? "Sem nome") - @(atividade.ProjetoNome ?? "Sem projeto") (@(atividade.StatusNome ?? "Sem status"))"
-                                                                 data-bs-toggle="tooltip">
-                                                                <div class="atividade-nome">
-                                                                    @{
-                                                                        var nomeAtividade = atividade.Nome ?? "Sem nome";
-                                                                        var nomeExibido = nomeAtividade.Length > 25 ? nomeAtividade.Substring(0, 25) + "..." : nomeAtividade;
-                                                                    }
-                                                                    @nomeExibido
-                                                                </div>
-                                                                <div class="atividade-projeto">@(atividade.ProjetoNome ?? "Sem projeto")</div>
-                                                                <div class="atividade-status">
-                                                                    <span class="badge badge-sm" style="background-color: @(atividade.StatusCor ?? "#6c757d")">
-                                                                        @(atividade.StatusNome ?? "Sem status")
-                                                                    </span>
-                                                                    <span class="badge badge-sm bg-@(atividade.PrioridadeCor ?? "secondary")">
-                                                                        @(atividade.PrioridadeTexto ?? "Normal")
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                        }
-
-                                                        @if (atividadesDoDia.Count > 3)
-                                                        {
-                                                            <div class="atividade-item atividade-mais">
-                                                                <small>+@(atividadesDoDia.Count - 3) mais</small>
-                                                            </div>
-                                                        }
-                                                    }
-                                                    else
-                                                    {
-                                                        <div class="sem-atividade">
-                                                            <small class="text-muted">-</small>
-                                                        </div>
-                                                    }
-                                                </td>
-                                            }
-                                        </tr>
-                                    }
-                                }
-                                else
+                                @foreach (var usuario in Model.UsuariosGrid)
                                 {
                                     <tr>
-                                        <td colspan="8" class="text-center py-4">
-                                            <i class="fas fa-info-circle me-2"></i>
-                                            Nenhum membro ou atividade encontrada para o período selecionado.
+                                        <td class="user-cell">
+                                            <div class="user-info">
+                                                <div class="user-avatar">
+                                                    @usuario.Iniciais
+                                                </div>
+                                                <div class="user-details">
+                                                    <div class="user-name">@usuario.Nome</div>
+                                                    <small class="text-muted">@usuario.Cargo</small>
+                                                </div>
+                                            </div>
                                         </td>
+                                        @foreach (var dia in Model.DiasSemana)
+                                        {
+                                            <td class="activity-cell">
+                                                @{
+                                                    var atividades = usuario.AtividadesPorDia
+                                                        .Where(a => a.Data.Date == dia.Data.Date);
+                                                }
+                                                @if (atividades.Any())
+                                                {
+                                                    <div class="activities-container">
+                                                        @foreach (var atividade in atividades)
+                                                        {
+                                                            <div class="activity-item @GetActivityCssClass(atividade)"
+                                                                 data-bs-toggle="tooltip"
+                                                                 title="@atividade.Descricao">
+                                                                <div class="activity-content">
+                                                                    <div class="activity-title">@atividade.Nome</div>
+                                                                    <div class="activity-meta">
+                                                                        <span class="activity-status">
+                                                                            @atividade.Status.Nome
+                                                                        </span>
+                                                                        @if (atividade.Prioridade > 2)
+                                                                        {
+                                                                            <i class="fas fa-exclamation-triangle text-warning ms-1"></i>
+                                                                        }
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <div class="no-activities">
+                                                        <i class="fas fa-minus text-muted"></i>
+                                                    </div>
+                                                }
+                                            </td>
+                                        }
                                     </tr>
                                 }
                             </tbody>
                         </table>
                     </div>
                 </div>
+
+                @if (!Model.UsuariosGrid.Any())
+                {
+                    <div class="card-body text-center py-5">
+                        <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">Nenhuma atividade encontrada</h5>
+                        <p class="text-muted">
+                            Não há atividades cadastradas para o período selecionado.
+                        </p>
+                        <a href="@Url.Page("/Atividades/Create")" class="btn btn-primary">
+                            <i class="fas fa-plus me-1"></i>
+                            Criar Nova Atividade
+                        </a>
+                    </div>
+                }
             </div>
         </div>
     </div>
 
-    <!-- Legenda -->
+    <!-- Legend -->
     <div class="row mt-4">
         <div class="col-12">
             <div class="card">
-                <div class="card-header">
-                    <h6 class="mb-0">
-                        <i class="fas fa-info-circle me-2"></i>Legenda
-                    </h6>
-                </div>
                 <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <h6>Status das Atividades:</h6>
-                            <div class="d-flex flex-wrap gap-2">
-                                <span class="badge" style="background-color: #6c757d">Pendente</span>
-                                <span class="badge" style="background-color: #007bff">Em Andamento</span>
-                                <span class="badge" style="background-color: #ffc107">Pausada</span>
-                                <span class="badge" style="background-color: #28a745">Concluída</span>
-                                <span class="badge" style="background-color: #dc3545">Cancelada</span>
+                    <h6 class="card-title">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Legenda
+                    </h6>
+                    <div class="legend-items d-flex flex-wrap gap-3">
+                        @foreach (var status in Model.StatusAtividades)
+                        {
+                            <div class="legend-item d-flex align-items-center">
+                                <div class="legend-color" 
+                                     style="background-color: @status.Cor; width: 16px; height: 16px; border-radius: 2px;"></div>
+                                <span class="ms-2">@status.Nome</span>
                             </div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <h6>Prioridades:</h6>
-                            <div class="d-flex flex-wrap gap-2">
-                                <span class="badge bg-success">Baixa</span>
-                                <span class="badge bg-info">Normal</span>
-                                <span class="badge bg-warning">Alta</span>
-                                <span class="badge bg-danger">Crítica</span>
-                            </div>
-                        </div>
+                        }
                     </div>
                 </div>
             </div>
@@ -211,406 +280,136 @@
     </div>
 </div>
 
-<style>
-    /* Grid específico - CSS otimizado e sem duplicações */
-    .grid-atividades {
-        font-size: 0.85rem;
-        border-collapse: collapse;
-    }
-
-    .table-responsive-grid {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-
-    .usuario-column {
-        width: 200px;
-        min-width: 200px;
-        max-width: 200px;
-        position: sticky;
-        left: 0;
-        background: white;
-        z-index: 20;
-        border-right: 2px solid #dee2e6;
-    }
-
-    .data-column {
-        width: 120px;
-        min-width: 120px;
-        max-width: 120px;
-        vertical-align: top;
-        padding: 0;
-    }
-
-        .data-column.hoje {
-            background-color: rgba(44, 90, 160, 0.1) !important;
-            border-color: #2c5aa0;
-        }
-
-    .data-header {
-        padding: 0.5rem;
-        text-align: center;
-    }
-
-    .dia-semana {
-        font-weight: 600;
-        font-size: 0.75rem;
-        text-transform: uppercase;
-        color: #6c757d;
-    }
-
-    .dia-numero {
-        font-size: 1.1rem;
-        font-weight: bold;
-        color: #2c5aa0;
-        margin: 0.1rem 0;
-    }
-
-    .mes-ano {
-        font-size: 0.65rem;
-        color: #adb5bd;
-    }
-
-    .usuario-info {
-        padding: 0.75rem;
-        background: white;
-        position: sticky;
-        left: 0;
-        z-index: 20;
-        border-right: 2px solid #dee2e6;
-    }
-
-    .usuario-details {
-        min-width: 0;
-        flex: 1;
-    }
-
-    .user-name {
-        font-size: 0.85rem;
-        line-height: 1.2;
-        word-break: break-word;
-    }
-
-    .user-cargo, .user-equipe {
-        font-size: 0.7rem;
-        line-height: 1.1;
-        display: block;
-    }
-
-    .atividade-cell {
-        padding: 0.4rem;
-        vertical-align: top;
-        min-height: 80px;
-        background: #fafafa;
-        border-right: 1px solid #dee2e6;
-        position: relative;
-    }
-
-        .atividade-cell.hoje {
-            background-color: rgba(44, 90, 160, 0.05);
-            border-color: #2c5aa0;
-        }
-
-    .atividade-item {
-        background: white;
-        border: 1px solid #e0e0e0;
-        border-radius: 4px;
-        padding: 0.3rem;
-        margin-bottom: 0.25rem;
-        font-size: 0.7rem;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        word-break: break-word;
-    }
-
-        .atividade-item:hover {
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-            transform: translateY(-1px);
-            z-index: 10;
-        }
-
-    .atividade-pendente {
-        border-left: 3px solid #6c757d;
-    }
-
-    .atividade-andamento {
-        border-left: 3px solid #007bff;
-    }
-
-    .atividade-pausada {
-        border-left: 3px solid #ffc107;
-    }
-
-    .atividade-concluida {
-        border-left: 3px solid #28a745;
-    }
-
-    .atividade-cancelada {
-        border-left: 3px solid #dc3545;
-    }
-
-    .atividade-nome {
-        font-weight: 600;
-        color: #495057;
-        margin-bottom: 0.2rem;
-        line-height: 1.2;
-    }
-
-    .atividade-projeto {
-        color: #6c757d;
-        font-size: 0.65rem;
-        margin-bottom: 0.25rem;
-        line-height: 1.1;
-    }
-
-    .atividade-status {
-        display: flex;
-        gap: 0.15rem;
-        flex-wrap: wrap;
-    }
-
-    .badge-sm {
-        font-size: 0.6rem;
-        padding: 0.15rem 0.3rem;
-        line-height: 1;
-    }
-
-    .atividade-mais {
-        text-align: center;
-        background: #e9ecef;
-        border: 1px dashed #adb5bd;
-        color: #6c757d;
-        cursor: default;
-    }
-
-        .atividade-mais:hover {
-            transform: none;
-            box-shadow: none;
-        }
-
-    .sem-atividade {
-        text-align: center;
-        padding: 1rem;
-        color: #adb5bd;
-        font-style: italic;
-    }
-
-    .avatar-circle {
-        width: 35px;
-        height: 35px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #2c5aa0 0%, #1a4480 100%);
-        color: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-        font-size: 0.9rem;
-        flex-shrink: 0;
-    }
-
-    /* Responsividade aprimorada */
-    @@media (max-width: 1200px) {
-        .data-column
-
-    {
-        width: 100px;
-        min-width: 100px;
-        max-width: 100px;
-    }
-
-    .atividade-item {
-        font-size: 0.65rem;
-        padding: 0.25rem;
-    }
-
-    .badge-sm {
-        font-size: 0.55rem;
-        padding: 0.1rem 0.25rem;
-    }
-
-    }
-
-    @@media (max-width: 992px) {
-        .usuario-column
-
-    {
-        width: 160px;
-        min-width: 160px;
-        max-width: 160px;
-    }
-
-    .data-column {
-        width: 90px;
-        min-width: 90px;
-        max-width: 90px;
-    }
-
-    .avatar-circle {
-        width: 30px;
-        height: 30px;
-        font-size: 0.8rem;
-    }
-
-    .user-name {
-        font-size: 0.8rem;
-    }
-
-    .user-cargo, .user-equipe {
-        font-size: 0.65rem;
-    }
-
-    }
-
-    @@media (max-width: 768px) {
-        .usuario-column
-
-    {
-        width: 140px;
-        min-width: 140px;
-        max-width: 140px;
-    }
-
-    .data-column {
-        width: 80px;
-        min-width: 80px;
-        max-width: 80px;
-    }
-
-    .atividade-item {
-        font-size: 0.6rem;
-        padding: 0.2rem;
-    }
-
-    .atividade-nome {
-        margin-bottom: 0.1rem;
-    }
-
-    .atividade-projeto {
-        font-size: 0.6rem;
-        margin-bottom: 0.15rem;
-    }
-
-    .badge-sm {
-        font-size: 0.5rem;
-        padding: 0.1rem 0.2rem;
-    }
-
-    .dia-numero {
-        font-size: 1rem;
-    }
-
-    .dia-semana {
-        font-size: 0.7rem;
-    }
-
-    .mes-ano {
-        font-size: 0.6rem;
-    }
-
-    }
-
-    @@media (max-width: 576px) {
-        .usuario-column
-
-    {
-        width: 120px;
-        min-width: 120px;
-        max-width: 120px;
-    }
-
-    .data-column {
-        width: 70px;
-        min-width: 70px;
-        max-width: 70px;
-    }
-
-    .usuario-info {
-        padding: 0.5rem;
-    }
-
-    .atividade-cell {
-        padding: 0.3rem;
-        min-height: 60px;
-    }
-
-    .avatar-circle {
-        width: 25px;
-        height: 25px;
-        font-size: 0.7rem;
-    }
-
-    .user-cargo, .user-equipe {
-        display: none; /* Esconder em telas muito pequenas */
-    }
-
-    }
-
-    /* Tooltip customizado */
-    .tooltip {
-        font-size: 0.8rem;
-    }
-
-    /* Animações suaves */
-    .card {
-        transition: all 0.3s ease;
-    }
-
-    .btn {
-        transition: all 0.2s ease;
-    }
-
-    /* Melhorar contraste */
-    .card-header-blue {
-        background: linear-gradient(135deg, #f8f9fc 0%, #e3f2fd 100%);
-        border-bottom: 2px solid #2c5aa0;
-        color: #1a4480;
-    }
-</style>
-
+<!-- Modal para período customizado -->
+<div class="modal fade" id="customPeriodModal" tabindex="-1" aria-labelledby="customPeriodModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" asp-page-handler="CustomPeriod">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="customPeriodModalLabel">
+                        <i class="fas fa-calendar-alt me-2"></i>
+                        Período Customizado
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="dataInicio" class="form-label">Data Início</label>
+                            <input type="date" class="form-control" id="dataInicio" name="dataInicio" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="dataFim" class="form-label">Data Fim</label>
+                            <input type="date" class="form-control" id="dataFim" name="dataFim" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-check me-1"></i>
+                        Aplicar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@* JavaScript específico da página *@
 @section Scripts {
+    <script src="~/js/services/DropdownService.js" asp-append-version="true"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Inicializar tooltips
+            // Inicializa tooltips
             var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
             var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl, {
-                    delay: { show: 500, hide: 100 }
-                });
+                return new bootstrap.Tooltip(tooltipTriggerEl);
             });
 
-            // Melhorar experiência de scroll horizontal
-            const tableContainer = document.querySelector('.table-responsive-grid');
-            if (tableContainer) {
-                let isScrolling = false;
+            // Configura dropdown de período
+            setupPeriodDropdown();
 
-                tableContainer.addEventListener('scroll', function() {
-                    if (!isScrolling) {
-                        tableContainer.style.cursor = 'grabbing';
-                        isScrolling = true;
-                    }
-
-                    clearTimeout(this.scrollTimeout);
-                    this.scrollTimeout = setTimeout(() => {
-                        tableContainer.style.cursor = 'grab';
-                        isScrolling = false;
-                    }, 150);
-                });
-
-                // Indicar que a tabela é scrollável
-                if (tableContainer.scrollWidth > tableContainer.clientWidth) {
-                    tableContainer.style.cursor = 'grab';
-                }
+            // Auto-refresh (opcional)
+            @if (Model.AutoRefresh)
+            {
+                <text>
+                setInterval(function() {
+                    location.reload();
+                }, @Model.AutoRefreshInterval);
+                </text>
             }
+        });
 
-            // Adicionar indicadores visuais para atividades com prioridade crítica
-            const atividadesCriticas = document.querySelectorAll('.badge.bg-danger');
-            atividadesCriticas.forEach(function(badge) {
-                const atividadeItem = badge.closest('.atividade-item');
-                if (atividadeItem) {
-                    atividadeItem.style.boxShadow = '0 0 0 2px rgba(220, 53, 69, 0.2)';
+        function setupPeriodDropdown() {
+            // Registra o dropdown no serviço
+            const dropdown = window.ProGestao.DropdownService.register(
+                'period-dropdown',
+                document.querySelector('[data-dropdown-id="period-dropdown"]'),
+                {
+                    debug: @Json.Serialize(Model.IsDebugMode)
+                }
+            );
+
+            // Observer para mudanças de período
+            window.ProGestao.DropdownService.addObserver(function(event, data) {
+                if (event === 'itemClick' && data.id === 'period-dropdown') {
+                    handlePeriodChange(data.item);
                 }
             });
-        });
+        }
+
+        function handlePeriodChange(item) {
+            const periodValue = item.getAttribute('data-period-value');
+            const periodLabel = item.getAttribute('data-period-label');
+            
+            if (periodValue) {
+                // Atualiza o label do botão
+                document.getElementById('period-label').textContent = periodLabel;
+                
+                // Redireciona com o novo período
+                const url = new URL(window.location);
+                url.searchParams.set('periodo', periodValue);
+                window.location.href = url.toString();
+            }
+        }
+
+        // Função auxiliar para debug
+        @if (Model.IsDebugMode)
+        {
+            <text>
+            window.debugGrid = {
+                toggleDropdownDebug: function() {
+                    document.body.classList.toggle('debug-zindex');
+                },
+                getDropdownInfo: function() {
+                    return window.ProGestao.DropdownService.dropdowns.get('period-dropdown');
+                }
+            };
+            console.log('Grid Debug mode enabled. Use window.debugGrid for debugging.');
+            </text>
+        }
     </script>
+}
+
+@functions {
+    private string GetActivityCssClass(AtividadeGridViewModel atividade)
+    {
+        var classes = new List<string> { "activity-item" };
+        
+        // Status
+        classes.Add($"status-{atividade.Status.Nome.ToLower().Replace(" ", "-")}");
+        
+        // Prioridade
+        if (atividade.Prioridade >= 3)
+            classes.Add("high-priority");
+        
+        // Atraso
+        if (atividade.EstaAtrasada)
+            classes.Add("overdue");
+            
+        return string.Join(" ", classes);
+    }
 }

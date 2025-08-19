@@ -24,4 +24,8 @@
     <Folder Include="Utilities\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="wwwroot\css\pages\grid.css" />
+  </ItemGroup>
+
 </Project>

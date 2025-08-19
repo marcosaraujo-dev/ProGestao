@@ -11,6 +11,8 @@
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+    @RenderSection("Styles", required: false)
+
     <!-- CSS customizado -->
     <style>
         :root {
@@ -23,6 +25,13 @@
             --danger-color: #dc3545;
             --dark-color: #343a40;
             --light-color: #f8f9fa;
+
+            --z-dropdown: 1050; /* Dropdown principal */
+            --z-modal: 1055; /* Modais */
+            --z-tooltip: 1070; /* Tooltips */
+            --z-navbar: 1030; /* Navbar fixa */
+            --z-sticky: 1020; /* Elementos sticky */
+            --z-grid: 1010; /* Grid base */
         }
 
         body {

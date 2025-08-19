@@ -29,6 +29,7 @@ try
     builder.Services.AddScoped<IAtividadeService, AtividadeService>();
     builder.Services.AddScoped<IProjetoService, ProjetoService>();
     builder.Services.AddScoped<IUsuarioService, UsuarioService>();
+    builder.Services.AddScoped<IGridService, GridService>();
 
     // Logging
     builder.Services.AddLogging(logging =>
