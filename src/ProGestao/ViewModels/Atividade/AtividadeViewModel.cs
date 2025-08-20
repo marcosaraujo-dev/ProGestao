@@ -101,5 +101,13 @@ namespace ProGestao.ViewModels.Atividade
         public decimal PercentualConclusao => HorasEstimadas.HasValue && HorasEstimadas > 0 && HorasReais.HasValue
             ? Math.Min(100, (HorasReais.Value / HorasEstimadas.Value) * 100)
             : 0;
+
+        public int? DuracaoEmDias => DataFimPrevista.HasValue
+            ? (DataFimPrevista.Value - DataInicio).Days + 1
+            : (int?)null;
+
+        public int? DiasRestantes => DataFimPrevista.HasValue && StatusNome != "Concluída"
+            ? Math.Max(0, (DataFimPrevista.Value - DateTime.Today).Days)
+            : (int?)null;
     }
 }

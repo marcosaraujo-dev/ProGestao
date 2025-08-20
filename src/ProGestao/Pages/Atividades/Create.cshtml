@@ -2,251 +2,685 @@
 @model ProGestao.Pages.Atividades.CreateModel
 @{
     ViewData["Title"] = "Nova Atividade";
+    var isEdit = Model.Atividade?.Id > 0;
+    if (isEdit) ViewData["Title"] = "Editar Atividade";
 }
 
+@section Styles {
+    <style>
+        .form-wizard {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+        }
+
+        .wizard-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: var(--white);
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .wizard-steps {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .wizard-step {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            font-size: 0.9rem;
+            transition: all var(--transition-normal);
+        }
+
+            .wizard-step.active {
+                background: rgba(255, 255, 255, 0.3);
+                font-weight: 600;
+            }
+
+            .wizard-step i {
+                font-size: 1rem;
+            }
+
+        .form-section-enhanced {
+            padding: 2rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+            .form-section-enhanced:last-child {
+                border-bottom: none;
+            }
+
+        .section-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            margin-right: 1rem;
+        }
+
+        .field-group {
+            background: #f8f9fa;
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid #e9ecef;
+        }
+
+            .field-group h6 {
+                color: var(--primary-color);
+                margin-bottom: 1rem;
+                font-weight: 600;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+
+        .preview-card {
+            background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+            border: 1px solid #e1bee7;
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .preview-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+            .preview-item:last-child {
+                margin-bottom: 0;
+            }
+
+        .preview-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--white);
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+        }
+
+        .input-enhanced {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+            .input-enhanced .form-label {
+                font-weight: 600;
+                margin-bottom: 0.75rem;
+                color: #2c3e50;
+            }
+
+        .floating-label {
+            position: relative;
+        }
+
+            .floating-label input,
+            .floating-label select,
+            .floating-label textarea {
+                padding-top: 1.5rem;
+                padding-bottom: 0.5rem;
+            }
+
+            .floating-label label {
+                position: absolute;
+                top: 1rem;
+                left: 1rem;
+                color: #6c757d;
+                transition: all var(--transition-normal);
+                pointer-events: none;
+            }
+
+            .floating-label input:focus + label,
+            .floating-label input:not(:placeholder-shown) + label,
+            .floating-label select:focus + label,
+            .floating-label textarea:focus + label,
+            .floating-label textarea:not(:placeholder-shown) + label {
+                top: 0.25rem;
+                font-size: 0.75rem;
+                color: var(--primary-color);
+            }
+
+        .validation-summary {
+            background: #ffeee6;
+            border: 1px solid #ff9800;
+            border-radius: var(--radius-lg);
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+            .validation-summary h6 {
+                color: #e65100;
+                margin-bottom: 0.75rem;
+            }
+
+            .validation-summary ul {
+                margin-bottom: 0;
+                padding-left: 1.5rem;
+            }
+
+            .validation-summary li {
+                color: #bf360c;
+                margin-bottom: 0.25rem;
+            }
+
+        @media (max-width: 768px) {
+            .wizard-header
+
+        {
+            padding: 1.5rem 1rem;
+        }
+
+        .wizard-steps {
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .form-section-enhanced {
+            padding: 1.5rem 1rem;
+        }
+
+        .field-group {
+            padding: 1rem;
+        }
+
+        }
+    </style>
+}
+
+<!-- Header da página -->
 <div class="header-blue">
     <div class="container">
-        <h2 class="mb-0">
-            <i class="fas fa-plus me-2"></i>Nova Atividade
-        </h2>
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h2 class="mb-0">
+                    <i class="fas @(isEdit ? "fa-edit" : "fa-plus") me-2"></i>
+                    @(isEdit ? "Editar Atividade" : "Nova Atividade")
+                </h2>
+                <p class="mb-0 mt-2 opacity-75">
+                    @(isEdit ? "Atualize as informações da atividade" : "Preencha os dados para criar uma nova atividade")
+                </p>
+            </div>
+            <div class="col-md-4 text-end">
+                <a href="/Atividades" class="btn btn-light">
+                    <i class="fas fa-arrow-left me-2"></i>Voltar à Lista
+                </a>
+            </div>
+        </div>
     </div>
 </div>
 
 <div class="container">
     <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="card">
-                <div class="card-header card-header-blue">
-                    <h5 class="mb-0">Informações da Atividade</h5>
+        <div class="col-lg-10 col-xl-8">
+
+            <!-- Validação Summary -->
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="validation-summary">
+                    <h6><i class="fas fa-exclamation-triangle me-2"></i>Correções Necessárias</h6>
+                    <ul>
+                        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                        {
+                            <li>@error.ErrorMessage</li>
+                        }
+                    </ul>
                 </div>
-                <div class="card-body">
-                    <form method="post">
-                        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+            }
 
-                        <div class="row mb-3">
-                            <div class="col-md-8">
-                                <label asp-for="Atividade.Nome" class="form-label">Nome da Atividade *</label>
-                                <input asp-for="Atividade.Nome" class="form-control" placeholder="Digite o nome da atividade">
-                                <span asp-validation-for="Atividade.Nome" class="text-danger"></span>
+            <!-- Formulário Principal -->
+            <div class="form-wizard">
+                <!-- Header do Wizard -->
+                <div class="wizard-header">
+                    <h3 class="mb-3">
+                        @(isEdit ? "Editar Atividade" : "Criar Nova Atividade")
+                    </h3>
+                    <div class="wizard-steps">
+                        <div class="wizard-step active">
+                            <i class="fas fa-info-circle"></i>
+                            <span>Informações</span>
+                        </div>
+                        <div class="wizard-step">
+                            <i class="fas fa-users"></i>
+                            <span>Atribuições</span>
+                        </div>
+                        <div class="wizard-step">
+                            <i class="fas fa-calendar"></i>
+                            <span>Prazos</span>
+                        </div>
+                        <div class="wizard-step">
+                            <i class="fas fa-flag"></i>
+                            <span>Status</span>
+                        </div>
+                    </div>
+                </div>
+
+                <form method="post" data-autosave="atividade-form" novalidate>
+                    @if (isEdit)
+                    {
+                        <input type="hidden" asp-for="Atividade.Id" />
+                    }
+
+                    <!-- Seção 1: Informações Básicas -->
+                    <div class="form-section-enhanced">
+                        <div class="d-flex align-items-center mb-4">
+                            <div class="section-icon">
+                                <i class="fas fa-info-circle"></i>
                             </div>
-                            <div class="col-md-4">
-                                <label asp-for="Atividade.Prioridade" class="form-label">Prioridade *</label>
-                                <select asp-for="Atividade.Prioridade" class="form-select">
-                                    <option value="1">🟢 Baixa</option>
-                                    <option value="2">🔵 Normal</option>
-                                    <option value="3" selected>🟡 Alta</option>
-                                    <option value="4">🔴 Crítica</option>
-                                </select>
-                                <span asp-validation-for="Atividade.Prioridade" class="text-danger"></span>
+                            <div>
+                                <h5 class="mb-0">Informações Básicas</h5>
+                                <small class="text-muted">Dados principais da atividade</small>
                             </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label asp-for="Atividade.Descricao" class="form-label">Descrição</label>
-                            <textarea asp-for="Atividade.Descricao" class="form-control" rows="3"
-                                      placeholder="Descreva os detalhes da atividade"></textarea>
-                            <span asp-validation-for="Atividade.Descricao" class="text-danger"></span>
-                        </div>
+                        <div class="field-group">
+                            <h6><i class="fas fa-edit me-2"></i>Identificação</h6>
 
-                        <div class="row mb-3">
-                            <!-- ALTERAÇÃO: Projeto agora é opcional -->
-                            <div class="col-md-6">
-                                <label asp-for="Atividade.ProjetoId" class="form-label">
-                                    Projeto
-                                    <small class="text-muted">(opcional)</small>
-                                </label>
-                                <select asp-for="Atividade.ProjetoId" class="form-select" id="selectProjeto">
-                                    <option value="">⚪ Sem projeto específico</option>
-                                    @foreach (var projeto in Model.Projetos)
-                                    {
-                                        <option value="@projeto.Id">📁 @projeto.Nome</option>
-                                    }
-                                </select>
-                                <small class="text-muted">
-                                    Para atividades como férias, treinamentos ou reuniões gerais, deixe sem projeto.
-                                </small>
-                                <span asp-validation-for="Atividade.ProjetoId" class="text-danger"></span>
+                            <div class="input-enhanced floating-label">
+                                <input asp-for="Atividade.Nome" type="text" class="form-control-enhanced form-control"
+                                       placeholder=" " required maxlength="200">
+                                <label asp-for="Atividade.Nome">Nome da Atividade *</label>
+                                <span asp-validation-for="Atividade.Nome" class="invalid-feedback"></span>
                             </div>
-                            <div class="col-md-6">
-                                <label asp-for="Atividade.UsuarioId" class="form-label">Responsável *</label>
-                                <select asp-for="Atividade.UsuarioId" class="form-select">
-                                    <option value="">Selecione um usuário</option>
-                                    @foreach (var usuario in Model.Usuarios)
-                                    {
-                                        <option value="@usuario.Id">👤 @usuario.Nome - @usuario.Cargo</option>
-                                    }
-                                </select>
-                                <span asp-validation-for="Atividade.UsuarioId" class="text-danger"></span>
-                            </div>
-                        </div>
 
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label asp-for="Atividade.TipoAtividadeId" class="form-label">Tipo de Atividade *</label>
-                                <select asp-for="Atividade.TipoAtividadeId" class="form-select" id="selectTipoAtividade">
-                                    <option value="">Selecione o tipo</option>
-                                    @foreach (var tipo in Model.TiposAtividade)
-                                    {
-                                        <option value="@tipo.Id" data-tipo="@tipo.Nome">
-                                            @GetIconeTipoAtividade(tipo.Nome) @tipo.Nome
-                                        </option>
-                                    }
-                                </select>
-                                <span asp-validation-for="Atividade.TipoAtividadeId" class="text-danger"></span>
-                            </div>
-                            <div class="col-md-6">
-                                <label asp-for="Atividade.StatusId" class="form-label">Status *</label>
-                                <select asp-for="Atividade.StatusId" class="form-select">
-                                    @foreach (var status in Model.StatusAtividades)
-                                    {
-                                        <option value="@status.Id" selected="@(status.Nome == "Pendente")">
-                                            ⚫ @status.Nome
-                                        </option>
-                                    }
-                                </select>
-                                <span asp-validation-for="Atividade.StatusId" class="text-danger"></span>
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-4">
-                                <label asp-for="Atividade.DataInicio" class="form-label">Data de Início *</label>
-                                <input asp-for="Atividade.DataInicio" type="datetime-local" class="form-control">
-                                <span asp-validation-for="Atividade.DataInicio" class="text-danger"></span>
-                            </div>
-                            <div class="col-md-4">
-                                <label asp-for="Atividade.DataFimPrevista" class="form-label">Data Fim Prevista</label>
-                                <input asp-for="Atividade.DataFimPrevista" type="datetime-local" class="form-control">
-                                <span asp-validation-for="Atividade.DataFimPrevista" class="text-danger"></span>
-                            </div>
-                            <div class="col-md-4">
-                                <label asp-for="Atividade.HorasEstimadas" class="form-label">Horas Estimadas</label>
-                                <input asp-for="Atividade.HorasEstimadas" type="number" step="0.5" class="form-control"
-                                       placeholder="Ex: 8.5">
-                                <span asp-validation-for="Atividade.HorasEstimadas" class="text-danger"></span>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label asp-for="Atividade.Observacoes" class="form-label">Observações</label>
-                            <textarea asp-for="Atividade.Observacoes" class="form-control" rows="2"
-                                      placeholder="Observações adicionais"></textarea>
-                            <span asp-validation-for="Atividade.Observacoes" class="text-danger"></span>
-                        </div>
-
-                        <!-- Exemplos de Atividades Sem Projeto -->
-                        <div class="alert alert-light border" id="exemplosSemProjeto" style="display: none;">
-                            <h6 class="alert-heading">💡 Exemplos de atividades sem projeto:</h6>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <ul class="small mb-0">
-                                        <li>🏖️ Férias</li>
-                                        <li>🤒 Atestado médico</li>
-                                        <li>📚 Treinamento</li>
-                                        <li>🎓 Capacitação</li>
-                                    </ul>
+                            <div class="input-enhanced floating-label">
+                                <textarea asp-for="Atividade.Descricao" class="form-control-enhanced form-control"
+                                          rows="4" placeholder=" " maxlength="1000"></textarea>
+                                <label asp-for="Atividade.Descricao">Descrição da Atividade</label>
+                                <span asp-validation-for="Atividade.Descricao" class="invalid-feedback"></span>
+                                <div class="form-text-enhanced">
+                                    Descreva detalhadamente o que deve ser realizado nesta atividade
                                 </div>
-                                <div class="col-md-6">
-                                    <ul class="small mb-0">
-                                        <li>🤝 Reunião geral</li>
-                                        <li>📋 Processo seletivo</li>
-                                        <li>⚙️ Manutenção do sistema</li>
-                                        <li>📊 Relatórios mensais</li>
-                                    </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Seção 2: Atribuições -->
+                    <div class="form-section-enhanced">
+                        <div class="d-flex align-items-center mb-4">
+                            <div class="section-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-0">Atribuições</h5>
+                                <small class="text-muted">Projeto e responsável pela atividade</small>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="field-group">
+                                    <h6><i class="fas fa-folder me-2"></i>Projeto</h6>
+                                    <div class="projeto-selector">
+                                        <select asp-for="Atividade.ProjetoId" class="form-select-enhanced form-select" id="selectProjeto">
+                                            <option value="">⚪ Sem projeto específico</option>
+                                            @foreach (var projeto in Model.Projetos)
+                                            {
+                                                <option value="@projeto.Id" data-status="@projeto.Status.Nome">
+                                                    📁 @projeto.Nome (@projeto.Status.Nome)
+                                                </option>
+                                            }
+                                        </select>
+                                        <span asp-validation-for="Atividade.ProjetoId" class="invalid-feedback"></span>
+                                        <div class="form-text-enhanced">
+                                            Para atividades como férias, treinamentos ou reuniões gerais, deixe sem projeto
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="field-group">
+                                    <h6><i class="fas fa-user me-2"></i>Responsável</h6>
+                                    <div class="usuario-selector">
+                                        <select asp-for="Atividade.UsuarioId" class="form-select-enhanced form-select" required id="selectUsuario">
+                                            <option value="">Selecione um usuário</option>
+                                            @foreach (var usuario in Model.Usuarios)
+                                            {
+                                                <option value="@usuario.Id" data-cargo="@usuario.Cargo" data-equipe="@usuario.Equipe.Nome">
+                                                    @usuario.Nome - @usuario.Cargo (@usuario.Equipe.Nome)
+                                                </option>
+                                            }
+                                        </select>
+                                        <span asp-validation-for="Atividade.UsuarioId" class="invalid-feedback"></span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="d-flex justify-content-between">
-                            <a href="/Atividades" class="btn btn-outline-secondary">
-                                <i class="fas fa-arrow-left me-1"></i>Voltar
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="field-group">
+                                    <h6><i class="fas fa-tag me-2"></i>Tipo de Atividade</h6>
+                                    <div class="tipo-atividade-selector">
+                                        <select asp-for="Atividade.TipoAtividadeId" class="form-select-enhanced form-select" required data-color-preview>
+                                            <option value="">Selecione o tipo</option>
+                                            @foreach (var tipo in Model.TiposAtividade)
+                                            {
+                                                <option value="@tipo.Id" data-color="@tipo.Cor">
+                                                    ● @tipo.Nome
+                                                </option>
+                                            }
+                                        </select>
+                                        <span asp-validation-for="Atividade.TipoAtividadeId" class="invalid-feedback"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="field-group">
+                                    <h6><i class="fas fa-exclamation-circle me-2"></i>Prioridade</h6>
+                                    <select asp-for="Atividade.Prioridade" class="form-select-enhanced form-select" required>
+                                        <option value="">Selecione a prioridade</option>
+                                        <option value="1">🔵 Baixa</option>
+                                        <option value="2">🟢 Normal</option>
+                                        <option value="3">🟡 Alta</option>
+                                        <option value="4">🔴 Crítica</option>
+                                    </select>
+                                    <span asp-validation-for="Atividade.Prioridade" class="invalid-feedback"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Seção 3: Prazos e Estimativas -->
+                    <div class="form-section-enhanced">
+                        <div class="d-flex align-items-center mb-4">
+                            <div class="section-icon">
+                                <i class="fas fa-calendar"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-0">Prazos e Estimativas</h5>
+                                <small class="text-muted">Cronograma e tempo estimado</small>
+                            </div>
+                        </div>
+
+                        <div class="field-group">
+                            <h6><i class="fas fa-calendar-alt me-2"></i>Cronograma</h6>
+
+                            <div class="date-range-group">
+                                <div class="input-enhanced">
+                                    <label asp-for="Atividade.DataInicio" class="form-label-enhanced form-label-required">
+                                        Data de Início
+                                    </label>
+                                    <input asp-for="Atividade.DataInicio" type="date" class="form-control-enhanced form-control"
+                                           required data-default-today>
+                                    <span asp-validation-for="Atividade.DataInicio" class="invalid-feedback"></span>
+                                </div>
+
+                                <div class="input-enhanced">
+                                    <label asp-for="Atividade.DataFimPrevista" class="form-label-enhanced">
+                                        Data Fim Prevista
+                                    </label>
+                                    <input asp-for="Atividade.DataFimPrevista" type="date" class="form-control-enhanced form-control">
+                                    <span asp-validation-for="Atividade.DataFimPrevista" class="invalid-feedback"></span>
+                                </div>
+                            </div>
+
+                            @if (isEdit)
+                            {
+                                <div class="input-enhanced">
+                                    <label asp-for="Atividade.DataFimReal" class="form-label-enhanced">
+                                        Data de Conclusão
+                                    </label>
+                                    <input asp-for="Atividade.DataFimReal" type="date" class="form-control-enhanced form-control">
+                                    <span asp-validation-for="Atividade.DataFimReal" class="invalid-feedback"></span>
+                                    <div class="form-text-enhanced">
+                                        Preencha apenas quando a atividade for concluída
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="field-group">
+                            <h6><i class="fas fa-clock me-2"></i>Estimativas de Tempo</h6>
+
+                            <div class="hours-group">
+                                <div class="input-enhanced floating-label">
+                                    <input asp-for="Atividade.HorasEstimadas" type="number" step="0.5" min="0" max="999"
+                                           class="form-control-enhanced form-control" placeholder=" ">
+                                    <label asp-for="Atividade.HorasEstimadas">Horas Estimadas</label>
+                                    <span asp-validation-for="Atividade.HorasEstimadas" class="invalid-feedback"></span>
+                                </div>
+
+                                @if (isEdit)
+                                {
+                                    <div class="input-enhanced floating-label">
+                                        <input asp-for="Atividade.HorasReais" type="number" step="0.5" min="0" max="999"
+                                               class="form-control-enhanced form-control" placeholder=" ">
+                                        <label asp-for="Atividade.HorasReais">Horas Realizadas</label>
+                                        <span asp-validation-for="Atividade.HorasReais" class="invalid-feedback"></span>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Seção 4: Status e Observações -->
+                    <div class="form-section-enhanced">
+                        <div class="d-flex align-items-center mb-4">
+                            <div class="section-icon">
+                                <i class="fas fa-flag"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-0">Status e Observações</h5>
+                                <small class="text-muted">Estado atual e informações adicionais</small>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="field-group">
+                                    <h6><i class="fas fa-flag me-2"></i>Status Atual</h6>
+                                    <select asp-for="Atividade.StatusId" class="form-select-enhanced form-select" required data-color-preview>
+                                        <option value="">Selecione o status</option>
+                                        @foreach (var status in Model.StatusAtividades)
+                                        {
+                                            <option value="@status.Id" data-color="@status.Cor">
+                                                ● @status.Nome
+                                            </option>
+                                        }
+                                    </select>
+                                    <span asp-validation-for="Atividade.StatusId" class="invalid-feedback"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="field-group">
+                                    <h6><i class="fas fa-sticky-note me-2"></i>Observações</h6>
+                                    <textarea asp-for="Atividade.Observacoes" class="form-control-enhanced form-control"
+                                              rows="3" placeholder="Observações adicionais..." maxlength="500"></textarea>
+                                    <span asp-validation-for="Atividade.Observacoes" class="invalid-feedback"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Exemplos de Atividades Sem Projeto -->
+                    <div class="form-examples" id="exemplosSemProjeto">
+                        <h6><i class="fas fa-lightbulb me-2"></i>Exemplos de atividades sem projeto específico:</h6>
+                        <div class="examples-grid">
+                            <div>
+                                <ul>
+                                    <li><i class="fas fa-umbrella-beach me-1"></i>Férias</li>
+                                    <li><i class="fas fa-user-md me-1"></i>Atestado médico</li>
+                                    <li><i class="fas fa-graduation-cap me-1"></i>Treinamento</li>
+                                    <li><i class="fas fa-book me-1"></i>Capacitação</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <ul>
+                                    <li><i class="fas fa-handshake me-1"></i>Reunião geral</li>
+                                    <li><i class="fas fa-users me-1"></i>Processo seletivo</li>
+                                    <li><i class="fas fa-calendar-day me-1"></i>Evento da empresa</li>
+                                    <li><i class="fas fa-cogs me-1"></i>Manutenção sistema</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Preview Card -->
+                    <div class="preview-card" id="activityPreview" style="display: none;">
+                        <h6><i class="fas fa-eye me-2"></i>Preview da Atividade</h6>
+                        <div id="previewContent">
+                            <!-- Conteúdo será preenchido via JavaScript -->
+                        </div>
+                    </div>
+
+                    <!-- Ações do Formulário -->
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-form-primary">
+                            <i class="fas @(isEdit ? "fa-save" : "fa-plus") me-2"></i>
+                            @(isEdit ? "Salvar Alterações" : "Criar Atividade")
+                        </button>
+
+                        <a href="/Atividades" class="btn btn-form-secondary">
+                            <i class="fas fa-times me-2"></i>Cancelar
+                        </a>
+
+                        @if (isEdit)
+                        {
+                            <a href="/Atividades/Delete/@Model.Atividade.Id"
+                               class="btn btn-form-danger"
+                               data-confirm="Tem certeza que deseja excluir esta atividade?">
+                                <i class="fas fa-trash me-2"></i>Excluir
                             </a>
-                            <button type="submit" class="btn btn-success">
-                                <i class="fas fa-save me-1"></i>Salvar Atividade
-                            </button>
-                        </div>
-                    </form>
-                </div>
+                        }
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 </div>
 
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Definir data atual como padrão para data de início
-            const dataInicio = document.querySelector('input[name="Atividade.DataInicio"]');
-            if (!dataInicio.value) {
-                const agora = new Date();
-                agora.setMinutes(agora.getMinutes() - agora.getTimezoneOffset());
-                dataInicio.value = agora.toISOString().slice(0, 16);
+            // Gerenciar seções do wizard visualmente
+            const sections = document.querySelectorAll('.form-section-enhanced');
+            const steps = document.querySelectorAll('.wizard-step');
+
+            // Observar scroll para atualizar step ativo
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const index = Array.from(sections).indexOf(entry.target);
+                        steps.forEach((step, i) => {
+                            step.classList.toggle('active', i === index);
+                        });
+                    }
+                });
+            }, { threshold: 0.5 });
+
+            sections.forEach(section => observer.observe(section));
+
+            // Preview dinâmico da atividade
+            const form = document.querySelector('form');
+            const previewCard = document.getElementById('activityPreview');
+            const previewContent = document.getElementById('previewContent');
+
+            function updatePreview() {
+                const formData = new FormData(form);
+                let hasContent = false;
+                let content = '';
+
+                // Nome
+                const nome = formData.get('Atividade.Nome');
+                if (nome) {
+                    content += `<div class="preview-item">
+                        <div class="preview-icon"><i class="fas fa-edit"></i></div>
+                        <div><strong>Nome:</strong> ${nome}</div>
+                    </div>`;
+                    hasContent = true;
+                }
+
+                // Responsável
+                const usuarioSelect = document.getElementById('selectUsuario');
+                if (usuarioSelect.value) {
+                    const usuarioNome = usuarioSelect.options[usuarioSelect.selectedIndex].text.split(' - ')[0];
+                    content += `<div class="preview-item">
+                        <div class="preview-icon"><i class="fas fa-user"></i></div>
+                        <div><strong>Responsável:</strong> ${usuarioNome}</div>
+                    </div>`;
+                    hasContent = true;
+                }
+
+                // Projeto
+                const projetoSelect = document.getElementById('selectProjeto');
+                if (projetoSelect.value) {
+                    const projetoNome = projetoSelect.options[projetoSelect.selectedIndex].text;
+                    content += `<div class="preview-item">
+                        <div class="preview-icon"><i class="fas fa-folder"></i></div>
+                        <div><strong>Projeto:</strong> ${projetoNome}</div>
+                    </div>`;
+                } else if (nome) {
+                    content += `<div class="preview-item">
+                        <div class="preview-icon"><i class="fas fa-circle"></i></div>
+                        <div><strong>Projeto:</strong> Sem projeto específico</div>
+                    </div>`;
+                }
+
+                if (hasContent) {
+                    previewContent.innerHTML = content;
+                    previewCard.style.display = 'block';
+                } else {
+                    previewCard.style.display = 'none';
+                }
             }
 
-            // Mostrar/ocultar exemplos quando selecionar "Sem projeto"
-            const selectProjeto = document.getElementById('selectProjeto');
-            const exemplosSemProjeto = document.getElementById('exemplosSemProjeto');
+            // Atualizar preview em tempo real
+            form.addEventListener('input', ProGestao.Utils.debounce(updatePreview, 300));
+            form.addEventListener('change', updatePreview);
 
-            selectProjeto.addEventListener('change', function() {
-                if (this.value === '') {
-                    exemplosSemProjeto.style.display = 'block';
-                } else {
-                    exemplosSemProjeto.style.display = 'none';
+            // Floating labels
+            const floatingInputs = document.querySelectorAll('.floating-label input, .floating-label select, .floating-label textarea');
+            floatingInputs.forEach(input => {
+                function checkLabel() {
+                    const label = input.nextElementSibling;
+                    if (label && label.tagName === 'LABEL') {
+                        if (input.value || input === document.activeElement) {
+                            label.style.top = '0.25rem';
+                            label.style.fontSize = '0.75rem';
+                            label.style.color = 'var(--primary-color)';
+                        } else {
+                            label.style.top = '1rem';
+                            label.style.fontSize = '1rem';
+                            label.style.color = '#6c757d';
+                        }
+                    }
                 }
-            });
 
-            // Sugerir tipos de atividade baseado no projeto
-            const selectTipo = document.getElementById('selectTipoAtividade');
-            selectProjeto.addEventListener('change', function() {
-                if (this.value === '') {
-                    // Sugerir tipos para atividades sem projeto
-                    sugerirTiposParaSemProjeto();
-                } else {
-                    // Resetar sugestões
-                    resetarSugestoesTipo();
-                }
+                input.addEventListener('focus', checkLabel);
+                input.addEventListener('blur', checkLabel);
+                input.addEventListener('input', checkLabel);
+
+                // Verificar estado inicial
+                checkLabel();
             });
         });
-
-        function sugerirTiposParaSemProjeto() {
-            const selectTipo = document.getElementById('selectTipoAtividade');
-            const options = selectTipo.querySelectorAll('option');
-
-            options.forEach(option => {
-                const tipo = option.getAttribute('data-tipo');
-                if (tipo && (tipo.includes('Férias') || tipo.includes('Treinamento') || tipo.includes('Reunião'))) {
-                    option.style.fontWeight = 'bold';
-                    option.style.backgroundColor = '#e7f3ff';
-                }
-            });
-        }
-
-        function resetarSugestoesTipo() {
-            const selectTipo = document.getElementById('selectTipoAtividade');
-            const options = selectTipo.querySelectorAll('option');
-
-            options.forEach(option => {
-                option.style.fontWeight = 'normal';
-                option.style.backgroundColor = '';
-            });
-        }
     </script>
 }
 
-@functions {
-    string GetIconeTipoAtividade(string tipo)
-    {
-        return tipo.ToLower() switch
-        {
-            "desenvolvimento" => "💻",
-            "teste" => "🧪",
-            "documentação" => "📝",
-            "reunião" => "🤝",
-            "férias" => "🏖️",
-            "treinamento" => "📚",
-            "deploy" => "🚀",
-            _ => "📋"
-        };
-    }
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
 }
