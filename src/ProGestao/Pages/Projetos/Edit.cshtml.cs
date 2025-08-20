@@ -1,29 +1,55 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using ProGestao.Data;
-using ProGestao.Models;
+using ProGestao.Services.Interfaces;
+using ProGestao.ViewModels.Projetos;
+using ProGestao.ViewModels.Usuarios;
 
 namespace ProGestao.Pages.Projetos
 {
+
+    /// <summary>
+    /// PageModel refatorado para edição de projetos
+    /// Implementa Separation of Concerns e Dependency Injection
+    /// </summary>
     public class EditModel : PageModel
     {
-        private readonly ProGestaoContext _context;
+        #region Dependencies
+
+        private readonly IProjetoQueryService _queryService;
+        private readonly IProjetoCommandService _commandService;
+        private readonly IProjetoLookupService _lookupService;
         private readonly ILogger<EditModel> _logger;
 
-        public EditModel(ProGestaoContext context, ILogger<EditModel> logger)
+        #endregion
+
+        #region Constructor
+
+        public EditModel(
+            IProjetoQueryService queryService,
+            IProjetoCommandService commandService,
+            IProjetoLookupService lookupService,
+            ILogger<EditModel> logger)
         {
-            _context = context;
-            _logger = logger;
+            _queryService = queryService ?? throw new ArgumentNullException(nameof(queryService));
+            _commandService = commandService ?? throw new ArgumentNullException(nameof(commandService));
+            _lookupService = lookupService ?? throw new ArgumentNullException(nameof(lookupService));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        [BindProperty]
-        public Projeto Projeto { get; set; } = default!;
+        #endregion
 
-        // SelectLists para dropdowns
-        public SelectList StatusSelectList { get; set; } = default!;
-        public SelectList ResponsaveisSelectList { get; set; } = default!;
+        #region Properties
+
+        [BindProperty]
+        public ProjetoViewModel Projeto { get; set; } = new ProjetoViewModel();
+
+        // Listas para dropdowns
+        public IList<StatusProjetoViewModel> StatusProjetos { get; set; } = new List<StatusProjetoViewModel>();
+        public IList<UsuarioLookupViewModel> Responsaveis { get; set; } = new List<UsuarioLookupViewModel>();
+
+        #endregion
+
+        #region GET Handler
 
         public async Task<IActionResult> OnGetAsync(int id)
         {
@@ -31,20 +57,19 @@ namespace ProGestao.Pages.Projetos
             {
                 _logger.LogInformation("Carregando projeto {ProjetoId} para edição", id);
 
-                var projeto = await _context.Projetos
-                    .Include(p => p.Responsavel)
-                    .Include(p => p.Status)
-                    .FirstOrDefaultAsync(p => p.Id == id);
+                ClearTempDataMessages();
 
+                var projeto = await _queryService.GetProjetoComDetalhesAsync(id);
                 if (projeto == null)
                 {
-                    _logger.LogWarning("Projeto com ID {ProjetoId} não encontrado para edição", id);
-                    TempData["ErrorMessage"] = $"Projeto com ID {id} não encontrado.";
+                    _logger.LogWarning("Projeto {ProjetoId} não encontrado", id);
+                    SetErrorMessage("Projeto não encontrado.");
                     return RedirectToPage("./Index");
                 }
 
                 Projeto = projeto;
-                await CarregarSelectLists();
+
+                await LoadDropdownDataAsync();
 
                 _logger.LogInformation("Projeto {ProjetoId} carregado com sucesso para edição", id);
                 return Page();
@@ -52,294 +77,121 @@ namespace ProGestao.Pages.Projetos
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao carregar projeto {ProjetoId} para edição", id);
-                TempData["ErrorMessage"] = "Erro interno do servidor. Tente novamente.";
+                SetErrorMessage("Erro ao carregar projeto. Tente novamente.");
                 return RedirectToPage("./Index");
             }
         }
+
+        #endregion
+
+        #region POST Handler
 
         public async Task<IActionResult> OnPostAsync()
         {
             try
             {
-                if (!ModelState.IsValid)
-                {
-                    _logger.LogWarning("Modelo inválido ao tentar salvar projeto {ProjetoId}", Projeto.Id);
-                    await CarregarSelectLists();
-                    return Page();
-                }
-
                 _logger.LogInformation("Iniciando atualização do projeto {ProjetoId}", Projeto.Id);
 
-                // Verificar se o projeto existe
-                var projetoExistente = await _context.Projetos
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(p => p.Id == Projeto.Id);
-
-                if (projetoExistente == null)
+                if (!ModelState.IsValid)
                 {
-                    _logger.LogWarning("Tentativa de atualizar projeto inexistente: ID {ProjetoId}", Projeto.Id);
-                    TempData["ErrorMessage"] = "Projeto não encontrado.";
-                    return RedirectToPage("./Index");
-                }
-
-                // Validações de negócio
-                var validationResult = await ValidarEdicao(Projeto);
-                if (!validationResult.IsValid)
-                {
-                    _logger.LogWarning("Validação falhou para projeto {ProjetoId}: {Erro}", Projeto.Id, validationResult.ErrorMessage);
-                    ModelState.AddModelError(string.Empty, validationResult.ErrorMessage);
-                    await CarregarSelectLists();
+                    _logger.LogWarning("ModelState inválido para projeto {ProjetoId}", Projeto.Id);
+                    await LoadDropdownDataAsync();
                     return Page();
                 }
 
-                // Preservar dados que não devem ser alterados
-                Projeto.DataCriacao = projetoExistente.DataCriacao;
+                var result = await _commandService.UpdateProjetoAsync(Projeto);
 
-                // Atualizar a entidade no contexto
-                _context.Entry(Projeto).State = EntityState.Modified;
-                _context.Entry(Projeto).Property(p => p.DataCriacao).IsModified = false;
-
-                await _context.SaveChangesAsync();
-
-                _logger.LogInformation("Projeto '{ProjetoNome}' (ID: {ProjetoId}) atualizado com sucesso",
-                    Projeto.Nome, Projeto.Id);
-
-                TempData["SuccessMessage"] = $"Projeto '{Projeto.Nome}' atualizado com sucesso!";
-                return RedirectToPage("./Details", new { id = Projeto.Id });
-            }
-            catch (DbUpdateConcurrencyException ex)
-            {
-                _logger.LogError(ex, "Erro de concorrência ao atualizar projeto {ProjetoId}", Projeto.Id);
-
-                if (!await ProjetoExists(Projeto.Id))
+                if (result.IsSuccess)
                 {
-                    TempData["ErrorMessage"] = "Projeto não encontrado. Pode ter sido excluído por outro usuário.";
+                    _logger.LogInformation("Projeto {ProjetoId} atualizado com sucesso", Projeto.Id);
+                    SetSuccessMessage(result.Message);
                     return RedirectToPage("./Index");
                 }
                 else
                 {
-                    TempData["ErrorMessage"] = "O projeto foi modificado por outro usuário. Recarregue a página e tente novamente.";
-                    return RedirectToPage("./Edit", new { id = Projeto.Id });
+                    _logger.LogWarning("Falha na atualização do projeto {ProjetoId}: {Message}",
+                        Projeto.Id, result.Message);
+
+                    if (result.Errors.Any())
+                    {
+                        foreach (var error in result.Errors)
+                        {
+                            ModelState.AddModelError("", error);
+                        }
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("", result.Message);
+                    }
+
+                    await LoadDropdownDataAsync();
+                    return Page();
                 }
-            }
-            catch (DbUpdateException ex)
-            {
-                _logger.LogError(ex, "Erro de banco de dados ao atualizar projeto {ProjetoId}", Projeto.Id);
-                ModelState.AddModelError(string.Empty, "Erro ao salvar as alterações. Verifique os dados e tente novamente.");
-                await CarregarSelectLists();
-                return Page();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro inesperado ao atualizar projeto {ProjetoId}", Projeto.Id);
-                TempData["ErrorMessage"] = "Erro interno do servidor. Tente novamente.";
-                await CarregarSelectLists();
+                SetErrorMessage("Erro interno ao atualizar projeto. Tente novamente.");
+                await LoadDropdownDataAsync();
                 return Page();
             }
         }
 
-        /// <summary>
-        /// Valida as regras de negócio para edição do projeto
-        /// </summary>
-        /// <param name="projeto">Projeto a ser validado</param>
-        /// <returns>Resultado da validação</returns>
-        private async Task<(bool IsValid, string ErrorMessage)> ValidarEdicao(Projeto projeto)
+        #endregion
+
+        #region Private Methods
+
+        private async Task LoadDropdownDataAsync()
         {
             try
             {
-                // Validar se as datas são consistentes
-                if (projeto.DataFimPrevista.HasValue && projeto.DataFimPrevista.Value < projeto.DataInicio)
-                {
-                    return (false, "A data de fim prevista não pode ser anterior à data de início.");
-                }
+                _logger.LogDebug("Carregando dados para dropdowns");
 
-                // Validar se o responsável existe
-               // if (projeto.ResponsavelId != 0)
-               // {
-               //     var responsavelExists = await _context.Usuarios.AnyAsync(u => u.Id == projeto.ResponsavelId);
-               //     if (!responsavelExists)
-               //     {
-               //         return (false, "Responsável selecionado não encontrado.");
-               //     }
-               // }
+                var statusProjetosTask = _lookupService.GetStatusProjetosAsync();
+                var responsaveisTask = _lookupService.GetResponsaveisAsync();
 
-                // Validar se o status existe
-                if (projeto.StatusId != 0)
-                {
-                    var statusExists = await _context.StatusProjetos.AnyAsync(s => s.Id == projeto.StatusId);
-                    if (!statusExists)
-                    {
-                        return (false, "Status selecionado não encontrado.");
-                    }
-                }
+                StatusProjetos = await statusProjetosTask;
+                Responsaveis = await responsaveisTask;
 
-                // Validar se já existe um projeto com o mesmo nome (exceto o atual)
-                var nomeJaExiste = await _context.Projetos
-                    .AnyAsync(p => p.Nome.ToLower() == projeto.Nome.ToLower() && p.Id != projeto.Id);
-
-                if (nomeJaExiste)
-                {
-                    return (false, "Já existe um projeto com este nome.");
-                }
-
-                // Validar URL se fornecida
-                if (!string.IsNullOrEmpty(projeto.LinkProjeto))
-                {
-                    if (!Uri.TryCreate(projeto.LinkProjeto, UriKind.Absolute, out var uriResult) ||
-                        (uriResult.Scheme != Uri.UriSchemeHttp && uriResult.Scheme != Uri.UriSchemeHttps))
-                    {
-                        return (false, "Link do projeto deve ser uma URL válida (http:// ou https://).");
-                    }
-                }
-
-                // Validar se as mudanças de status são permitidas
-                var projetoOriginal = await _context.Projetos
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(p => p.Id == projeto.Id);
-
-                if (projetoOriginal != null && projetoOriginal.StatusId != projeto.StatusId)
-                {
-                    var mudancaPermitida = await ValidarMudancaStatus(projetoOriginal.StatusId, projeto.StatusId);
-                    if (!mudancaPermitida.IsValid)
-                    {
-                        return (false, mudancaPermitida.ErrorMessage);
-                    }
-                }
-
-                return (true, string.Empty);
+                _logger.LogDebug("Dados dos dropdowns carregados: {StatusCount} status, {ResponsaveisCount} responsáveis",
+                    StatusProjetos.Count, Responsaveis.Count);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro durante validação de edição do projeto {ProjetoId}", projeto.Id);
-                return (false, "Erro durante validação. Tente novamente.");
+                _logger.LogError(ex, "Erro ao carregar dados para dropdowns");
+
+                StatusProjetos ??= new List<StatusProjetoViewModel>();
+                Responsaveis ??= new List<UsuarioLookupViewModel>();
+
+                SetErrorMessage("Erro ao carregar dados do formulário. Alguns campos podem não estar disponíveis.");
             }
         }
 
-        /// <summary>
-        /// Valida se a mudança de status é permitida
-        /// </summary>
-        /// <param name="statusAtualId">ID do status atual</param>
-        /// <param name="novoStatusId">ID do novo status</param>
-        /// <returns>Resultado da validação</returns>
-        private async Task<(bool IsValid, string ErrorMessage)> ValidarMudancaStatus(int statusAtualId, int novoStatusId)
+        private void ClearTempDataMessages()
         {
-            try
-            {
-                var statusAtual = await _context.StatusProjetos.FindAsync(statusAtualId);
-                var novoStatus = await _context.StatusProjetos.FindAsync(novoStatusId);
-
-                if (statusAtual == null || novoStatus == null)
-                {
-                    return (true, string.Empty); // Se não encontrar os status, permite a mudança
-                }
-
-              
-                if (statusAtual.Nome == "Concluído" && novoStatus.Nome != "Concluído")
-                {
-                    return (false, "Não é possível alterar o status de um projeto já concluído.");
-                }
-
-                if (statusAtual.Nome == "Cancelado" && novoStatus.Nome == "Em Andamento")
-                {
-                    return (false, "Não é possível reativar um projeto cancelado diretamente. Altere primeiro para 'Planejamento'.");
-                }
-
-                return (true, string.Empty);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao validar mudança de status de {StatusAtual} para {NovoStatus}",
-                    statusAtualId, novoStatusId);
-                return (false, "Erro ao validar mudança de status.");
-            }
+            TempData.Remove("SuccessMessage");
+            TempData.Remove("ErrorMessage");
+            TempData.Remove("WarningMessage");
+            TempData.Remove("InfoMessage");
         }
 
-        /// <summary>
-        /// Carrega as listas de seleção para os dropdowns
-        /// </summary>
-        private async Task CarregarSelectLists()
+        private void SetSuccessMessage(string message)
         {
-            try
+            if (!string.IsNullOrWhiteSpace(message))
             {
-                // Carregar status de projetos
-                var statusList = await _context.StatusProjetos
-                    .OrderBy(s => s.Nome)
-                    .Select(s => new { s.Id, s.Nome })
-                    .ToListAsync();
-
-                StatusSelectList = new SelectList(statusList, "Id", "Nome", Projeto?.StatusId);
-
-                // Carregar usuários (responsáveis)
-                var responsaveisList = await _context.Usuarios
-                    .Where(u => u.Ativo) // Assumindo que existe um campo Ativo
-                    .OrderBy(u => u.Nome)
-                    .Select(u => new { u.Id, u.Nome })
-                    .ToListAsync();
-
-                ResponsaveisSelectList = new SelectList(responsaveisList, "Id", "Nome", Projeto?.ResponsavelId);
-
-                _logger.LogDebug("SelectLists carregadas: {StatusCount} status, {ResponsaveisCount} responsáveis",
-                    statusList.Count, responsaveisList.Count);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao carregar SelectLists");
-
-                // Criar listas vazias em caso de erro
-                StatusSelectList = new SelectList(new List<object>(), "Id", "Nome");
-                ResponsaveisSelectList = new SelectList(new List<object>(), "Id", "Nome");
-
-                throw;
+                TempData["SuccessMessage"] = message.Trim();
             }
         }
 
-        /// <summary>
-        /// Verifica se um projeto existe
-        /// </summary>
-        /// <param name="id">ID do projeto</param>
-        /// <returns>True se existe, False caso contrário</returns>
-        private async Task<bool> ProjetoExists(int id)
+        private void SetErrorMessage(string message)
         {
-            try
+            if (!string.IsNullOrWhiteSpace(message))
             {
-                return await _context.Projetos.AnyAsync(e => e.Id == id);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao verificar existência do projeto {ProjetoId}", id);
-                return false;
+                TempData["ErrorMessage"] = message.Trim();
             }
         }
 
-        /// <summary>
-        /// Método auxiliar para obter dados adicionais do projeto
-        /// </summary>
-        /// <param name="projetoId">ID do projeto</param>
-        /// <returns>Dados adicionais</returns>
-        public async Task<object> ObterDadosAdicionais(int projetoId)
-        {
-            try
-            {
-                var atividadesCount = await _context.Atividades.CountAsync(a => a.ProjetoId == projetoId);
-                var atividadesConcluidas = await _context.Atividades
-                    .Include(a => a.Status)
-                    .CountAsync(a => a.ProjetoId == projetoId && a.Status != null && a.Status.Nome == "Concluída");
-
-                var percentualConclusao = atividadesCount > 0 ?
-                    Math.Round((double)atividadesConcluidas / atividadesCount * 100, 1) : 0;
-
-                return new
-                {
-                    TotalAtividades = atividadesCount,
-                    AtividadesConcluidas = atividadesConcluidas,
-                    PercentualConclusao = percentualConclusao
-                };
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao obter dados adicionais do projeto {ProjetoId}", projetoId);
-                return new { TotalAtividades = 0, AtividadesConcluidas = 0, PercentualConclusao = 0 };
-            }
-        }
+        #endregion
     }
+
 }

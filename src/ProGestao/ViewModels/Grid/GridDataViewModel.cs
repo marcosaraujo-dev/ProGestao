@@ -1,6 +1,7 @@
 ﻿using ProGestao.Services;
+using ProGestao.ViewModels.Usuarios;
 
-namespace ProGestao.ViewModels
+namespace ProGestao.ViewModels.Grid
 {
     /// <summary>
     /// ViewModel para dados do grid

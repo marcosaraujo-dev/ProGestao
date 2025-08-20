@@ -1,4 +1,4 @@
-﻿namespace ProGestao.ViewModels
+﻿namespace ProGestao.ViewModels.Grid
 {
     /// <summary>
     /// ViewModel para dias do grid

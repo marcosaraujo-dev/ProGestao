@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ProGestao.Data;
-using ProGestao.ViewModels;
+using ProGestao.ViewModels.Atividade;
+using ProGestao.ViewModels.Grid;
+using ProGestao.ViewModels.Usuarios;
 using System.Globalization;
 
 namespace ProGestao.Services

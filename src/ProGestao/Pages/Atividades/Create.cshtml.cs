@@ -1,93 +1,164 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
-using ProGestao.Data;
+using ProGestao.Extensions;
 using ProGestao.Models;
-using ProGestao.ViewModels;
+using ProGestao.Services.Interfaces;
+using ProGestao.ViewModels.Atividade;
+using ProGestao.ViewModels.Projetos;
+using ProGestao.ViewModels.Usuarios;
+
 
 namespace ProGestao.Pages.Atividades
 {
+    /// <summary>
+    /// PageModel refatorado para criação de atividades
+    /// Reutiliza a mesma estrutura da edição
+    /// </summary>
     public class CreateModel : PageModel
     {
-        private readonly ProGestaoContext _context;
+        #region Dependencies
 
-        public CreateModel(ProGestaoContext context)
+        private readonly IAtividadeCommandService _commandService;
+        private readonly ILookupService _lookupService;
+        private readonly ILogger<CreateModel> _logger;
+
+        #endregion
+
+        #region Constructor
+
+        public CreateModel(
+            IAtividadeCommandService commandService,
+            ILookupService lookupService,
+            ILogger<CreateModel> logger)
         {
-            _context = context;
+            _commandService = commandService ?? throw new ArgumentNullException(nameof(commandService));
+            _lookupService = lookupService ?? throw new ArgumentNullException(nameof(lookupService));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
+
+        #endregion
+
+        #region Properties
 
         [BindProperty]
         public AtividadeViewModel Atividade { get; set; } = new AtividadeViewModel();
 
-        public IList<Projeto> Projetos { get; set; } = new List<Projeto>();
-        public IList<Usuario> Usuarios { get; set; } = new List<Usuario>();
-        public IList<TipoAtividade> TiposAtividade { get; set; } = new List<TipoAtividade>();
-        public IList<StatusAtividade> StatusAtividades { get; set; } = new List<StatusAtividade>();
+        public IList<ProjetoViewModel> Projetos { get; set; } = new List<ProjetoViewModel>();
+        public IList<UsuarioViewModel> Usuarios { get; set; } = new List<UsuarioViewModel>();
+        public IList<TipoAtividadeViewModel> TiposAtividade { get; set; } = new List<TipoAtividadeViewModel>();
+        public IList<StatusAtividadeViewModel> StatusAtividades { get; set; } = new List<StatusAtividadeViewModel>();
 
-        public async Task OnGetAsync()
+        #endregion
+
+        #region GET Handler
+
+        public async Task<IActionResult> OnGetAsync()
         {
-            
-            await CarregarDados();
+            try
+            {
+                _logger.LogInformation("Iniciando criação de nova atividade");
 
-            // Definir valores padrão
-            Atividade.DataInicio = DateTime.Now;
-            Atividade.Prioridade = 3; // Alta
+                // Inicializar com valores padrão
+                Atividade.DataInicio = DateTime.Today;
+                Atividade.Prioridade = 3; // Normal
+
+                await LoadDropdownDataAsync();
+
+                return Page();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao inicializar criação de atividade");
+                TempData["ErrorMessage"] = "Erro ao carregar formulário. Tente novamente.";
+                return RedirectToPage("./Index");
+            }
         }
+
+        #endregion
+
+        #region POST Handler
 
         public async Task<IActionResult> OnPostAsync()
         {
-            if (!ModelState.IsValid)
+            try
             {
-                await CarregarDados();
+                _logger.LogInformation("Iniciando criação de atividade: {Nome}", Atividade.Nome);
+
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogWarning("ModelState inválido para criação de atividade");
+                    await LoadDropdownDataAsync();
+                    return Page();
+                }
+
+                var result = await _commandService.CreateAtividadeAsync(Atividade);
+
+                if (result.IsSuccess)
+                {
+                    _logger.LogInformation("Atividade criada com sucesso: ID {AtividadeId}", result.Data);
+                    TempData["SuccessMessage"] = result.Message;
+                    return RedirectToPage("./Index");
+                }
+                else
+                {
+                    _logger.LogWarning("Falha na criação da atividade: {Message}", result.Message);
+
+                    foreach (var error in result.Errors)
+                    {
+                        ModelState.AddModelError("", error);
+                    }
+
+                    await LoadDropdownDataAsync();
+                    return Page();
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro inesperado ao criar atividade");
+                TempData["ErrorMessage"] = "Erro interno ao criar atividade. Tente novamente.";
+                await LoadDropdownDataAsync();
                 return Page();
             }
-
-            var atividade = new Atividade
-            {
-                Nome = Atividade.Nome,
-                Descricao = Atividade.Descricao,
-                ProjetoId = Atividade.ProjetoId, 
-                TipoAtividadeId = Atividade.TipoAtividadeId,
-                StatusId = Atividade.StatusId,
-                UsuarioId = Atividade.UsuarioId,
-                DataInicio = Atividade.DataInicio,
-                DataFimPrevista = Atividade.DataFimPrevista,
-                DataFimReal = Atividade.DataFimReal,
-                HorasEstimadas = Atividade.HorasEstimadas,
-                HorasReais = Atividade.HorasReais,
-                Prioridade = Atividade.Prioridade,
-                Observacoes = Atividade.Observacoes,
-                DataCriacao = DateTime.Now,
-                DataAtualizacao = DateTime.Now
-            };
-
-            _context.Atividades.Add(atividade);
-            await _context.SaveChangesAsync();
-
-            TempData["SuccessMessage"] = $"Atividade '{atividade.Nome}' criada com sucesso!";
-            return RedirectToPage("./Index");
         }
 
-        private async Task CarregarDados()
+        #endregion
+
+        #region Private Methods
+
+        private async Task LoadDropdownDataAsync()
         {
-            Projetos = await _context.Projetos
-                .Where(p => p.Status.Nome != "Cancelado")
-                .OrderBy(p => p.Nome)
-                .ToListAsync();
+            try
+            {
 
-            Usuarios = await _context.Usuarios
-                .Include(u => u.Equipe)
-                .Where(u => u.Ativo)
-                .OrderBy(u => u.Nome)
-                .ToListAsync();
+                _logger.LogDebug("Carregando dados para dropdowns");
 
-            TiposAtividade = await _context.TiposAtividade
-                .OrderBy(t => t.Nome)
-                .ToListAsync();
+                var projetosAtivosTask = _lookupService.GetProjetosAtivosAsync();
+                var usuariosAtivosTask = _lookupService.GetUsuariosAtivosAsync();  
+                var tiposAtividadeTask = _lookupService.GetTiposAtividadeAsync();
+                var statusAtividadesTask = _lookupService.GetStatusAtividadesAsync();
 
-            StatusAtividades = await _context.StatusAtividades
-                .OrderBy(s => s.Ordem)
-                .ToListAsync();
+
+                Projetos = await projetosAtivosTask;
+                Usuarios = await usuariosAtivosTask;
+                TiposAtividade = await tiposAtividadeTask;
+                StatusAtividades = await statusAtividadesTask;
+
+                _logger.LogDebug("Dados dos dropdowns carregados: {ProjetosCount} projetos, {UsuariosCount} usuários, {TiposCount} tipos, {StatusCount} status",
+                    Projetos.Count, Usuarios.Count, TiposAtividade.Count, StatusAtividades.Count);
+
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao carregar dados para dropdowns na criação");
+
+                Projetos ??= new List<ProjetoViewModel>();
+                Usuarios ??= new List<UsuarioViewModel>();
+                TiposAtividade ??= new List<TipoAtividadeViewModel>();
+                StatusAtividades ??= new List<StatusAtividadeViewModel>();
+            }
         }
+
+        #endregion
     }
 }

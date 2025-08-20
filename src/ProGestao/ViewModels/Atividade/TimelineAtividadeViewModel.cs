@@ -1,4 +1,4 @@
-﻿namespace ProGestao.ViewModels
+﻿namespace ProGestao.ViewModels.Atividade
 {
     public class TimelineAtividadeViewModel
     {

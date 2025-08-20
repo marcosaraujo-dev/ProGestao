@@ -5,6 +5,8 @@ using ProGestao.Services;
 using ProGestao.ViewModels;
 using ProGestao.Data;
 using ProGestao.Models;
+using ProGestao.ViewModels.Grid;
+using ProGestao.ViewModels.Usuarios;
 
 namespace ProGestao.Pages.Grid
 {

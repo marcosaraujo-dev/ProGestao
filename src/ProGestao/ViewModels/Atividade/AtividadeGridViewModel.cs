@@ -1,4 +1,4 @@
-﻿namespace ProGestao.ViewModels
+﻿namespace ProGestao.ViewModels.Atividade
 {
     public class AtividadeGridViewModel
     {
@@ -60,6 +60,15 @@
             3 => "warning",
             4 => "danger",
             _ => "info"
+        };
+
+        public string PrioridadeClasse => Prioridade switch
+        {
+            1 => "baixa",
+            2 => "normal",
+            3 => "alta",
+            4 => "critica",
+            _ => "normal"
         };
     }
 }

@@ -1,6 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using ProGestao.ViewModels.Atividade;
+using System.ComponentModel.DataAnnotations;
 
-namespace ProGestao.ViewModels
+namespace ProGestao.ViewModels.Usuarios
 {
     public class UsuarioGridViewModel
     {

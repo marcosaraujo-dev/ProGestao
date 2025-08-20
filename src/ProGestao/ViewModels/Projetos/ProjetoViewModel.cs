@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace ProGestao.ViewModels
+namespace ProGestao.ViewModels.Projetos
 {
     public class ProjetoViewModel
     {
@@ -39,10 +39,28 @@ namespace ProGestao.ViewModels
         public string? StatusNome { get; set; }
         public string? StatusCor { get; set; }
         public string? ResponsavelNome { get; set; }
-        public int TotalAtividades { get; set; }
-        public int AtividadesConcluidas { get; set; }
-        public decimal ProgressoPercentual => TotalAtividades > 0 ?
-            (decimal)AtividadesConcluidas / TotalAtividades * 100 : 0;
+
+        // Métricas do projeto
+        public int QtdAtividades { get; set; }
+        public int QtdAtividadesConcluidas { get; set; }
+        public decimal PercentualConclusao { get; set; }
+        
+        
+        public decimal ProgressoPercentual => QtdAtividades > 0 ?
+            (decimal)QtdAtividadesConcluidas / QtdAtividades * 100 : 0;
+
+        public bool EstaAtrasado => DataFimPrevista.HasValue &&
+                                   DataFimPrevista < DateTime.Today &&
+                                   StatusNome != "Concluído";
+
+        public string StatusClasse => StatusNome?.ToLowerInvariant() switch
+        {
+            "planejamento" => "warning",
+            "em andamento" => "info",
+            "concluído" => "success",
+            "cancelado" => "danger",
+            _ => "secondary"
+        };
 
         public DateTime DataCriacao { get; set; }
     }

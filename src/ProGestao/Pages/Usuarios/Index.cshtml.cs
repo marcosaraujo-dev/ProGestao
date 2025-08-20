@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using ProGestao.Data;
-using ProGestao.ViewModels;
+using ProGestao.ViewModels.Usuarios;
 
 namespace ProGestao.Pages.Usuarios
 {

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace ProGestao.ViewModels
+namespace ProGestao.ViewModels.Usuarios
 {
     public class UsuarioViewModel
     {
@@ -36,5 +36,6 @@ namespace ProGestao.ViewModels
 
         public string StatusTexto => Ativo ? "Ativo" : "Inativo";
         public string StatusClasse => Ativo ? "success" : "secondary";
+        public string InicialNome => string.IsNullOrEmpty(Nome) ? "?" : Nome.Substring(0, 1).ToUpperInvariant();
     }
 }

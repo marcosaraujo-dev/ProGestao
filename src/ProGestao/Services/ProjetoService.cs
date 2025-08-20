@@ -1,11 +1,10 @@
-﻿// ===== Services/IProjetoService.cs =====
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using ProGestao.Data;
 using ProGestao.Models;
-using ProGestao.ViewModels;
-
+using ProGestao.ViewModels.Projetos;
 namespace ProGestao.Services
 {
+    /*
     public interface IProjetoService
     {
         Task<IList<ProjetoViewModel>> GetProjetosAsync();
@@ -574,12 +573,13 @@ namespace ProGestao.Services
                     ResponsavelNome = projeto.Responsavel?.Nome,
                     LinkProjeto = projeto.LinkProjeto,
                     Observacoes = projeto.Observacoes,
-                    TotalAtividades = totalAtividades,
-                    AtividadesConcluidas = atividadesConcluidas,
+                    QtdAtividades = totalAtividades,
+                    QtdAtividadesConcluidas = atividadesConcluidas,
                     DataCriacao = projeto.DataCriacao
                 };
             }
         }
+        */
     }
 
 

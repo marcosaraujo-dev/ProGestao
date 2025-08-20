@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ProGestao.Data;
 using ProGestao.Models;
-using ProGestao.ViewModels;
+using ProGestao.ViewModels.Usuarios;
 
 namespace ProGestao.Services
 {

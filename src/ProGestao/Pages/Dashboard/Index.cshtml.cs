@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using ProGestao.Data;
 using ProGestao.ViewModels;
+using ProGestao.ViewModels.Atividade;
 
 namespace ProGestao.Pages.Dashboard
 {

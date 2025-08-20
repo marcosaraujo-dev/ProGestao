@@ -1,80 +1,114 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
-using ProGestao.Data;
-using ProGestao.ViewModels;
+using ProGestao.Services.Interfaces;
+using ProGestao.ViewModels.Projetos;
+using ProGestao.ViewModels.Usuarios;
 
 namespace ProGestao.Pages.Projetos
 {
+    /// <summary>
+    /// PageModel refatorado para listagem de projetos
+    /// </summary>
     public class IndexModel : PageModel
     {
-        private readonly ProGestaoContext _context;
+        #region Dependencies
 
-        public IndexModel(ProGestaoContext context)
+        private readonly IProjetoQueryService _queryService;
+        private readonly IProjetoLookupService _lookupService;
+        private readonly ILogger<IndexModel> _logger;
+
+        #endregion
+
+        #region Constructor
+
+        public IndexModel(
+            IProjetoQueryService queryService,
+            IProjetoLookupService lookupService,
+            ILogger<IndexModel> logger)
         {
-            _context = context;
+            _queryService = queryService ?? throw new ArgumentNullException(nameof(queryService));
+            _lookupService = lookupService ?? throw new ArgumentNullException(nameof(lookupService));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
+
+        #endregion
+
+        #region Properties
 
         public IList<ProjetoViewModel> Projetos { get; set; } = new List<ProjetoViewModel>();
+        public IList<StatusProjetoViewModel> StatusProjetos { get; set; } = new List<StatusProjetoViewModel>();
+        public IList<UsuarioLookupViewModel> Responsaveis { get; set; } = new List<UsuarioLookupViewModel>();
 
         [BindProperty(SupportsGet = true)]
-        public string? FiltroStatus { get; set; }
+        public ProjetoFiltroViewModel Filtros { get; set; } = new ProjetoFiltroViewModel();
 
-        [BindProperty(SupportsGet = true)]
-        public string? FiltroResponsavel { get; set; }
+        #endregion
 
-        public async Task OnGetAsync()
+        #region GET Handler
+
+        public async Task<IActionResult> OnGetAsync()
         {
-            var query = _context.Projetos
-                .Include(p => p.Status)
-                .Include(p => p.Responsavel)
-                .AsQueryable();
-
-            // Aplicar filtros
-            if (!string.IsNullOrEmpty(FiltroStatus))
+            try
             {
-                query = query.Where(p => p.Status.Nome.Contains(FiltroStatus));
-            }
+                _logger.LogInformation("Carregando lista de projetos com filtros: {@Filtros}", Filtros);
 
-            if (!string.IsNullOrEmpty(FiltroResponsavel) && int.TryParse(FiltroResponsavel, out var responsavelId))
-            {
-                query = query.Where(p => p.ResponsavelId == responsavelId);
-            }
+                await LoadDropdownDataAsync();
 
-            var projetos = await query.OrderByDescending(p => p.DataCriacao).ToListAsync();
-
-            Projetos = new List<ProjetoViewModel>();
-
-            foreach (var projeto in projetos)
-            {
-                var totalAtividades = await _context.Atividades
-                    .Where(a => a.ProjetoId == projeto.Id)
-                    .CountAsync();
-
-                var atividadesConcluidas = await _context.Atividades
-                    .Where(a => a.ProjetoId == projeto.Id && a.Status.Nome == "Concluída")
-                    .CountAsync();
-
-                Projetos.Add(new ProjetoViewModel
+                if (Filtros.TemFiltros)
                 {
-                    Id = projeto.Id,
-                    Nome = projeto.Nome,
-                    Descricao = projeto.Descricao,
-                    DataInicio = projeto.DataInicio,
-                    DataFimPrevista = projeto.DataFimPrevista,
-                    DataFimReal = projeto.DataFimReal,
-                    StatusId = projeto.StatusId,
-                    StatusNome = projeto.Status.Nome,
-                    StatusCor = projeto.Status.Cor,
-                    ResponsavelId = projeto.ResponsavelId,
-                    ResponsavelNome = projeto.Responsavel?.Nome,
-                    LinkProjeto = projeto.LinkProjeto,
-                    Observacoes = projeto.Observacoes,
-                    TotalAtividades = totalAtividades,
-                    AtividadesConcluidas = atividadesConcluidas,
-                    DataCriacao = projeto.DataCriacao
-                });
+                    Projetos = await _queryService.GetProjetosByFiltroAsync(
+                        Filtros.Status,
+                        Filtros.ResponsavelId,
+                        Filtros.Nome);
+                }
+                else
+                {
+                    Projetos = await _queryService.GetProjetosAsync();
+                }
+
+                _logger.LogInformation("Carregados {Count} projetos", Projetos.Count);
+                return Page();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao carregar lista de projetos");
+                TempData["ErrorMessage"] = "Erro ao carregar projetos. Tente novamente.";
+
+                Projetos = new List<ProjetoViewModel>();
+                await LoadDropdownDataAsync();
+
+                return Page();
             }
         }
+
+        #endregion
+
+        #region Private Methods
+
+        private async Task LoadDropdownDataAsync()
+        {
+            try
+            {
+                _logger.LogDebug("Carregando dados para dropdowns");
+
+                var statusProjetosTask = _lookupService.GetStatusProjetosAsync();
+                var responsaveisTask = _lookupService.GetResponsaveisAsync();
+
+                StatusProjetos = await statusProjetosTask;
+                Responsaveis = await responsaveisTask;
+
+                _logger.LogDebug("Dados dos dropdowns carregados: {StatusCount} status, {ResponsaveisCount} responsáveis",
+                    StatusProjetos.Count, Responsaveis.Count);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao carregar dados para filtros");
+
+                StatusProjetos ??= new List<StatusProjetoViewModel>();
+                Responsaveis ??= new List<UsuarioLookupViewModel>();
+            }
+        }
+
+        #endregion
     }
 }

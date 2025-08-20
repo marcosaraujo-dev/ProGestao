@@ -1,4 +1,4 @@
-﻿using ProGestao.ViewModels;
+﻿using ProGestao.ViewModels.Atividade;
 using System.ComponentModel.DataAnnotations;
 
 public interface IAtividadeService
