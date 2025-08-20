@@ -2,7 +2,6 @@
 using ProGestao.Data;
 using ProGestao.Services;
 using ProGestao.Services.Atividades;
-using ProGestao.Services.Implementation;
 using ProGestao.Services.Interfaces;
 using ProGestao.Services.Projetos;
 using ProGestao.Services.Usuarios;

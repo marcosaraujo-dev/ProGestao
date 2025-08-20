@@ -1,0 +1,695 @@
+﻿/* =============================================================
+   PROGESTAO - DELETE PAGES CSS
+   Arquivo: wwwroot/css/pages/delete-pages.css
+   Versão: 1.0 - Estilos específicos para páginas de exclusão
+   ============================================================= */
+
+/* =============================================================
+   1. CONTAINERS PRINCIPAIS
+   ============================================================= */
+.delete-container {
+	background: linear-gradient(135deg, #ffffff 0%, #fff5f5 100%);
+	border: 2px solid #fecaca;
+	border-radius: var(--radius-xl);
+	box-shadow: var(--shadow-lg);
+	overflow: hidden;
+	animation: slideInUp 0.4s ease-out;
+}
+
+@keyframes slideInUp {
+	from {
+		opacity: 0;
+		transform: translateY(30px);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.delete-header {
+	background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+	color: var(--white);
+	padding: 2rem;
+	text-align: center;
+	position: relative;
+	overflow: hidden;
+}
+
+	.delete-header::before {
+		content: '';
+		position: absolute;
+		top: -50%;
+		left: -50%;
+		width: 200%;
+		height: 200%;
+		background: repeating-linear-gradient( 45deg, transparent, transparent 10px, rgba(255, 255, 255, 0.05) 10px, rgba(255, 255, 255, 0.05) 20px );
+		animation: warningPattern 20s linear infinite;
+	}
+
+@keyframes warningPattern {
+	0% {
+		transform: translateX(-100px);
+	}
+
+	100% {
+		transform: translateX(100px);
+	}
+}
+
+/* =============================================================
+   2. ÍCONES DE STATUS
+   ============================================================= */
+.warning-icon {
+	font-size: 3rem;
+	color: #dc2626;
+	margin-bottom: 1rem;
+	animation: pulse 2s ease-in-out infinite;
+	filter: drop-shadow(0 4px 8px rgba(220, 38, 38, 0.3));
+}
+
+.blocked-icon {
+	font-size: 3rem;
+	color: #f59e0b;
+	margin-bottom: 1rem;
+	animation: shake 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+	0%, 100% {
+		transform: scale(1);
+		opacity: 1;
+	}
+
+	50% {
+		transform: scale(1.1);
+		opacity: 0.8;
+	}
+}
+
+@keyframes shake {
+	0%, 100% {
+		transform: translateX(0);
+	}
+
+	10%, 30%, 50%, 70%, 90% {
+		transform: translateX(-2px);
+	}
+
+	20%, 40%, 60%, 80% {
+		transform: translateX(2px);
+	}
+}
+
+/* =============================================================
+   3. ALERTAS E AVISOS
+   ============================================================= */
+.delete-warning {
+	background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+	border: 1px solid #fecaca;
+	border-left: 4px solid #dc2626;
+	border-radius: var(--radius-lg);
+	padding: 1.5rem;
+	margin: 1.5rem 0;
+	animation: warningGlow 3s ease-in-out infinite;
+}
+
+@keyframes warningGlow {
+	0%, 100% {
+		box-shadow: 0 0 0 rgba(220, 38, 38, 0);
+	}
+
+	50% {
+		box-shadow: 0 0 20px rgba(220, 38, 38, 0.1);
+	}
+}
+
+.delete-blocked {
+	background: linear-gradient(135deg, #fef3cd 0%, #fde68a 100%);
+	border: 1px solid #f6cc66;
+	border-left: 4px solid #f59e0b;
+	border-radius: var(--radius-lg);
+	padding: 1.5rem;
+	margin: 1.5rem 0;
+}
+
+.orphan-warning {
+	background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+	border: 1px solid #93c5fd;
+	border-left: 4px solid #3b82f6;
+	border-radius: var(--radius-lg);
+	padding: 1.5rem;
+	margin: 1.5rem 0;
+}
+
+.impact-analysis {
+	background: linear-gradient(135deg, #e0f2fe 0%, #b3e5fc 100%);
+	border: 1px solid #81d4fa;
+	border-left: 4px solid #0277bd;
+	border-radius: var(--radius-lg);
+	padding: 1.5rem;
+	margin: 1.5rem 0;
+}
+
+/* =============================================================
+   4. RESUMOS E INFORMAÇÕES
+   ============================================================= */
+.activity-summary,
+.project-summary {
+	background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+	border: 1px solid #dee2e6;
+	border-radius: var(--radius-lg);
+	padding: 2rem;
+	margin: 1.5rem 0;
+	box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.summary-item {
+	display: flex;
+	align-items: center;
+	padding: 0.75rem 0;
+	border-bottom: 1px solid #e9ecef;
+	transition: all var(--transition-normal);
+}
+
+	.summary-item:last-child {
+		border-bottom: none;
+	}
+
+	.summary-item:hover {
+		background: rgba(44, 90, 160, 0.05);
+		border-radius: var(--radius-md);
+		margin: 0 -0.5rem;
+		padding: 0.75rem 0.5rem;
+	}
+
+.summary-icon {
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+	background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+	color: var(--white);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-right: 1rem;
+	font-size: 1rem;
+	box-shadow: 0 2px 8px rgba(44, 90, 160, 0.3);
+}
+
+.summary-content {
+	flex: 1;
+}
+
+.summary-label {
+	font-weight: 600;
+	color: #495057;
+	font-size: 0.9rem;
+	margin-bottom: 0.25rem;
+}
+
+.summary-value {
+	color: #6c757d;
+}
+
+/* =============================================================
+   5. ESTATÍSTICAS E MÉTRICAS
+   ============================================================= */
+.summary-stats {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+	gap: 1rem;
+	margin: 1.5rem 0;
+}
+
+.stat-card {
+	background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+	border: 1px solid #e5e7eb;
+	border-radius: var(--radius-lg);
+	padding: 1.5rem;
+	text-align: center;
+	transition: all var(--transition-normal);
+	box-shadow: var(--shadow-sm);
+}
+
+	.stat-card:hover {
+		transform: translateY(-2px);
+		box-shadow: var(--shadow-md);
+	}
+
+.stat-number {
+	font-size: 2rem;
+	font-weight: 700;
+	color: var(--primary-color);
+	display: block;
+	line-height: 1;
+}
+
+.stat-label {
+	font-size: 0.9rem;
+	color: #6b7280;
+	margin-top: 0.5rem;
+	font-weight: 500;
+}
+
+/* =============================================================
+   6. LISTAS DE ATIVIDADES
+   ============================================================= */
+.activities-impact {
+	background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);
+	border: 1px solid #f6cc66;
+	border-left: 4px solid #f59e0b;
+	border-radius: var(--radius-lg);
+	padding: 1.5rem;
+	margin: 1.5rem 0;
+}
+
+.activities-list {
+	max-height: 300px;
+	overflow-y: auto;
+	border: 1px solid #e5e7eb;
+	border-radius: var(--radius-md);
+	background: var(--white);
+	box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.activity-item {
+	padding: 1rem;
+	border-bottom: 1px solid #f3f4f6;
+	display: flex;
+	align-items: center;
+	justify-content: between;
+	transition: all var(--transition-fast);
+}
+
+	.activity-item:last-child {
+		border-bottom: none;
+	}
+
+	.activity-item:hover {
+		background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+		transform: translateX(5px);
+	}
+
+.activity-info {
+	flex: 1;
+}
+
+.activity-name {
+	font-weight: 600;
+	color: #374151;
+	margin-bottom: 0.5rem;
+	transition: color var(--transition-fast);
+}
+
+.activity-item:hover .activity-name {
+	color: var(--primary-color);
+}
+
+.activity-meta {
+	font-size: 0.8rem;
+	color: #6b7280;
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	flex-wrap: wrap;
+}
+
+.activity-status {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	margin-left: auto;
+	font-size: 0.85rem;
+	font-weight: 500;
+}
+
+.status-dot {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	display: inline-block;
+	box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.8);
+}
+
+/* =============================================================
+   7. BADGES E INDICADORES
+   ============================================================= */
+.priority-badge {
+	padding: 0.25rem 0.5rem;
+	border-radius: 12px;
+	font-size: 0.75rem;
+	font-weight: 500;
+	border: 1px solid transparent;
+}
+
+.priority-indicator {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.25rem 0.75rem;
+	border-radius: 15px;
+	font-size: 0.85rem;
+	font-weight: 500;
+}
+
+.priority-critical {
+	background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+	color: #991b1b;
+	border-color: #f87171;
+}
+
+.priority-high {
+	background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+	color: #92400e;
+	border-color: #fbbf24;
+}
+
+.priority-normal {
+	background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+	color: #065f46;
+	border-color: #34d399;
+}
+
+.priority-low {
+	background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+	color: #1e40af;
+	border-color: #60a5fa;
+}
+
+.status-indicator {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.25rem 0.75rem;
+	border-radius: 15px;
+	font-size: 0.85rem;
+	font-weight: 500;
+	color: var(--white);
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* =============================================================
+   8. BOTÕES DE AÇÃO
+   ============================================================= */
+.btn-delete-confirm {
+	background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+	border: none;
+	color: var(--white);
+	padding: 0.75rem 2rem;
+	font-weight: 600;
+	min-width: 160px;
+	position: relative;
+	overflow: hidden;
+}
+
+	.btn-delete-confirm::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: -100%;
+		width: 100%;
+		height: 100%;
+		background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+		transition: left 0.5s;
+	}
+
+	.btn-delete-confirm:hover::before {
+		left: 100%;
+	}
+
+	.btn-delete-confirm:hover {
+		background: linear-gradient(135deg, #991b1b 0%, #7f1d1d 100%);
+		color: var(--white);
+		transform: translateY(-2px);
+		box-shadow: 0 4px 12px rgba(153, 27, 27, 0.4);
+	}
+
+	.btn-delete-confirm:disabled {
+		background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
+		cursor: not-allowed;
+		transform: none;
+		box-shadow: none;
+	}
+
+		.btn-delete-confirm:disabled::before {
+			display: none;
+		}
+
+.delete-actions {
+	padding: 2rem;
+	border-top: 2px solid #f3f4f6;
+	background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
+	display: flex;
+	gap: 1rem;
+	justify-content: center;
+	flex-wrap: wrap;
+}
+
+/* =============================================================
+   9. VALIDAÇÃO E FEEDBACK
+   ============================================================= */
+.validation-summary {
+	background: linear-gradient(135deg, #ffeee6 0%, #ffdd99 100%);
+	border: 1px solid #ff9800;
+	border-left: 4px solid #e65100;
+	border-radius: var(--radius-lg);
+	padding: 1rem;
+	margin-bottom: 1.5rem;
+	animation: fadeInDown var(--transition-slow) ease-out;
+}
+
+@keyframes fadeInDown {
+	from {
+		opacity: 0;
+		transform: translateY(-10px);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.validation-summary h6 {
+	color: #e65100;
+	margin-bottom: 0.75rem;
+	font-weight: 600;
+}
+
+.validation-summary ul {
+	margin-bottom: 0;
+	padding-left: 1.5rem;
+}
+
+.validation-summary li {
+	color: #bf360c;
+	margin-bottom: 0.25rem;
+	font-weight: 500;
+}
+
+/* =============================================================
+   10. RESPONSIVIDADE
+   ============================================================= */
+@media (max-width: 768px) {
+	.delete-header {
+		padding: 1.5rem 1rem;
+	}
+
+	.activity-summary,
+	.project-summary {
+		padding: 1.5rem;
+	}
+
+	.summary-stats {
+		grid-template-columns: repeat(2, 1fr);
+	}
+
+	.delete-actions {
+		flex-direction: column;
+		align-items: stretch;
+		padding: 1.5rem;
+	}
+
+	.btn-delete-confirm,
+	.btn {
+		width: 100%;
+		margin-bottom: 0.5rem;
+	}
+
+	.activity-meta {
+		gap: 0.5rem;
+		font-size: 0.75rem;
+	}
+
+	.activity-item {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 0.5rem;
+	}
+
+	.activity-status {
+		margin-left: 0;
+		margin-top: 0.5rem;
+	}
+
+	.summary-item {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 0.75rem;
+	}
+
+	.summary-icon {
+		margin-right: 0;
+		margin-bottom: 0.5rem;
+	}
+}
+
+@media (max-width: 575.98px) {
+	.delete-container {
+		margin: 0.5rem;
+	}
+
+	.warning-icon,
+	.blocked-icon {
+		font-size: 2rem;
+	}
+
+	.stat-number {
+		font-size: 1.5rem;
+	}
+
+	.activities-list {
+		max-height: 200px;
+	}
+
+	.summary-stats {
+		grid-template-columns: 1fr;
+	}
+}
+
+/* =============================================================
+   11. MODO ESCURO (Preparação para futuro)
+   ============================================================= */
+@media (prefers-color-scheme: dark) {
+	.delete-container {
+		background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+		border-color: #ef4444;
+	}
+
+	.activity-summary,
+	.project-summary {
+		background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+		border-color: #6b7280;
+	}
+
+	.summary-label {
+		color: #d1d5db;
+	}
+
+	.summary-value {
+		color: #9ca3af;
+	}
+
+	.stat-card {
+		background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+		border-color: #6b7280;
+	}
+
+	.activities-list {
+		background: #374151;
+		border-color: #6b7280;
+	}
+
+	.activity-item {
+		border-color: #4b5563;
+	}
+
+		.activity-item:hover {
+			background: linear-gradient(135deg, #4b5563 0%, #6b7280 100%);
+		}
+
+	.activity-name {
+		color: #f3f4f6;
+	}
+
+	.activity-meta {
+		color: #9ca3af;
+	}
+}
+
+/* =============================================================
+   12. TRANSIÇÕES E ANIMAÇÕES AVANÇADAS
+   ============================================================= */
+.delete-container * {
+	transition: all var(--transition-normal);
+}
+
+/* Animação de entrada para elementos da lista */
+.activity-item {
+	animation: slideInLeft 0.3s ease-out;
+	animation-fill-mode: both;
+}
+
+	.activity-item:nth-child(1) {
+		animation-delay: 0.1s;
+	}
+
+	.activity-item:nth-child(2) {
+		animation-delay: 0.2s;
+	}
+
+	.activity-item:nth-child(3) {
+		animation-delay: 0.3s;
+	}
+
+	.activity-item:nth-child(4) {
+		animation-delay: 0.4s;
+	}
+
+	.activity-item:nth-child(5) {
+		animation-delay: 0.5s;
+	}
+
+@keyframes slideInLeft {
+	from {
+		opacity: 0;
+		transform: translateX(-20px);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateX(0);
+	}
+}
+
+/* Efeito de loading para ações críticas */
+.btn-delete-confirm.loading {
+	pointer-events: none;
+	position: relative;
+}
+
+	.btn-delete-confirm.loading::after {
+		content: '';
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		width: 20px;
+		height: 20px;
+		margin: -10px 0 0 -10px;
+		border: 2px solid transparent;
+		border-top-color: var(--white);
+		border-radius: 50%;
+		animation: btn-loading-spin 1s linear infinite;
+	}
+
+@keyframes btn-loading-spin {
+	0% {
+		transform: rotate(0deg);
+	}
+
+	100% {
+		transform: rotate(360deg);
+	}
+}
