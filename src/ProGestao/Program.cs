@@ -4,12 +4,11 @@ using ProGestao.Configuration;
 using ProGestao.Data;
 using ProGestao.Services;
 
-
 var builder = WebApplication.CreateBuilder(args);
 
 try
 {
-    // Configurar fontes de configuração
+    // Configurar fontes de configuração (MANTIDO - sua implementação original)
     builder.Configuration
         .SetBasePath(Directory.GetCurrentDirectory())
         .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
@@ -22,16 +21,9 @@ try
     builder.Services.AddRazorPages();
     builder.Services.AddSecureConfiguration(builder.Configuration);
 
-    //Injeção
-    builder.Services.AddScoped<ITimelineService, TimelineService>();
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-    builder.Services.AddScoped<IProjetoService, ProjetoService>();
-    builder.Services.AddScoped<IAtividadeService, AtividadeService>();
-    builder.Services.AddScoped<IProjetoService, ProjetoService>();
-    builder.Services.AddScoped<IUsuarioService, UsuarioService>();
-    builder.Services.AddScoped<IGridService, GridService>();
-
-    // Logging
+    // Logging 
     builder.Services.AddLogging(logging =>
     {
         logging.ClearProviders();
@@ -44,15 +36,49 @@ try
         }
     });
 
-    builder.Services.AddDbContext<ProGestaoContext>(options =>
-        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    // DbContextPool com configurações de resilência resolvendo problemas de concorrência
+    builder.Services.AddDbContextPool<ProGestaoContext>(options =>
+    {
+        options.UseSqlServer(connectionString, sqlServerOptions =>
+        {
+            // Configurações de resilência
+            sqlServerOptions.EnableRetryOnFailure(
+                maxRetryCount: 3,
+                maxRetryDelay: TimeSpan.FromSeconds(5),
+                errorNumbersToAdd: null);
+
+            // Timeout para consultas
+            sqlServerOptions.CommandTimeout(30);
+        });
+
+        // ✅ CONFIGURAÇÃO ESPECÍFICA PARA RESOLVER O ERRO
+        // Remove o tracking para melhor performance
+        options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+
+        // Configurações de desenvolvimento
+        if (builder.Environment.IsDevelopment())
+        {
+            options.EnableSensitiveDataLogging();
+            options.EnableDetailedErrors();
+        }
+    },
+    poolSize: 64);  // ✅ POOL SIZE para resolver concorrência
+
+    builder.Services.AddApplicationServices();  // Chama método do DependencyInjectionConfig
+
 
     var app = builder.Build();
 
-    // Testar conexão com banco na inicialização (apenas em desenvolvimento)
+    using (var scope = app.Services.CreateScope())
+    {
+        var context = scope.ServiceProvider.GetRequiredService<ProGestaoContext>();
+        // Verifica se o contexto foi criado corretamente
+        _ = context.Database.ProviderName; // Força verificação
+    }
+
+    // Testar conexão com banco na inicialização
     if (app.Environment.IsDevelopment())
     {
-        var connectionString = app.Configuration.GetConnectionString("DefaultConnection");
         var canConnect = await ConfigurationValidator.TestDatabaseConnectionAsync(connectionString!);
 
         if (!canConnect)
@@ -65,39 +91,34 @@ try
         }
     }
 
-
-    // Configure the HTTP request pipeline.
+    // Configure the HTTP request pipeline
     if (!app.Environment.IsDevelopment())
     {
         app.UseExceptionHandler("/Error");
-        // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
         app.UseHsts();
     }
 
     // Configurar pipeline com segurança
     app.ConfigureSecureApp();
-    app.MapRazorPages();
 
-    // Log de inicialização
+    // Log de inicialização 
     var appSettings = app.Configuration.GetSection("ApplicationSettings").Get<ApplicationSettings>();
     app.Logger.LogInformation($"🚀 {appSettings?.AppName} v{appSettings?.Version} iniciado em ambiente {appSettings?.Environment}");
 
-
+    // Pipeline configuration 
     app.UseHttpsRedirection();
-
     app.UseRouting();
-
     app.UseAuthorization();
 
     app.MapStaticAssets();
     app.MapRazorPages()
        .WithStaticAssets();
 
-
     app.Run();
 }
 catch (InvalidOperationException ex) when (ex.Message.Contains("Erros de configuração"))
 {
+    
     Console.ForegroundColor = ConsoleColor.Red;
     Console.WriteLine("❌ ERRO DE CONFIGURAÇÃO:");
     Console.WriteLine(ex.Message);
@@ -111,8 +132,49 @@ catch (InvalidOperationException ex) when (ex.Message.Contains("Erros de configu
 }
 catch (Exception ex)
 {
+    
     Console.ForegroundColor = ConsoleColor.Red;
     Console.WriteLine($"❌ ERRO CRÍTICO NA INICIALIZAÇÃO: {ex.Message}");
+
+    if (ex.Message.Contains("DbContext") || ex.Message.Contains("service"))
+    {
+        Console.WriteLine();
+        Console.WriteLine("🔍 POSSÍVEIS CAUSAS:");
+        Console.WriteLine("1. Configuração duplicada do DbContext");
+        Console.WriteLine("2. Conflito entre AddDbContext e AddDbContextPool");
+        Console.WriteLine("3. Serviços registrados incorretamente");
+        Console.WriteLine();
+        Console.WriteLine("💡 SOLUÇÕES:");
+        Console.WriteLine("1. Verifique se não há múltiplas configurações do DbContext");
+        Console.WriteLine("2. Certifique-se que usa apenas AddDbContextPool");
+        Console.WriteLine("3. Remova configurações antigas do Entity Framework");
+    }
     Console.ResetColor();
     Environment.Exit(1);
+}
+
+/// <summary>
+/// Extensões para configuração adicional
+/// </summary>
+public static class ServiceCollectionExtensions
+{
+    /// <summary>
+    /// Adiciona configurações específicas de performance se necessário
+    /// </summary>
+    public static IServiceCollection AddPerformanceOptimizations(this IServiceCollection services)
+    {
+        // Cache em memória para otimizações futuras
+        services.AddMemoryCache(options =>
+        {
+            options.SizeLimit = 1024; // Limite de cache
+        });
+
+        // Compression para responses grandes
+        services.AddResponseCompression(options =>
+        {
+            options.EnableForHttps = true;
+        });
+
+        return services;
+    }
 }

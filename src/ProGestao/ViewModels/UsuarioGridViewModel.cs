@@ -15,10 +15,17 @@ namespace ProGestao.ViewModels
         [Display(Name = "Equipe")]
         public string EquipeNome { get; set; } = string.Empty;
 
+        // Iniciais para compatibilidade com Grid
+        public string Iniciais { get; set; } = string.Empty;
+
+        // Lista de atividades para compatibilidade
+        public List<AtividadeGridViewModel> Atividades { get; set; } = new();
+
+        // Propriedade existente mantida
         public Dictionary<DateTime, List<AtividadeGridViewModel>> AtividadesPorDia { get; set; } =
             new Dictionary<DateTime, List<AtividadeGridViewModel>>();
 
-        // Propriedades calculadas para estatísticas
+        // Propriedades calculadas existentes mantidas
         public int TotalAtividades => AtividadesPorDia.Values.SelectMany(x => x).Count();
 
         public int AtividadesPendentes => AtividadesPorDia.Values.SelectMany(x => x)

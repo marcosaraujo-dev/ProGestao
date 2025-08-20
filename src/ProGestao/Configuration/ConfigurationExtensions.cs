@@ -13,21 +13,7 @@ namespace ProGestao.Configuration
             // Configurar ApplicationSettings
             services.Configure<ApplicationSettings>(configuration.GetSection("ApplicationSettings"));
 
-            // Configurar DbContext
-            services.AddDbContext<ProGestaoContext>(options =>
-            {
-                var connectionString = configuration.GetConnectionString("DefaultConnection");
-                options.UseSqlServer(connectionString);
-
-                // Configurar logging SQL baseado na configuração
-                var appSettings = configuration.GetSection("ApplicationSettings").Get<ApplicationSettings>();
-                if (appSettings?.EnableSqlLogging == true)
-                {
-                    options.EnableSensitiveDataLogging();
-                    options.EnableDetailedErrors();
-                }
-            });
-
+           
             return services;
         }
 

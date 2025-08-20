@@ -1,44 +1,23 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ProGestao.Data;
-using ProGestao.Pages.Grid;
+using ProGestao.ViewModels;
 using System.Globalization;
 
 namespace ProGestao.Services
 {
     /// <summary>
     /// Interface para serviço do Grid
-    /// Define contrato seguindo Interface Segregation Principle
     /// </summary>
     public interface IGridService
     {
-        /// <summary>
-        /// Obtém dados do grid baseado nos filtros
-        /// </summary>
         Task<GridDataViewModel> GetGridDataAsync(GridFilterViewModel filter);
-
-        /// <summary>
-        /// Obtém atividades para um período específico
-        /// </summary>
-        Task<IEnumerable<AtividadeGridViewModel>> GetAtividadesPorPeriodoAsync(
-            DateTime dataInicio, DateTime dataFim, int? equipeId = null);
-
-        /// <summary>
-        /// Obtém usuários ativos da equipe
-        /// </summary>
+        Task<IEnumerable<AtividadeGridViewModel>> GetAtividadesPorPeriodoAsync(DateTime dataInicio, DateTime dataFim, int? equipeId = null);
         Task<IEnumerable<UsuarioGridViewModel>> GetUsuariosAtivosAsync(int? equipeId = null);
-
-        /// <summary>
-        /// Calcula métricas do grid
-        /// </summary>
         Task<GridMetricsViewModel> GetGridMetricsAsync(GridFilterViewModel filter);
     }
-}
 
-namespace ProGestao.Services
-{
     /// <summary>
-    /// Implementação do serviço do Grid
-    /// Implementa Repository Pattern e SOLID principles
+    /// Implementação aprimorada do GridService
     /// </summary>
     public class GridService : IGridService
     {
@@ -52,9 +31,7 @@ namespace ProGestao.Services
 
         #region Constructor
 
-        public GridService(
-            ProGestaoContext context,
-            ILogger<GridService> logger)
+        public GridService(ProGestaoContext context, ILogger<GridService> logger)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -67,6 +44,7 @@ namespace ProGestao.Services
 
         /// <summary>
         /// Obtém dados completos do grid
+        /// Suporte a períodos dinâmicos
         /// </summary>
         public async Task<GridDataViewModel> GetGridDataAsync(GridFilterViewModel filter)
         {
@@ -75,23 +53,20 @@ namespace ProGestao.Services
                 _logger.LogInformation("Carregando dados do grid para período {DataInicio} - {DataFim}",
                     filter.DataInicio, filter.DataFim);
 
-                // Valida filtros
                 ValidateFilter(filter);
 
-                // Carrega dados em paralelo
-                var usuariosTask = GetUsuariosAtivosAsync(filter.EquipeId);
-                var atividadesTask = GetAtividadesPorPeriodoAsync(
+                // 1. Carrega usuários
+                var usuarios = await GetUsuariosAtivosAsync(filter.EquipeId);
+
+                // 2. Carrega atividades
+                var atividades = await GetAtividadesPorPeriodoAsync(
                     filter.DataInicio, filter.DataFim, filter.EquipeId);
-                var diasTask = Task.FromResult(GetDiasSemana(filter.SemanaReferencia));
 
-                await Task.WhenAll(usuariosTask, atividadesTask, diasTask);
+                // 3.  Gera dias baseado no período (não fixo em 7 dias)
+                var dias = GetDiasPeriodo(filter.DataInicio, filter.DataFim);
 
-                var usuarios = await usuariosTask;
-                var atividades = await atividadesTask;
-                var dias = await diasTask;
-
-                // Mapeia atividades para usuários
-                var usuariosComAtividades = MapearAtividadesParaUsuarios(usuarios, atividades);
+                // 4.  Mapeia atividades para usuários com expansão multi-dia
+                var usuariosComAtividades = MapearAtividadesParaUsuariosComExpansao(usuarios, atividades, filter.DataInicio, filter.DataFim);
 
                 var result = new GridDataViewModel
                 {
@@ -99,8 +74,8 @@ namespace ProGestao.Services
                     Dias = dias.ToList()
                 };
 
-                _logger.LogInformation("Dados do grid carregados: {QtdUsuarios} usuários, {QtdAtividades} atividades",
-                    result.Usuarios.Count, atividades.Count());
+                _logger.LogInformation("Dados do grid carregados: {QtdUsuarios} usuários, {QtdAtividades} atividades, {QtdDias} dias",
+                    result.Usuarios.Count, atividades.Count(), result.Dias.Count);
 
                 return result;
             }
@@ -112,7 +87,7 @@ namespace ProGestao.Services
         }
 
         /// <summary>
-        /// Obtém atividades para período
+        ///  Carrega atividades com informações completas (projeto, etc.)
         /// </summary>
         public async Task<IEnumerable<AtividadeGridViewModel>> GetAtividadesPorPeriodoAsync(
             DateTime dataInicio, DateTime dataFim, int? equipeId = null)
@@ -120,45 +95,42 @@ namespace ProGestao.Services
             try
             {
                 var query = _context.Atividades
+                    .AsNoTracking()
                     .Include(a => a.Usuario)
                     .Include(a => a.Status)
                     .Include(a => a.TipoAtividade)
-                    .Include(a => a.Projeto)
+                    .Include(a => a.Projeto) // ✅ IMPORTANTE: Incluir projeto
                     .Where(a => a.DataInicio <= dataFim &&
                                (a.DataFimReal ?? a.DataFimPrevista) >= dataInicio);
 
-                // Filtro por equipe
                 if (equipeId.HasValue)
                 {
-                    query = query.Where(a => a.Usuario.EquipeId == equipeId.Value);
+                    query = query.Where(a => a.Usuario != null && a.Usuario.EquipeId == equipeId.Value);
                 }
 
-                var atividades = await query
+                var atividadesList = await query
                     .OrderBy(a => a.DataInicio)
                     .ThenBy(a => a.Prioridade)
-                    .Select(a => new AtividadeGridViewModel
-                    {
-                        Id = a.Id,
-                        Nome = a.Nome,
-                        Descricao = a.Descricao,
-                        Data = a.DataInicio,
-                        Prioridade = a.Prioridade,
-                        EstaAtrasada = a.DataFimReal == null &&
-                                      a.DataFimPrevista < DateTime.Today &&
-                                      a.StatusId != GetStatusConcluida(),
-                        Status = new StatusAtividadeViewModel
-                        {
-                            Id = a.Status.Id,
-                            Nome = a.Status.Nome,
-                            Cor = a.Status.Cor
-                        }
-                    })
                     .ToListAsync();
 
-                // Expande atividades por dia (para atividades multi-dia)
-                var atividadesExpandidas = ExpandirAtividadesPorDia(atividades, dataInicio, dataFim);
+                // Mapeia com TODAS as informações necessárias
+                var atividades = atividadesList.Select(a => new AtividadeGridViewModel
+                {
+                    Id = a.Id,
+                    Nome = a.Nome ?? string.Empty,
+                    Descricao = a.Descricao ?? string.Empty,
+                    ProjetoNome = a.Projeto?.Nome, 
+                    TipoAtividadeNome = a.TipoAtividade?.Nome ?? string.Empty,
+                    StatusNome = a.Status?.Nome ?? string.Empty,
+                    StatusCor = a.Status?.Cor ?? "#6c757d",
+                    DataInicio = a.DataInicio,
+                    DataFimPrevista = a.DataFimPrevista,
+                    DataFimReal = a.DataFimReal,
+                    Prioridade = a.Prioridade,
+                    UsuarioId = a.UsuarioId
+                }).ToList();
 
-                return atividadesExpandidas;
+                return atividades;
             }
             catch (Exception ex)
             {
@@ -175,6 +147,7 @@ namespace ProGestao.Services
             try
             {
                 var query = _context.Usuarios
+                    .AsNoTracking()
                     .Include(u => u.Equipe)
                     .Where(u => u.Ativo);
 
@@ -183,16 +156,20 @@ namespace ProGestao.Services
                     query = query.Where(u => u.EquipeId == equipeId.Value);
                 }
 
-                var usuarios = await query
+                var usuariosList = await query
                     .OrderBy(u => u.Nome)
-                    .Select(u => new UsuarioGridViewModel
-                    {
-                        Id = u.Id,
-                        Nome = u.Nome,
-                        Cargo = u.Cargo,
-                        Iniciais = GetInitials(u.Nome)
-                    })
                     .ToListAsync();
+
+                var usuarios = usuariosList.Select(u => new UsuarioGridViewModel
+                {
+                    Id = u.Id,
+                    Nome = u.Nome ?? string.Empty,
+                    Cargo = u.Cargo ?? string.Empty,
+                    EquipeNome = u.Equipe?.Nome ?? string.Empty,
+                    Iniciais = GetInitials(u.Nome ?? string.Empty),
+                    Atividades = new List<AtividadeGridViewModel>(),
+                    AtividadesPorDia = new Dictionary<DateTime, List<AtividadeGridViewModel>>()
+                }).ToList();
 
                 return usuarios;
             }
@@ -213,15 +190,17 @@ namespace ProGestao.Services
                 var atividades = await GetAtividadesPorPeriodoAsync(
                     filter.DataInicio, filter.DataFim, filter.EquipeId);
 
+                var atividadesList = atividades.ToList();
+
                 var metrics = new GridMetricsViewModel
                 {
-                    TotalAtividades = atividades.Count(),
-                    AtividadesAtrasadas = atividades.Count(a => a.EstaAtrasada),
-                    AtividadesPorStatus = atividades
-                        .GroupBy(a => a.Status.Nome)
+                    TotalAtividades = atividadesList.Count,
+                    AtividadesAtrasadas = atividadesList.Count(a => a.EstaAtrasada),
+                    AtividadesPorStatus = atividadesList
+                        .GroupBy(a => a.StatusNome)
                         .ToDictionary(g => g.Key, g => g.Count()),
-                    AtividadesPorPrioridade = atividades
-                        .GroupBy(a => GetPrioridadeName(a.Prioridade))
+                    AtividadesPorPrioridade = atividadesList
+                        .GroupBy(a => a.PrioridadeTexto)
                         .ToDictionary(g => g.Key, g => g.Count())
                 };
 
@@ -239,78 +218,132 @@ namespace ProGestao.Services
         #region Private Methods
 
         /// <summary>
-        /// Valida filtros de entrada
+        ///  Gera dias do período (não fixo em 7 dias)
         /// </summary>
-        private static void ValidateFilter(GridFilterViewModel filter)
+        private List<DiaGridViewModel> GetDiasPeriodo(DateTime dataInicio, DateTime dataFim)
         {
-            if (filter.DataInicio > filter.DataFim)
-                throw new ArgumentException("Data início deve ser anterior à data fim");
+            var dias = new List<DiaGridViewModel>();
+            var dataAtual = dataInicio.Date;
 
-            if ((filter.DataFim - filter.DataInicio).TotalDays > 365)
-                throw new ArgumentException("Período não pode exceder 365 dias");
-        }
-
-        /// <summary>
-        /// Obtém dias da semana
-        /// </summary>
-        private IEnumerable<DiaGridViewModel> GetDiasSemana(DateTime semanaReferencia)
-        {
-            var inicioSemana = semanaReferencia.StartOfWeek();
-
-            for (int i = 0; i < 7; i++)
+            while (dataAtual <= dataFim.Date)
             {
-                var data = inicioSemana.AddDays(i);
-                yield return new DiaGridViewModel
+                dias.Add(new DiaGridViewModel
                 {
-                    Data = data,
-                    DiaSemana = _culture.DateTimeFormat.GetAbbreviatedDayName(data.DayOfWeek).ToUpper(),
-                    Dia = data.Day,
-                    Mes = _culture.DateTimeFormat.GetAbbreviatedMonthName(data.Month)
-                };
+                    Data = dataAtual,
+                    DiaSemana = _culture.DateTimeFormat.GetDayName(dataAtual.DayOfWeek),
+                    Dia = dataAtual.Day.ToString("00"),
+                    Mes = _culture.DateTimeFormat.GetMonthName(dataAtual.Month).Substring(0, 3)
+                });
+
+                dataAtual = dataAtual.AddDays(1);
             }
+
+            return dias;
         }
 
         /// <summary>
-        /// Mapeia atividades para usuários
+        ///  Mapeia atividades com expansão multi-dia
         /// </summary>
-        private static IEnumerable<UsuarioGridViewModel> MapearAtividadesParaUsuarios(
+        private static IEnumerable<UsuarioGridViewModel> MapearAtividadesParaUsuariosComExpansao(
             IEnumerable<UsuarioGridViewModel> usuarios,
-            IEnumerable<AtividadeGridViewModel> atividades)
-        {
-            var atividadesPorUsuario = atividades
-                .ToLookup(a => GetUsuarioIdFromAtividade(a));
-
-            foreach (var usuario in usuarios)
-            {
-                usuario.AtividadesPorDia = atividadesPorUsuario[usuario.Id].ToList();
-                yield return usuario;
-            }
-        }
-
-        /// <summary>
-        /// Expande atividades multi-dia para cada dia individual
-        /// </summary>
-        private static IEnumerable<AtividadeGridViewModel> ExpandirAtividadesPorDia(
             IEnumerable<AtividadeGridViewModel> atividades,
             DateTime dataInicio,
             DateTime dataFim)
         {
-            foreach (var atividade in atividades)
-            {
-                // Para atividades de um dia apenas
-                if (atividade.Data.Date >= dataInicio.Date && atividade.Data.Date <= dataFim.Date)
-                {
-                    yield return atividade;
-                }
+            var atividadesPorUsuario = atividades
+                .GroupBy(a => a.UsuarioId)
+                .ToDictionary(g => g.Key, g => g.ToList());
 
-                // Para atividades multi-dia (expandir para cada dia)
-                // TODO: Implementar lógica para atividades que span múltiplos dias
-                // Esta seria uma feature adicional baseada em DataInicio e DataFimPrevista
+            foreach (var usuario in usuarios)
+            {
+                if (atividadesPorUsuario.TryGetValue(usuario.Id, out var atividadesUsuario))
+                {
+                    // Lista simples para compatibilidade
+                    usuario.Atividades = atividadesUsuario;
+
+                    //  Expande atividades para todos os dias do período
+                    usuario.AtividadesPorDia = ExpandirAtividadesParaTodosPeriodo(
+                        atividadesUsuario, dataInicio, dataFim);
+                }
             }
+
+            return usuarios;
         }
 
         /// <summary>
-        /// Obtém iniciais do nome
+        /// Expande atividades para todos os dias do período
+        /// </summary>
+        private static Dictionary<DateTime, List<AtividadeGridViewModel>> ExpandirAtividadesParaTodosPeriodo(
+            List<AtividadeGridViewModel> atividades,
+            DateTime dataInicio,
+            DateTime dataFim)
+        {
+            var atividadesPorDia = new Dictionary<DateTime, List<AtividadeGridViewModel>>();
+
+            foreach (var atividade in atividades)
+            {
+                // Determina período efetivo da atividade
+                var inicioAtividade = atividade.DataInicio.Date;
+                var fimAtividade = (atividade.DataFimReal ?? atividade.DataFimPrevista ?? atividade.DataInicio).Date;
+
+                // Garante que está dentro do período do grid
+                var inicioEfetivo = inicioAtividade < dataInicio ? dataInicio : inicioAtividade;
+                var fimEfetivo = fimAtividade > dataFim ? dataFim : fimAtividade;
+
+                // Adiciona atividade em TODOS os dias do período
+                var dataAtual = inicioEfetivo;
+                while (dataAtual <= fimEfetivo)
+                {
+                    if (!atividadesPorDia.ContainsKey(dataAtual))
+                    {
+                        atividadesPorDia[dataAtual] = new List<AtividadeGridViewModel>();
+                    }
+
+                    // Clona a atividade para cada dia (evita referência compartilhada)
+                    var atividadeClone = new AtividadeGridViewModel
+                    {
+                        Id = atividade.Id,
+                        Nome = atividade.Nome,
+                        Descricao = atividade.Descricao,
+                        ProjetoNome = atividade.ProjetoNome,
+                        TipoAtividadeNome = atividade.TipoAtividadeNome,
+                        StatusNome = atividade.StatusNome,
+                        StatusCor = atividade.StatusCor,
+                        DataInicio = atividade.DataInicio,
+                        DataFimPrevista = atividade.DataFimPrevista,
+                        DataFimReal = atividade.DataFimReal,
+                        Prioridade = atividade.Prioridade,
+                        UsuarioId = atividade.UsuarioId
+                    };
+
+                    atividadesPorDia[dataAtual].Add(atividadeClone);
+                    dataAtual = dataAtual.AddDays(1);
+                }
+            }
+
+            return atividadesPorDia;
+        }
+
+        /// <summary>
+        /// Valida filtros de entrada
+        /// Limite máximo de 30 dias
+        /// </summary>
+        private static void ValidateFilter(GridFilterViewModel filter)
+        {
+            if (filter == null)
+                throw new ArgumentNullException(nameof(filter));
+
+            if (filter.DataInicio > filter.DataFim)
+                throw new ArgumentException("Data inicial não pode ser maior que data final");
+
+            //  Máximo 30 dias 
+            var diffDays = (filter.DataFim - filter.DataInicio).TotalDays;
+            if (diffDays > 30)
+                throw new ArgumentException("Período não pode ser maior que 30 dias");
+        }
+
+        /// <summary>
+        /// Gera iniciais do nome
         /// </summary>
         private static string GetInitials(string nome)
         {
@@ -322,66 +355,9 @@ namespace ProGestao.Services
             if (words.Length == 1)
                 return words[0].Substring(0, Math.Min(2, words[0].Length)).ToUpper();
 
-            return $"{words[0][0]}{words[words.Length - 1][0]}".ToUpper();
-        }
-
-        /// <summary>
-        /// Obtém nome da prioridade
-        /// </summary>
-        private static string GetPrioridadeName(int prioridade)
-        {
-            return prioridade switch
-            {
-                1 => "Baixa",
-                2 => "Normal",
-                3 => "Alta",
-                4 => "Crítica",
-                _ => "Não definida"
-            };
-        }
-
-        /// <summary>
-        /// Obtém ID do status "Concluída"
-        /// TODO: Implementar cache ou configuração para evitar hardcoding
-        /// </summary>
-        private int GetStatusConcluida()
-        {
-            // Esta seria uma implementação mais robusta em um cenário real
-            // Por exemplo, usando um enum ou configuração
-            return 3; // Assumindo que 3 é o ID do status "Concluída"
-        }
-
-        /// <summary>
-        /// Obtém ID do usuário de uma atividade
-        /// TODO: Adicionar propriedade UsuarioId em AtividadeGridViewModel
-        /// </summary>
-        private static int GetUsuarioIdFromAtividade(AtividadeGridViewModel atividade)
-        {
-            // Esta seria uma implementação mais robusta
-            // Por enquanto, retorna 0 - precisa ser ajustado com a propriedade correta
-            return 0;
+            return $"{words[0][0]}{words[^1][0]}".ToUpper();
         }
 
         #endregion
     }
-
-    #region Additional ViewModels
-
-    /// <summary>
-    /// ViewModel para métricas do grid
-    /// </summary>
-    public class GridMetricsViewModel
-    {
-        public int TotalAtividades { get; set; }
-        public int AtividadesAtrasadas { get; set; }
-        public Dictionary<string, int> AtividadesPorStatus { get; set; } = new();
-        public Dictionary<string, int> AtividadesPorPrioridade { get; set; } = new();
-        public double TaxaConclusao => TotalAtividades > 0
-            ? (TotalAtividades - AtividadesAtrasadas) / (double)TotalAtividades * 100
-            : 0;
-    }
-
-    #endregion
-
-   
 }

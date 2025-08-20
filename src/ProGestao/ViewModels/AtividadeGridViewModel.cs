@@ -4,8 +4,8 @@
     {
         public int Id { get; set; }
         public string Nome { get; set; } = string.Empty;
-        public string? Descricao { get; set; }
-        public string ProjetoNome { get; set; } = string.Empty;
+        public string Descricao { get; set; } = string.Empty;
+        public string? ProjetoNome { get; set; }
         public string TipoAtividadeNome { get; set; } = string.Empty;
         public string StatusNome { get; set; } = string.Empty;
         public string StatusCor { get; set; } = string.Empty;
@@ -14,6 +14,26 @@
         public DateTime? DataFimReal { get; set; }
         public int Prioridade { get; set; }
 
+        // Propriedades necessárias para o Grid
+        public int UsuarioId { get; set; }
+
+        //  Data para compatibilidade (usa DataInicio)
+        public DateTime Data => DataInicio;
+
+        //  Status como objeto para compatibilidade
+        public StatusAtividadeViewModel Status => new()
+        {
+            Nome = StatusNome,
+            Cor = StatusCor
+        };
+
+        // Verifica se está atrasada
+        public bool EstaAtrasada => DataFimReal == null &&
+                                   DataFimPrevista.HasValue &&
+                                   DataFimPrevista.Value < DateTime.Today &&
+                                   StatusNome != "Concluída";
+
+        // Propriedades existentes mantidas
         public string StatusClasse => StatusNome.ToLower() switch
         {
             "pendente" => "pendente",
