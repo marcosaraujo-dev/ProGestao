@@ -313,7 +313,7 @@
                 <!-- Period Dropdown -->
                 <div class="period-controls d-flex align-items-center gap-2">
                     <!-- Filtros adicionais -->
-                    <select class="form-select form-select-sm" style="width: auto;"
+                    <select class="form-select form-select-sm equipe-filter-container" style="width: auto;"
                             name="equipeId" onchange="this.form.submit()">
                         <option value="">Todas as equipes</option>
                         @foreach (var equipe in Model.Equipes)
@@ -324,50 +324,23 @@
                         }
                     </select>
 
-                    <!-- Dropdown de Período -->
-                    <div class="dropdown dropdown-period-container"
-                         data-dropdown-auto
-                         data-dropdown-id="period-dropdown">
-
-                        <button class="btn dropdown-period-toggle dropdown-toggle"
-                                type="button"
-                                id="dropdownPeriodo"
-                                data-bs-toggle="dropdown"
-                                aria-expanded="false"
-                                aria-haspopup="true"
-                                aria-label="Selecionar período de visualização">
-                            <i class="fas fa-calendar me-2"></i>
-                            <span id="period-label">@Model.PeriodoSelecionado</span>
-                        </button>
-
-                        <ul class="dropdown-menu" aria-labelledby="dropdownPeriodo">
+                    <!-- Filtro Período -->
+                    <div class="col-md-4">
+                        <select name="Periodo" class="form-select period-filter-container" onchange="this.form.submit()">
                             @foreach (var periodo in Model.PeriodosDisponiveis)
                             {
-                                <li>
-                                    <button class="dropdown-period-item @(periodo.Valor == Model.PeriodoAtual ? "active" : "")"
-                                            type="button"
-                                            data-period-value="@periodo.Valor"
-                                            data-period-label="@periodo.Nome">
-                                        <i class="@periodo.Icone me-2"></i>
-                                        @periodo.Nome
-                                        @if (periodo.Descricao != null)
-                                        {
-                                            <small class="text-muted d-block">@periodo.Descricao</small>
-                                        }
-                                    </button>
-                                </li>
+                                <option value="@periodo.Valor" selected="@(periodo.Valor == Model.PeriodoAtual)">
+                                    @periodo.Nome
+                                </option>
                             }
-                            <li><hr class="dropdown-divider"></li>
-                            <li>
-                                <button class="dropdown-period-item"
-                                        type="button"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#customPeriodModal">
-                                    <i class="fas fa-cog me-2"></i>
-                                    Período customizado
-                                </button>
-                            </li>
-                        </ul>
+                        </select>
+                    </div>
+                    <!-- Período Customizado -->
+                    <div class="col-md-4">
+                        <button type="button" class="btn btn-outline-secondary custom-period-btn w-100"
+                                data-bs-toggle="modal" data-bs-target="#customPeriodModal">
+                            <i class="fas fa-calendar-alt me-1"></i>Período Customizado
+                        </button>
                     </div>
 
                     <!-- Refresh Button -->
@@ -587,15 +560,14 @@
     </div>
 </div>
 
-<!-- Modal para período customizado -->
+<!-- Modal para Período Customizado -->
 <div class="modal fade" id="customPeriodModal" tabindex="-1" aria-labelledby="customPeriodModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form method="post" asp-page-handler="CustomPeriod">
+            <form method="post" asp-page-handler="CustomPeriod" id="customPeriodForm">
                 <div class="modal-header">
                     <h5 class="modal-title" id="customPeriodModalLabel">
-                        <i class="fas fa-calendar-alt me-2"></i>
-                        Período Customizado
+                        <i class="fas fa-calendar-alt me-2"></i>Período Customizado
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
                 </div>
@@ -603,33 +575,47 @@
                     <div class="row">
                         <div class="col-md-6">
                             <label for="dataInicio" class="form-label">Data Início</label>
-                            <input type="date" class="form-control" id="dataInicio" name="dataInicio" required>
+                            <input type="date" class="form-control" id="dataInicio" name="dataInicio"
+                                   value="@DateTime.Today.ToString("yyyy-MM-dd")" required>
+                            <div class="invalid-feedback" id="dataInicioError"></div>
                         </div>
                         <div class="col-md-6">
                             <label for="dataFim" class="form-label">Data Fim</label>
-                            <input type="date" class="form-control" id="dataFim" name="dataFim" required>
+                            <input type="date" class="form-control" id="dataFim" name="dataFim"
+                                   value="@DateTime.Today.AddDays(7).ToString("yyyy-MM-dd")" required>
+                            <div class="invalid-feedback" id="dataFimError"></div>
                         </div>
+                    </div>
+                    <div class="mt-3">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Máximo de 30 dias permitido
+                        </small>
+                    </div>
+                    <div class="alert alert-danger mt-2 d-none" id="periodError">
+                        <i class="fas fa-exclamation-triangle me-1"></i>
+                        <span id="periodErrorMessage"></span>
                     </div>
                 </div>
                 <div class="modal-footer">
+                    <input type="hidden" name="EquipeId" value="@Model.EquipeId" />
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                         Cancelar
                     </button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-check me-1"></i>
-                        Aplicar
+                    <button type="submit" class="btn btn-primary" id="applyPeriodBtn">
+                        <i class="fas fa-check me-1"></i>Aplicar
                     </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
-
 @* JavaScript específico da página *@
 @section Scripts {
     <script src="~/js/services/DropdownService.js" asp-append-version="true"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+             const modal = document.getElementById('customPeriodModal');
             // Inicializa tooltips
             var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
             var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
@@ -648,6 +634,88 @@
                     }, @Model.AutoRefreshInterval);
                     </text>
             }
+
+             // Função para mostrar erro
+            function showError(message) {
+                periodErrorMessage.textContent = message;
+                periodError.classList.remove('d-none');
+                applyBtn.disabled = false;
+                applyBtn.innerHTML = '<i class="fas fa-check me-1"></i>Aplicar';
+            }
+            // Função para esconder erro
+            function hideError() {
+                periodError.classList.add('d-none');
+            }
+
+            // Validação em tempo real
+            function validatePeriod() {
+                hideError();
+
+                if (!dataInicio.value || !dataFim.value) {
+                    return false;
+                }
+
+                const inicio = new Date(dataInicio.value);
+                const fim = new Date(dataFim.value);
+
+                if (inicio > fim) {
+                    showError('Data inicial não pode ser maior que data final.');
+                    dataInicio.classList.add('is-invalid');
+                    dataFim.classList.add('is-invalid');
+                    return false;
+                }
+
+                const diffTime = Math.abs(fim - inicio);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
+                if (diffDays > 30) {
+                    showError('Período não pode ser maior que 30 dias.');
+                    dataInicio.classList.add('is-invalid');
+                    dataFim.classList.add('is-invalid');
+                    return false;
+                }
+
+                // Remove classes de erro se validação passou
+                dataInicio.classList.remove('is-invalid');
+                dataFim.classList.remove('is-invalid');
+                return true;
+            }
+            // Eventos de validação
+            dataInicio.addEventListener('change', validatePeriod);
+            dataFim.addEventListener('change', validatePeriod);
+
+            // Configuração inicial quando modal abre
+            modal.addEventListener('show.bs.modal', function() {
+                hideError();
+                dataInicio.classList.remove('is-invalid');
+                dataFim.classList.remove('is-invalid');
+                applyBtn.disabled = false;
+                applyBtn.innerHTML = '<i class="fas fa-check me-1"></i>Aplicar';
+
+                // Define valores padrão se estiverem vazios
+                if (!dataInicio.value) {
+                    dataInicio.value = new Date().toISOString().split('T')[0];
+                }
+                if (!dataFim.value) {
+                    const nextWeek = new Date();
+                    nextWeek.setDate(nextWeek.getDate() + 7);
+                    dataFim.value = nextWeek.toISOString().split('T')[0];
+                }
+            });
+
+            // Validação no submit
+            form.addEventListener('submit', function(e) {
+                if (!validatePeriod()) {
+                    e.preventDefault();
+                    return false;
+                }
+
+                // Mostra loading
+                applyBtn.disabled = true;
+                applyBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processando...';
+
+                return true;
+            });
         });
 
         function setupPeriodDropdown() {

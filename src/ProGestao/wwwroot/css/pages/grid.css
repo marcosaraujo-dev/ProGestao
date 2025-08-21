@@ -33,18 +33,23 @@
    2. GRID CONTROLS
    ============================================================= */
 .grid-controls {
-	background: #fff;
-	padding: 1rem 1.5rem;
+	background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+	border: 1px solid #dee2e6;
 	border-radius: 8px;
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+	padding: 1rem;
 	margin-bottom: 1rem;
 }
 
-.week-navigation .btn-group .btn {
+.week-navigation .btn {
 	font-weight: 500;
 	padding: 0.5rem 1rem;
-	border-radius: 0.375rem;
+	border: 1px solid #2c5aa0;
 	transition: all 0.3s ease;
+}
+
+.week-navigation .btn-outline-primary:hover {
+	background-color: #2c5aa0;
+	border-color: #2c5aa0;
 }
 
 	.week-navigation .btn-group .btn:first-child {
@@ -78,6 +83,19 @@
 			box-shadow: 0 0 0 0.2rem rgba(44, 90, 160, 0.25);
 		}
 
+.equipe-filter-container {
+	min-width: 220px !important;
+	max-width: 280px !important;
+}
+
+.period-filter-container {
+	min-width: 180px !important;
+}
+
+.form-select:focus {
+	border-color: #2c5aa0;
+	box-shadow: 0 0 0 0.2rem rgba(44, 90, 160, 0.25);
+}
 /* =============================================================
    3. GRID WRAPPER AND TABLE
    ============================================================= */
@@ -517,6 +535,39 @@
 		.period-controls .form-select {
 			min-width: auto;
 		}
+}
+
+/* ============================================
+   MODAL - PERÍODO CUSTOMIZADO
+   ============================================ */
+
+.modal-content {
+	border-radius: 12px;
+	border: none;
+	box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+}
+
+.modal-header {
+	background: linear-gradient(135deg, #2c5aa0 0%, #1a4480 100%);
+	color: white;
+	border-radius: 12px 12px 0 0;
+}
+
+	.modal-header .btn-close {
+		filter: invert(1);
+	}
+
+/* Validação de formulário */
+.is-invalid {
+	border-color: #dc3545 !important;
+}
+
+.invalid-feedback {
+	display: block;
+	width: 100%;
+	margin-top: 0.25rem;
+	font-size: 0.875rem;
+	color: #dc3545;
 }
 
 @media (max-width: 576px) {

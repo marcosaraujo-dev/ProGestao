@@ -1,4 +1,5 @@
 ﻿using ProGestao.ViewModels.Atividade;
+using ProGestao.ViewModels.Grid;
 using System.ComponentModel.DataAnnotations;
 
 namespace ProGestao.ViewModels.Usuarios
@@ -19,6 +20,13 @@ namespace ProGestao.ViewModels.Usuarios
         // Iniciais para compatibilidade com Grid
         public string Iniciais { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Lista de dias com atividades do usuário
+        /// </summary>
+        public List<DiaUsuarioViewModel> Dias { get; set; } = new();
+
+       
+
         // Lista de atividades para compatibilidade
         public List<AtividadeGridViewModel> Atividades { get; set; } = new();
 
@@ -27,7 +35,8 @@ namespace ProGestao.ViewModels.Usuarios
             new Dictionary<DateTime, List<AtividadeGridViewModel>>();
 
         // Propriedades calculadas existentes mantidas
-        public int TotalAtividades => AtividadesPorDia.Values.SelectMany(x => x).Count();
+        public int TotalAtividades => Dias.Sum(d => d.Atividades.Count);
+
 
         public int AtividadesPendentes => AtividadesPorDia.Values.SelectMany(x => x)
             .Count(a => a.StatusClasse == "pendente");

@@ -12,7 +12,7 @@
         public DateTime DataInicio { get; set; }
         public DateTime? DataFimPrevista { get; set; }
         public DateTime? DataFimReal { get; set; }
-        public int Prioridade { get; set; }
+        public int Prioridade { get; set; } 
 
         // Propriedades necessárias para o Grid
         public int UsuarioId { get; set; }
