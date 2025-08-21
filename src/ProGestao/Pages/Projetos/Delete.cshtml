@@ -58,10 +58,10 @@
                                         }
                                     </div>
                                     <div class="col-md-4 text-end">
-                                        @if (Model.Projeto.Status != null)
+                                        @if (!string.IsNullOrEmpty(Model.Projeto.StatusNome))
                                         {
-                                            <span class="badge status-badge" style="background-color: @Model.Projeto.Status.Cor">
-                                                @Model.Projeto.Status.Nome
+                                            <span class="badge status-badge" style="background-color: @Model.Projeto.StatusCor">
+                                                @Model.Projeto.StatusNome
                                             </span>
                                         }
                                         else
@@ -77,9 +77,9 @@
                                     <div class="col-md-6">
                                         <strong><i class="fas fa-user me-1"></i>Responsável:</strong>
                                         <br>
-                                        @if (Model.Projeto.Responsavel != null)
+                                        @if (!string.IsNullOrEmpty(Model.Projeto.ResponsavelNome))
                                         {
-                                            <span>👤 @Model.Projeto.Responsavel.Nome</span>
+                                            <span>👤 @Model.Projeto.ResponsavelNome</span>
                                         }
                                         else
                                         {

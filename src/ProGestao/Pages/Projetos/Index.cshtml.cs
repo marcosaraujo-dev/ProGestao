@@ -41,6 +41,12 @@ namespace ProGestao.Pages.Projetos
 
         [BindProperty(SupportsGet = true)]
         public ProjetoFiltroViewModel Filtros { get; set; } = new ProjetoFiltroViewModel();
+        
+        [BindProperty(SupportsGet = true)]
+        public string? FiltroStatus { get; set; }
+        
+        [BindProperty(SupportsGet = true)]
+        public string? FiltroResponsavel { get; set; }
 
         #endregion
 
@@ -97,7 +103,7 @@ namespace ProGestao.Pages.Projetos
                 StatusProjetos = await statusProjetosTask;
                 Responsaveis = await responsaveisTask;
 
-                _logger.LogDebug("Dados dos dropdowns carregados: {StatusCount} status, {ResponsaveisCount} responsáveis",
+                _logger.LogDebug("Dados dos dropdowns carregados: {StatusCount} status, {ResponsaveisCount} responsï¿½veis",
                     StatusProjetos.Count, Responsaveis.Count);
             }
             catch (Exception ex)

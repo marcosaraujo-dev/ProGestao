@@ -6,7 +6,7 @@ using ProGestao.ViewModels.Projetos;
 namespace ProGestao.Pages.Projetos
 {
     /// <summary>
-    /// PageModel refatorado para exclusão de projetos
+    /// PageModel refatorado para exclusï¿½o de projetos
     /// </summary>
     public class DeleteModel : PageModel
     {
@@ -36,6 +36,11 @@ namespace ProGestao.Pages.Projetos
 
         public ProjetoViewModel? Projeto { get; set; }
         public int AtividadesRelacionadas { get; set; }
+        
+        // Propriedades para compatibilidade com views
+        public int AtividadesEmAndamento { get; set; }
+        public int AtividadesConcluidas { get; set; }
+        public int AtividadesPendentes { get; set; }
 
         #endregion
 
@@ -45,26 +50,26 @@ namespace ProGestao.Pages.Projetos
         {
             try
             {
-                _logger.LogInformation("Carregando projeto {ProjetoId} para exclusão", id);
+                _logger.LogInformation("Carregando projeto {ProjetoId} para exclusï¿½o", id);
 
                 Projeto = await _queryService.GetProjetoComAtividadesAsync(id);
                 if (Projeto == null)
                 {
-                    _logger.LogWarning("Projeto {ProjetoId} não encontrado para exclusão", id);
-                    TempData["ErrorMessage"] = "Projeto não encontrado.";
+                    _logger.LogWarning("Projeto {ProjetoId} nï¿½o encontrado para exclusï¿½o", id);
+                    TempData["ErrorMessage"] = "Projeto nï¿½o encontrado.";
                     return RedirectToPage("./Index");
                 }
 
                 AtividadesRelacionadas = await _queryService.GetQuantidadeAtividadesAsync(id);
 
-                _logger.LogInformation("Projeto {ProjetoId} carregado para exclusão. Atividades relacionadas: {Count}",
+                _logger.LogInformation("Projeto {ProjetoId} carregado para exclusï¿½o. Atividades relacionadas: {Count}",
                     id, AtividadesRelacionadas);
 
                 return Page();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao carregar projeto {ProjetoId} para exclusão", id);
+                _logger.LogError(ex, "Erro ao carregar projeto {ProjetoId} para exclusï¿½o", id);
                 TempData["ErrorMessage"] = "Erro ao carregar projeto. Tente novamente.";
                 return RedirectToPage("./Index");
             }
@@ -78,19 +83,19 @@ namespace ProGestao.Pages.Projetos
         {
             try
             {
-                _logger.LogInformation("Iniciando exclusão do projeto {ProjetoId}", id);
+                _logger.LogInformation("Iniciando exclusï¿½o do projeto {ProjetoId}", id);
 
                 var result = await _commandService.DeleteProjetoAsync(id);
 
                 if (result.IsSuccess)
                 {
-                    _logger.LogInformation("Projeto {ProjetoId} excluído com sucesso", id);
+                    _logger.LogInformation("Projeto {ProjetoId} excluï¿½do com sucesso", id);
                     TempData["SuccessMessage"] = result.Message;
                     return RedirectToPage("./Index");
                 }
                 else
                 {
-                    _logger.LogWarning("Falha na exclusão do projeto {ProjetoId}: {Message}", id, result.Message);
+                    _logger.LogWarning("Falha na exclusï¿½o do projeto {ProjetoId}: {Message}", id, result.Message);
 
                     TempData["ErrorMessage"] = result.Errors.Any()
                         ? string.Join("; ", result.Errors)

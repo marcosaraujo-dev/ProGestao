@@ -8,7 +8,7 @@ namespace ProGestao.Pages.Projetos
 {
 
     /// <summary>
-    /// PageModel refatorado para criação de projetos
+    /// PageModel refatorado para criaï¿½ï¿½o de projetos
     /// </summary>
     public class CreateModel : PageModel
     {
@@ -41,6 +41,10 @@ namespace ProGestao.Pages.Projetos
 
         public IList<StatusProjetoViewModel> StatusProjetos { get; set; } = new List<StatusProjetoViewModel>();
         public IList<UsuarioLookupViewModel> Responsaveis { get; set; } = new List<UsuarioLookupViewModel>();
+        
+        // Propriedades para compatibilidade com views
+        public IList<StatusProjetoViewModel> StatusSelectList => StatusProjetos;
+        public IList<UsuarioLookupViewModel> ResponsaveisSelectList => Responsaveis;
 
         #endregion
 
@@ -50,7 +54,7 @@ namespace ProGestao.Pages.Projetos
         {
             try
             {
-                _logger.LogInformation("Iniciando criação de novo projeto");
+                _logger.LogInformation("Iniciando criaï¿½ï¿½o de novo projeto");
 
                 Projeto.DataInicio = DateTime.Today;
 
@@ -60,8 +64,8 @@ namespace ProGestao.Pages.Projetos
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao inicializar criação de projeto");
-                TempData["ErrorMessage"] = "Erro ao carregar formulário. Tente novamente.";
+                _logger.LogError(ex, "Erro ao inicializar criaï¿½ï¿½o de projeto");
+                TempData["ErrorMessage"] = "Erro ao carregar formulï¿½rio. Tente novamente.";
                 return RedirectToPage("./Index");
             }
         }
@@ -74,11 +78,11 @@ namespace ProGestao.Pages.Projetos
         {
             try
             {
-                _logger.LogInformation("Iniciando criação de projeto: {Nome}", Projeto.Nome);
+                _logger.LogInformation("Iniciando criaï¿½ï¿½o de projeto: {Nome}", Projeto.Nome);
 
                 if (!ModelState.IsValid)
                 {
-                    _logger.LogWarning("ModelState inválido para criação de projeto");
+                    _logger.LogWarning("ModelState invï¿½lido para criaï¿½ï¿½o de projeto");
                     await LoadDropdownDataAsync();
                     return Page();
                 }
@@ -93,7 +97,7 @@ namespace ProGestao.Pages.Projetos
                 }
                 else
                 {
-                    _logger.LogWarning("Falha na criação do projeto: {Message}", result.Message);
+                    _logger.LogWarning("Falha na criaï¿½ï¿½o do projeto: {Message}", result.Message);
 
                     foreach (var error in result.Errors)
                     {
@@ -129,12 +133,12 @@ namespace ProGestao.Pages.Projetos
                 StatusProjetos = await statusProjetosTask;
                 Responsaveis = await responsaveisTask;
 
-                _logger.LogDebug("Dados dos dropdowns carregados: {StatusCount} status, {ResponsaveisCount} responsáveis",
+                _logger.LogDebug("Dados dos dropdowns carregados: {StatusCount} status, {ResponsaveisCount} responsï¿½veis",
                     StatusProjetos.Count, Responsaveis.Count);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao carregar dados para dropdowns na criação");
+                _logger.LogError(ex, "Erro ao carregar dados para dropdowns na criaï¿½ï¿½o");
 
                 StatusProjetos ??= new List<StatusProjetoViewModel>();
                 Responsaveis ??= new List<UsuarioLookupViewModel>();

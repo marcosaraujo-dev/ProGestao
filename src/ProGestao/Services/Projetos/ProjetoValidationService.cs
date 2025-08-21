@@ -6,7 +6,7 @@ using ProGestao.Models;
 using ProGestao.Services.Interfaces;
 using ProGestao.ViewModels.Projetos;
 
-namespace ProGestao.Services.Implementation
+namespace ProGestao.Services.Projetos
 {
     // <summary>
     /// Service para validação de projetos

@@ -15,6 +15,7 @@ namespace ProGestao.Models
 
         [StringLength(200)]
         public string? Descricao { get; set; }
+        public bool Ativo { get; set; } = true;
 
         public ICollection<Atividade> Atividades { get; set; } = new List<Atividade>();
     }

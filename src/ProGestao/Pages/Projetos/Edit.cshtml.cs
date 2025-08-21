@@ -8,7 +8,7 @@ namespace ProGestao.Pages.Projetos
 {
 
     /// <summary>
-    /// PageModel refatorado para edição de projetos
+    /// PageModel refatorado para ediï¿½ï¿½o de projetos
     /// Implementa Separation of Concerns e Dependency Injection
     /// </summary>
     public class EditModel : PageModel
@@ -46,6 +46,10 @@ namespace ProGestao.Pages.Projetos
         // Listas para dropdowns
         public IList<StatusProjetoViewModel> StatusProjetos { get; set; } = new List<StatusProjetoViewModel>();
         public IList<UsuarioLookupViewModel> Responsaveis { get; set; } = new List<UsuarioLookupViewModel>();
+        
+        // Propriedades para compatibilidade com views
+        public IList<StatusProjetoViewModel> StatusSelectList => StatusProjetos;
+        public IList<UsuarioLookupViewModel> ResponsaveisSelectList => Responsaveis;
 
         #endregion
 
@@ -55,15 +59,15 @@ namespace ProGestao.Pages.Projetos
         {
             try
             {
-                _logger.LogInformation("Carregando projeto {ProjetoId} para edição", id);
+                _logger.LogInformation("Carregando projeto {ProjetoId} para ediï¿½ï¿½o", id);
 
                 ClearTempDataMessages();
 
                 var projeto = await _queryService.GetProjetoComDetalhesAsync(id);
                 if (projeto == null)
                 {
-                    _logger.LogWarning("Projeto {ProjetoId} não encontrado", id);
-                    SetErrorMessage("Projeto não encontrado.");
+                    _logger.LogWarning("Projeto {ProjetoId} nï¿½o encontrado", id);
+                    SetErrorMessage("Projeto nï¿½o encontrado.");
                     return RedirectToPage("./Index");
                 }
 
@@ -71,12 +75,12 @@ namespace ProGestao.Pages.Projetos
 
                 await LoadDropdownDataAsync();
 
-                _logger.LogInformation("Projeto {ProjetoId} carregado com sucesso para edição", id);
+                _logger.LogInformation("Projeto {ProjetoId} carregado com sucesso para ediï¿½ï¿½o", id);
                 return Page();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao carregar projeto {ProjetoId} para edição", id);
+                _logger.LogError(ex, "Erro ao carregar projeto {ProjetoId} para ediï¿½ï¿½o", id);
                 SetErrorMessage("Erro ao carregar projeto. Tente novamente.");
                 return RedirectToPage("./Index");
             }
@@ -90,11 +94,11 @@ namespace ProGestao.Pages.Projetos
         {
             try
             {
-                _logger.LogInformation("Iniciando atualização do projeto {ProjetoId}", Projeto.Id);
+                _logger.LogInformation("Iniciando atualizaï¿½ï¿½o do projeto {ProjetoId}", Projeto.Id);
 
                 if (!ModelState.IsValid)
                 {
-                    _logger.LogWarning("ModelState inválido para projeto {ProjetoId}", Projeto.Id);
+                    _logger.LogWarning("ModelState invï¿½lido para projeto {ProjetoId}", Projeto.Id);
                     await LoadDropdownDataAsync();
                     return Page();
                 }
@@ -109,7 +113,7 @@ namespace ProGestao.Pages.Projetos
                 }
                 else
                 {
-                    _logger.LogWarning("Falha na atualização do projeto {ProjetoId}: {Message}",
+                    _logger.LogWarning("Falha na atualizaï¿½ï¿½o do projeto {ProjetoId}: {Message}",
                         Projeto.Id, result.Message);
 
                     if (result.Errors.Any())
@@ -153,7 +157,7 @@ namespace ProGestao.Pages.Projetos
                 StatusProjetos = await statusProjetosTask;
                 Responsaveis = await responsaveisTask;
 
-                _logger.LogDebug("Dados dos dropdowns carregados: {StatusCount} status, {ResponsaveisCount} responsáveis",
+                _logger.LogDebug("Dados dos dropdowns carregados: {StatusCount} status, {ResponsaveisCount} responsï¿½veis",
                     StatusProjetos.Count, Responsaveis.Count);
             }
             catch (Exception ex)
@@ -163,7 +167,7 @@ namespace ProGestao.Pages.Projetos
                 StatusProjetos ??= new List<StatusProjetoViewModel>();
                 Responsaveis ??= new List<UsuarioLookupViewModel>();
 
-                SetErrorMessage("Erro ao carregar dados do formulário. Alguns campos podem não estar disponíveis.");
+                SetErrorMessage("Erro ao carregar dados do formulï¿½rio. Alguns campos podem nï¿½o estar disponï¿½veis.");
             }
         }
 

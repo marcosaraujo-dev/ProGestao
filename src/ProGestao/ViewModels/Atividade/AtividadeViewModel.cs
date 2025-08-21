@@ -55,6 +55,7 @@ namespace ProGestao.ViewModels.Atividade
         public string? StatusNome { get; set; }
         public string? StatusCor { get; set; }
         public string? UsuarioNome { get; set; }
+        public string? UsuarioCargo { get; set; }
 
         // Propriedades estendidas para detalhes
         public string? UsuarioEquipe { get; set; }

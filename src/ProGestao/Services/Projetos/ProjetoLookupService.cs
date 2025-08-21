@@ -6,7 +6,7 @@ using ProGestao.Services.Interfaces;
 using ProGestao.ViewModels.Projetos;
 using ProGestao.ViewModels.Usuarios;
 
-namespace ProGestao.Services.Implementation
+namespace ProGestao.Services.Projetos
 {
 
     /// <summary>

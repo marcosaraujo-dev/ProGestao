@@ -25,6 +25,12 @@ namespace ProGestao.Pages.Usuarios
 
         [BindProperty(SupportsGet = true)]
         public bool? FiltroAtivo { get; set; }
+        
+        [BindProperty(SupportsGet = true)]
+        public string? FiltroStatus { get; set; }
+        
+        [BindProperty(SupportsGet = true)]
+        public string? FiltroResponsavel { get; set; }
 
         public async Task OnGetAsync()
         {
@@ -63,7 +69,7 @@ namespace ProGestao.Pages.Usuarios
                     .CountAsync();
 
                 var atividadesConcluidas = await _context.Atividades
-                    .Where(a => a.UsuarioId == usuario.Id && a.Status.Nome == "Concluída")
+                    .Where(a => a.UsuarioId == usuario.Id && a.Status.Nome == "Concluï¿½da")
                     .CountAsync();
 
                 Usuarios.Add(new UsuarioViewModel

@@ -184,7 +184,7 @@
                 margin-bottom: 0.25rem;
             }
 
-        @media (max-width: 768px) {
+        @@media (max-width: 768px) {
             .wizard-header
 
         {
@@ -336,8 +336,8 @@
                                             <option value="">⚪ Sem projeto específico</option>
                                             @foreach (var projeto in Model.Projetos)
                                             {
-                                                <option value="@projeto.Id" data-status="@projeto.Status.Nome">
-                                                    📁 @projeto.Nome (@projeto.Status.Nome)
+                                                <option value="@projeto.Id" data-status="@projeto.StatusNome">
+                                                    📁 @projeto.Nome (@projeto.StatusNome)
                                                 </option>
                                             }
                                         </select>
@@ -357,8 +357,8 @@
                                             <option value="">Selecione um usuário</option>
                                             @foreach (var usuario in Model.Usuarios)
                                             {
-                                                <option value="@usuario.Id" data-cargo="@usuario.Cargo" data-equipe="@usuario.Equipe.Nome">
-                                                    @usuario.Nome - @usuario.Cargo (@usuario.Equipe.Nome)
+                                                <option value="@usuario.Id" data-cargo="@usuario.Cargo" data-equipe="@usuario.EquipeNome">
+                                                    @usuario.Nome - @usuario.Cargo (@usuario.EquipeNome)
                                                 </option>
                                             }
                                         </select>

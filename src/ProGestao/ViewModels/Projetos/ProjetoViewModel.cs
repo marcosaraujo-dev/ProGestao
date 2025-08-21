@@ -45,6 +45,10 @@ namespace ProGestao.ViewModels.Projetos
         public int QtdAtividadesConcluidas { get; set; }
         public decimal PercentualConclusao { get; set; }
         
+        // Propriedades para compatibilidade com views
+        public int TotalAtividades => QtdAtividades;
+        public int AtividadesConcluidas => QtdAtividadesConcluidas;
+        
         
         public decimal ProgressoPercentual => QtdAtividades > 0 ?
             (decimal)QtdAtividadesConcluidas / QtdAtividades * 100 : 0;

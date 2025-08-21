@@ -6,7 +6,7 @@ using ProGestao.ViewModels;
 using ProGestao.Services.Interfaces;
 using ProGestao.ViewModels.Projetos;
 
-namespace ProGestao.Services.Implementation
+namespace ProGestao.Services.Projetos
 {
     /// <summary>
     /// Service para operações de leitura de projetos

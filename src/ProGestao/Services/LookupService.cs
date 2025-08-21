@@ -96,8 +96,7 @@ namespace ProGestao.Services
                     Ativo = u.Ativo,
                     EquipeId = u.EquipeId,
                     EquipeNome = u.Equipe?.Nome ?? string.Empty,
-                    DataCriacao = u.DataCriacao,
-                    DataAtualizacao = u.DataAtualizacao
+                    DataCriacao = u.DataCriacao
                 }).ToList();
 
                 _logger.LogDebug("Carregados {Count} usuários ativos", viewModels.Count);
@@ -126,9 +125,7 @@ namespace ProGestao.Services
                     Id = s.Id,
                     Nome = s.Nome,
                     Cor = s.Cor,
-                    Descricao = s.Descricao,
-                    Ordem = s.Ordem,
-                    Ativo = s.Ativo
+                    Ordem = s.Ordem
                 }).ToList();
 
                 _logger.LogDebug("Carregados {Count} status de atividades", viewModels.Count);
@@ -157,8 +154,7 @@ namespace ProGestao.Services
                     Id = t.Id,
                     Nome = t.Nome,
                     Cor = t.Cor,
-                    Descricao = t.Descricao,
-                    Ativo = t.Ativo
+                    Descricao = t.Descricao
                 }).ToList();
 
                 _logger.LogDebug("Carregados {Count} tipos de atividade", viewModels.Count);
@@ -187,8 +183,7 @@ namespace ProGestao.Services
                 {
                     Id = e.Id,
                     Nome = e.Nome,
-                    Descricao = e.Descricao,
-                    QuantidadeMembros = e.Usuarios?.Count(u => u.Ativo) ?? 0
+                    Descricao = e.Descricao
                 }).ToList();
 
                 _logger.LogDebug("Carregadas {Count} equipes ativas", viewModels.Count);

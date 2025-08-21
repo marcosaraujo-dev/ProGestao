@@ -44,8 +44,12 @@
                                     <label asp-for="Projeto.StatusId" class="form-label">
                                         <i class="fas fa-flag me-1"></i>Status *
                                     </label>
-                                    <select asp-for="Projeto.StatusId" class="form-select" asp-items="Model.StatusSelectList">
+                                    <select asp-for="Projeto.StatusId" class="form-select">
                                         <option value="">Selecione um status</option>
+                                        @foreach (var status in Model.StatusProjetos)
+                                        {
+                                            <option value="@status.Id" selected="@(Model.Projeto.StatusId == status.Id)">@status.Nome</option>
+                                        }
                                     </select>
                                     <span asp-validation-for="Projeto.StatusId" class="text-danger"></span>
                                 </div>
@@ -57,8 +61,12 @@
                                     <label asp-for="Projeto.ResponsavelId" class="form-label">
                                         <i class="fas fa-user me-1"></i>Responsável *
                                     </label>
-                                    <select asp-for="Projeto.ResponsavelId" class="form-select" asp-items="Model.ResponsaveisSelectList">
+                                    <select asp-for="Projeto.ResponsavelId" class="form-select">
                                         <option value="">Selecione um responsável</option>
+                                        @foreach (var responsavel in Model.Responsaveis)
+                                        {
+                                            <option value="@responsavel.Id" selected="@(Model.Projeto.ResponsavelId == responsavel.Id)">@responsavel.Nome</option>
+                                        }
                                     </select>
                                     <span asp-validation-for="Projeto.ResponsavelId" class="text-danger"></span>
                                 </div>
