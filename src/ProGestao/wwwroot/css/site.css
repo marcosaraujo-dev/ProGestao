@@ -351,6 +351,10 @@ body {
     position: relative;
     z-index: var(--z-card);
     overflow: hidden;
+
+    transition: transform 0.2s ease-in-out;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
     .card:hover {
@@ -380,7 +384,36 @@ body {
 
 .card-body {
     padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
 }
+
+.card-text {
+    flex: 1;
+}
+
+.btn-group {
+    margin-top: auto;
+    min-height: 50px;
+    width: auto;
+}
+    .btn-group .btn {
+        padding: 0.375rem 1rem; 
+        font-size: 0.875rem;
+    }
+
+    .btn-group .dropdown-toggle-split {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    .btn-group .dropdown-toggle-split::after {
+        margin: 0 !important;
+        vertical-align: middle !important;
+    }
 
 .card-footer {
     background: var(--gray-50);
@@ -389,6 +422,19 @@ body {
 }
 
 /* Cards especiais */
+.card .bg-primary,
+.card .bg-success,
+.card .bg-info,
+.card .bg-warning {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+}
+
 .card.bg-primary {
     background: var(--gradient-primary) !important;
     border-color: var(--primary-dark);
@@ -1125,7 +1171,13 @@ body {
     .card {
         margin-bottom: 1rem;
     }
-
+        .card .bg-primary,
+        .card .bg-success,
+        .card .bg-info,
+        .card .bg-warning {
+            width: 60px;
+            height: 60px;
+        }
     .btn {
         width: 100%;
         justify-content: center;

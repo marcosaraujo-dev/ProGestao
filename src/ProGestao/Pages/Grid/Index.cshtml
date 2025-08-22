@@ -9,7 +9,7 @@
 @section Styles {
     <link rel="stylesheet" href="~/css/components/dropdown-fix.css" asp-append-version="true">
     <link rel="stylesheet" href="~/css/pages/grid.css" asp-append-version="true">
-    
+   
     
 }
 
@@ -30,7 +30,7 @@
     <!-- Controls Row -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="grid-controls d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div class="grid-controls d-flex justify-content-between align-items-center flex-wrap gap-3" id="grid-controls">
                 
                 <!-- Navegação de Período -->
                 <div class="week-navigation">
@@ -132,7 +132,7 @@
                             @Model.TituloSemana
                         </h5>
                         <div class="grid-stats">
-                            <span class="badge bg-primary me-2">
+                            <span class="badge bg-primary me-2" >
                                 @Model.TotalAtividades atividades
                             </span>
                             @if (Model.TemAtividadesAtrasadas)
@@ -371,7 +371,29 @@
 
 @section Scripts {
     <script>
+        // Força o scroll para o topo ao carregar a página
+        window.scrollTo(0, 0);
+        
         document.addEventListener('DOMContentLoaded', function() {
+            // Garante que o foco fique no topo
+            window.scrollTo(0, 0);
+                    document.querySelectorAll('[autofocus]').forEach(el => {
+                el.removeAttribute('autofocus');
+                el.blur();
+            });
+                // Remove âncoras da URL
+            if (window.location.hash) {
+                history.replaceState(null, null, window.location.pathname + window.location.search);
+            }
+
+           // Foca nos controles do grid após carregamento
+            setTimeout(() => {
+                const gridControls = document.querySelector('.grid-controls');
+                if (gridControls) {
+                    gridControls.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }, 100);
+
             // Inicializa tooltips
             var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
             var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
