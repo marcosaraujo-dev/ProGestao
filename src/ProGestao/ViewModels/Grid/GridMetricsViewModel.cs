@@ -13,5 +13,10 @@
         public double TaxaConclusao => TotalAtividades > 0
             ? (TotalAtividades - AtividadesAtrasadas) / (double)TotalAtividades * 100
             : 0;
+        public double PercentualAtrasadas => TotalAtividades > 0
+       ? Math.Round((double)AtividadesAtrasadas / TotalAtividades * 100, 1)
+       : 0;
+
+        public bool TemAtividadesAtrasadas => AtividadesAtrasadas > 0;
     }
 }

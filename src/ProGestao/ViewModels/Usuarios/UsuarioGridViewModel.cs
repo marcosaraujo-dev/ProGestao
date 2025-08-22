@@ -34,7 +34,7 @@ namespace ProGestao.ViewModels.Usuarios
         public Dictionary<DateTime, List<AtividadeGridViewModel>> AtividadesPorDia { get; set; } =
             new Dictionary<DateTime, List<AtividadeGridViewModel>>();
 
-        // Propriedades calculadas existentes mantidas
+        // Propriedades calculadas
         public int TotalAtividades => Dias.Sum(d => d.Atividades.Count);
 
 
@@ -47,8 +47,38 @@ namespace ProGestao.ViewModels.Usuarios
         public int AtividadesConcluidas => AtividadesPorDia.Values.SelectMany(x => x)
             .Count(a => a.StatusClasse == "concluida");
 
+        public int AtividadesAtrasadas => AtividadesPorDia.Values
+           .SelectMany(x => x)
+           .Count(a => a.EstaAtrasada);
+
         public double PercentualConclusao => TotalAtividades > 0
             ? Math.Round((double)AtividadesConcluidas / TotalAtividades * 100, 1)
             : 0;
+        public bool TemAtividades => TotalAtividades > 0;
+        public bool TemAtividadesAtrasadas => AtividadesAtrasadas > 0;
+
+        public string CorIndicadorPerformance => PercentualConclusao switch
+        {
+            >= 80 => "success",
+            >= 60 => "warning",
+            _ => "danger"
+        };
+
+        public List<AtividadeGridViewModel> ObterAtividadesDoDia(DateTime data)
+        {
+            return AtividadesPorDia.TryGetValue(data.Date, out var atividades)
+                ? atividades
+                : new List<AtividadeGridViewModel>();
+        }
+
+        public int ContarAtividadesDoDia(DateTime data)
+        {
+            return ObterAtividadesDoDia(data).Count;
+        }
+
+        public bool TemAtividadesNoDia(DateTime data)
+        {
+            return ContarAtividadesDoDia(data) > 0;
+        }
     }
 }

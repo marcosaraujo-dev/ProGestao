@@ -1,78 +1,20 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using ProGestao.Services;
-using ProGestao.ViewModels;
 using ProGestao.Data;
 using ProGestao.Models;
+using ProGestao.Services;
+using ProGestao.ViewModels;
 using ProGestao.ViewModels.Grid;
 using ProGestao.ViewModels.Usuarios;
 
 namespace ProGestao.Pages.Grid
 {
-    /// <summary>
-    /// Page Model aprimorado para Grid com períodos dinâmicos
-    /// </summary>
     public class IndexModel : PageModel
     {
-        #region Fields and Dependencies
-
         private readonly IGridService _gridService;
         private readonly ProGestaoContext _context;
         private readonly ILogger<IndexModel> _logger;
-
-        #endregion
-
-        #region Properties Principais
-
-        // Dados do Grid
-        public List<UsuarioGridViewModel> UsuariosGrid { get; set; } = new();
-        public List<DiaGridViewModel> DiasSemana { get; set; } = new(); // Nome mantido para compatibilidade
-
-        // Métricas
-        public int TotalAtividades { get; set; }
-        public int QtdAtividadesAtrasadas { get; set; }
-        public bool TemAtividadesAtrasadas => QtdAtividadesAtrasadas > 0;
-
-        // Navigation baseada no período atual
-        public DateTime PeriodoInicio { get; set; }
-        public DateTime PeriodoFim { get; set; }
-        public int QtdDiasPeriodo { get; set; }
-
-        // Navegação (baseada no período)
-        public DateTime PeriodoAnterior => PeriodoInicio.AddDays(-QtdDiasPeriodo);
-        public DateTime PeriodoProximo => PeriodoInicio.AddDays(QtdDiasPeriodo);
-
-        // Aliases para compatibilidade com view
-        public DateTime SemanaAtual => PeriodoInicio;
-        public DateTime SemanaAnterior => PeriodoAnterior;
-        public DateTime ProximaSemana => PeriodoProximo;
-
-        public string TituloSemana => GetTituloPeriodo();
-
-        #endregion
-
-        #region Properties da View
-
-        // Filtros
-        public List<Equipe> Equipes { get; set; } = new();
-        public List<StatusAtividade> StatusAtividades { get; set; } = new();
-
-        // Períodos dinâmicos
-        public List<PeriodoViewModel> PeriodosDisponiveis { get; set; } = new();
-        public string PeriodoSelecionado { get; set; } = "Esta Semana";
-        public string PeriodoAtual { get; set; } = "semana";
-
-        // Auto-refresh
-        public bool AutoRefresh { get; set; } = false;
-        public int AutoRefreshInterval { get; set; } = 300000;
-
-        // Debug
-        public bool IsDebugMode => Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development";
-
-        #endregion
-
-        #region Bind Properties
 
         [BindProperty(SupportsGet = true)]
         public DateTime? Semana { get; set; }
@@ -81,248 +23,166 @@ namespace ProGestao.Pages.Grid
         public int? EquipeId { get; set; }
 
         [BindProperty(SupportsGet = true)]
-        public int? FiltroEquipeId { get; set; }
+        public string Periodo { get; set; } = "semana";
 
-        [BindProperty(SupportsGet = true)]
-        public string? Periodo { get; set; } // ✅ NOVO: Parâmetro de período
+        public List<UsuarioGridViewModel> UsuariosGrid { get; private set; } = new();
+        public List<DiaGridViewModel> DiasSemana { get; private set; } = new();
+        public int TotalAtividades { get; private set; }
+        public int QtdAtividadesAtrasadas { get; private set; }
+        public DateTime PeriodoInicio { get; private set; }
+        public DateTime PeriodoFim { get; private set; }
+        public List<Equipe> Equipes { get; private set; } = new();
+        public List<PeriodoViewModel> PeriodosDisponiveis { get; private set; } = new();
 
-        #endregion
+        public bool TemAtividadesAtrasadas => QtdAtividadesAtrasadas > 0;
+        public string TituloSemana => ObterTituloPeriodo();
+        public DateTime SemanaAnterior => CalcularPeriodoAnterior();
+        public DateTime ProximaSemana => CalcularProximoPeriodo();
 
-        #region Constructor
-
-        public IndexModel(
-            IGridService gridService,
-            ProGestaoContext context,
-            ILogger<IndexModel> logger)
+        public IndexModel(IGridService gridService, ProGestaoContext context, ILogger<IndexModel> logger)
         {
             _gridService = gridService ?? throw new ArgumentNullException(nameof(gridService));
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        #endregion
-
-        #region Page Methods
-
-        /// <summary>
-        /// Handler principal 
-        /// </summary>
         public async Task<IActionResult> OnGetAsync()
         {
             try
             {
-                _logger.LogInformation("Carregando Grid com período: {Periodo}", Periodo ?? "semana");
+                _logger.LogInformation("=== INICIANDO CARREGAMENTO DO GRID ===");
+                _logger.LogInformation("Parâmetros recebidos - Período: {Periodo}, Semana: {Semana}, EquipeId: {EquipeId}",
+                    Periodo, Semana, EquipeId);
 
-                //  Calcula período baseado no parâmetro
-                CalcularPeriodo();
+                ConfigurarPeriodo();
 
-                var equipeIdFiltro = EquipeId ?? FiltroEquipeId;
+                _logger.LogInformation("Período configurado - Início: {PeriodoInicio}, Fim: {PeriodoFim}",
+                    PeriodoInicio, PeriodoFim);
 
-                await LoadStaticDataAsync();
-                await LoadGridDataAsync(equipeIdFiltro);
+                await CarregarDadosEstaticos();
 
-                _logger.LogInformation("Grid carregado: {QtdUsuarios} usuários, {QtdAtividades} atividades, {QtdDias} dias",
+                _logger.LogInformation("Equipes carregadas: {QtdEquipes}", Equipes.Count);
+
+                await CarregarDadosGrid();
+
+                _logger.LogInformation("=== GRID CARREGADO COM SUCESSO ===");
+                _logger.LogInformation("Usuários: {QtdUsuarios}, Atividades Totais: {TotalAtividades}, Dias: {QtdDias}",
                     UsuariosGrid.Count, TotalAtividades, DiasSemana.Count);
+
+                // Debug detalhado de cada usuário
+                foreach (var usuario in UsuariosGrid)
+                {
+                    _logger.LogInformation("Usuário: {NomeUsuario} - Atividades: {QtdAtividades} - Dias com atividades: {DiaComAtividades}",
+                        usuario.Nome,
+                        usuario.TotalAtividades,
+                        usuario.AtividadesPorDia.Count(kvp => kvp.Value.Any()));
+
+                    // Log detalhado das atividades por dia
+                    foreach (var dia in usuario.AtividadesPorDia.Where(kvp => kvp.Value.Any()))
+                    {
+                        _logger.LogInformation("  -> {Data}: {QtdAtividades} atividades",
+                            dia.Key.ToString("dd/MM/yyyy"), dia.Value.Count);
+                    }
+                }
 
                 return Page();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao carregar Grid");
-                TempData["ErrorMessage"] = "Erro ao carregar dados do grid. Tente novamente.";
+                _logger.LogError(ex, "ERRO CRÍTICO ao carregar Grid");
+                TempData["ErrorMessage"] = "Erro ao carregar dados do grid. Verifique os logs para mais detalhes.";
                 return Page();
             }
         }
 
-        /// <summary>
-        /// Handler para período customizado
-        /// </summary>
-        public async Task<IActionResult> OnPostCustomPeriodAsync(DateTime dataInicio, DateTime dataFim)
+        public async Task<IActionResult> OnPostPeriodoCustomizadoAsync(DateTime dataInicio, DateTime dataFim, int? equipeId)
         {
             try
             {
+                _logger.LogInformation("Aplicando período customizado: {DataInicio} a {DataFim}, EquipeId: {EquipeId}",
+                    dataInicio, dataFim, equipeId);
+
                 if (dataInicio > dataFim)
                 {
                     TempData["ErrorMessage"] = "Data inicial não pode ser maior que data final.";
-                    return RedirectToPage();
+                    return RedirectToPage(new { periodo = Periodo, equipeId });
                 }
 
                 var diffDays = (dataFim - dataInicio).TotalDays;
                 if (diffDays > 30)
                 {
                     TempData["ErrorMessage"] = "Período não pode ser maior que 30 dias.";
-                    return RedirectToPage();
+                    return RedirectToPage(new { periodo = Periodo, equipeId });
                 }
 
                 return RedirectToPage(new
                 {
+                    periodo = "customizado",
                     semana = dataInicio,
-                    periodo = "custom",
-                    fim = dataFim.ToString("yyyy-MM-dd")
+                    equipeId,
+                    dataFim = dataFim.ToString("yyyy-MM-dd")
                 });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao processar período customizado");
-                TempData["ErrorMessage"] = "Erro ao processar período customizado.";
+                _logger.LogError(ex, "Erro ao aplicar período customizado");
+                TempData["ErrorMessage"] = "Erro ao aplicar período customizado.";
                 return RedirectToPage();
             }
         }
 
-        #endregion
-
-        #region Private Methods
-
-        /// <summary>
-        ///  Calcula período baseado nos parâmetros
-        /// </summary>
-        private void CalcularPeriodo()
+        private void ConfigurarPeriodo()
         {
             var hoje = DateTime.Today;
-            var periodoTipo = Periodo ?? "semana";
+            var dataBase = Semana ?? hoje;
 
-            switch (periodoTipo.ToLower())
+            _logger.LogInformation("Configurando período - Tipo: {Periodo}, DataBase: {DataBase}", Periodo, dataBase);
+
+            (PeriodoInicio, PeriodoFim) = Periodo?.ToLower() switch
             {
-                case "semana":
-                    PeriodoInicio = Semana ?? GetStartOfWeek(hoje);
-                    QtdDiasPeriodo = 7;
-                    PeriodoFim = PeriodoInicio.AddDays(6);
-                    PeriodoAtual = "semana";
-                    PeriodoSelecionado = "Esta Semana";
-                    break;
+                "7dias" or "semana" => ObterPeriodoSemana(dataBase),
+                "15dias" => (hoje.AddDays(-14), hoje),
+                "30dias" => (hoje.AddDays(-29), hoje),
+                "mes" => ObterPeriodoMesAtual(hoje),
+                "customizado" => ObterPeriodoCustomizado(),
+                _ => ObterPeriodoSemana(dataBase)
+            };
 
-                case "15dias":
-                    PeriodoInicio = Semana ?? hoje.AddDays(-14);
-                    QtdDiasPeriodo = 15;
-                    PeriodoFim = PeriodoInicio.AddDays(14);
-                    PeriodoAtual = "15dias";
-                    PeriodoSelecionado = "Últimos 15 dias";
-                    break;
+            ConfigurarPeriodosDisponiveis();
 
-                case "mes":
-                    var inicioMes = new DateTime(hoje.Year, hoje.Month, 1);
-                    PeriodoInicio = Semana ?? inicioMes;
-                    var fimMes = inicioMes.AddMonths(1).AddDays(-1);
-                    QtdDiasPeriodo = (fimMes - inicioMes).Days + 1;
-                    PeriodoFim = fimMes;
-                    PeriodoAtual = "mes";
-                    PeriodoSelecionado = "Este Mês";
-                    break;
-
-                case "30dias":
-                    PeriodoInicio = Semana ?? hoje.AddDays(-29);
-                    QtdDiasPeriodo = 30;
-                    PeriodoFim = PeriodoInicio.AddDays(29);
-                    PeriodoAtual = "30dias";
-                    PeriodoSelecionado = "Últimos 30 dias";
-                    break;
-
-                case "custom":
-                    PeriodoInicio = Semana ?? hoje;
-                    // Para custom, tentar pegar parâmetro 'fim' da query string
-                    if (Request.Query.TryGetValue("fim", out var fimStr) &&
-                        DateTime.TryParse(fimStr, out var fimCustom))
-                    {
-                        PeriodoFim = fimCustom;
-                        QtdDiasPeriodo = (PeriodoFim - PeriodoInicio).Days + 1;
-                    }
-                    else
-                    {
-                        QtdDiasPeriodo = 7;
-                        PeriodoFim = PeriodoInicio.AddDays(6);
-                    }
-                    PeriodoAtual = "custom";
-                    PeriodoSelecionado = "Período Customizado";
-                    break;
-
-                default:
-                    goto case "semana";
-            }
-
-            // Validação de limite máximo
-            if (QtdDiasPeriodo > 30)
-            {
-                QtdDiasPeriodo = 30;
-                PeriodoFim = PeriodoInicio.AddDays(29);
-            }
+            _logger.LogInformation("Período final configurado - Início: {Inicio}, Fim: {Fim}, QtdDias: {QtdDias}",
+                PeriodoInicio, PeriodoFim, (PeriodoFim - PeriodoInicio).Days + 1);
         }
 
-        /// <summary>
-        /// Título dinâmico baseado no período
-        /// </summary>
-        private string GetTituloPeriodo()
+        private (DateTime inicio, DateTime fim) ObterPeriodoSemana(DateTime dataBase)
         {
-            if (QtdDiasPeriodo <= 7)
-            {
-                return $"Semana de {PeriodoInicio:dd/MM} a {PeriodoFim:dd/MM/yyyy}";
-            }
-            else
-            {
-                return $"Período de {PeriodoInicio:dd/MM} a {PeriodoFim:dd/MM/yyyy} ({QtdDiasPeriodo} dias)";
-            }
+            var inicioDaSemana = dataBase.AddDays(-(int)dataBase.DayOfWeek);
+            var resultado = (inicioDaSemana, inicioDaSemana.AddDays(6));
+
+            _logger.LogInformation("Período semana calculado - Base: {DataBase}, Início: {Inicio}, Fim: {Fim}",
+                dataBase, resultado.Item1, resultado.Item2);
+
+            return resultado;
         }
 
-        /// <summary>
-        /// Carrega dados estáticos
-        /// </summary>
-        private async Task LoadStaticDataAsync()
+        private (DateTime inicio, DateTime fim) ObterPeriodoMesAtual(DateTime data)
         {
-            try
-            {
-                Equipes = await _context.Equipes
-                    .AsNoTracking()
-                    .Where(e => e.Ativo)
-                    .OrderBy(e => e.Nome)
-                    .ToListAsync();
-
-                StatusAtividades = await _context.StatusAtividades
-                    .AsNoTracking()
-                    .OrderBy(s => s.Ordem)
-                    .ToListAsync();
-
-                ConfigurarPeriodos();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao carregar dados estáticos");
-                throw;
-            }
+            var primeiroDiaDoMes = new DateTime(data.Year, data.Month, 1);
+            var ultimoDiaDoMes = primeiroDiaDoMes.AddMonths(1).AddDays(-1);
+            return (primeiroDiaDoMes, ultimoDiaDoMes);
         }
 
-        /// <summary>
-        /// Carrega dados do grid com período dinâmico
-        /// </summary>
-        private async Task LoadGridDataAsync(int? equipeIdFiltro)
+        private (DateTime inicio, DateTime fim) ObterPeriodoCustomizado()
         {
-            try
+            if (Request.Query.ContainsKey("dataFim") &&
+                DateTime.TryParse(Request.Query["dataFim"], out var dataFim))
             {
-                var filter = new GridFilterViewModel
-                {
-                    DataInicio = PeriodoInicio,
-                    DataFim = PeriodoFim,
-                    SemanaReferencia = PeriodoInicio, // Para compatibilidade
-                    EquipeId = equipeIdFiltro
-                };
-
-                var gridData = await _gridService.GetGridDataAsync(filter);
-                UsuariosGrid = gridData.Usuarios;
-                DiasSemana = gridData.Dias; // Nome mantido para compatibilidade
-
-                var metrics = await _gridService.GetGridMetricsAsync(filter);
-                TotalAtividades = metrics.TotalAtividades;
-                QtdAtividadesAtrasadas = metrics.AtividadesAtrasadas;
+                return (PeriodoInicio, dataFim);
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao carregar dados do grid");
-                throw;
-            }
+            return ObterPeriodoSemana(Semana ?? DateTime.Today);
         }
 
-        /// <summary>
-        /// Configura períodos disponíveis
-        /// </summary>
-        private void ConfigurarPeriodos()
+        private void ConfigurarPeriodosDisponiveis()
         {
             PeriodosDisponiveis = new List<PeriodoViewModel>
             {
@@ -333,15 +193,90 @@ namespace ProGestao.Pages.Grid
             };
         }
 
-        /// <summary>
-        /// Obtém início da semana
-        /// </summary>
-        private static DateTime GetStartOfWeek(DateTime date)
+        private async Task CarregarDadosEstaticos()
         {
-            var diff = (7 + (date.DayOfWeek - DayOfWeek.Sunday)) % 7;
-            return date.AddDays(-diff).Date;
+            _logger.LogInformation("Carregando dados estáticos...");
+
+            Equipes = await _context.Equipes
+                .AsNoTracking()
+                .Where(e => e.Ativo)
+                .OrderBy(e => e.Nome)
+                .ToListAsync();
+
+            _logger.LogInformation("Equipes carregadas: {Equipes}",
+                string.Join(", ", Equipes.Select(e => $"{e.Id}-{e.Nome}")));
         }
 
-        #endregion
+        private async Task CarregarDadosGrid()
+        {
+            _logger.LogInformation("=== INICIANDO CARREGAMENTO DOS DADOS DO GRID ===");
+
+            var filtro = new GridFilterViewModel
+            {
+                DataInicio = PeriodoInicio,
+                DataFim = PeriodoFim,
+                EquipeId = EquipeId
+            };
+
+            _logger.LogInformation("Filtro criado - DataInicio: {DataInicio}, DataFim: {DataFim}, EquipeId: {EquipeId}",
+                filtro.DataInicio, filtro.DataFim, filtro.EquipeId);
+
+            try
+            {
+                var gridData = await _gridService.GetGridDataAsync(filtro);
+
+                _logger.LogInformation("GridService retornou - Usuários: {QtdUsuarios}, Dias: {QtdDias}",
+                    gridData.Usuarios.Count, gridData.Dias.Count);
+
+                UsuariosGrid = gridData.Usuarios;
+                DiasSemana = gridData.Dias;
+
+                // Verifica se os usuários têm atividades mapeadas
+                var usuariosComAtividades = UsuariosGrid.Count(u => u.TotalAtividades > 0);
+                _logger.LogInformation("Usuários com atividades: {UsuariosComAtividades} de {TotalUsuarios}",
+                    usuariosComAtividades, UsuariosGrid.Count);
+
+                var metricas = await _gridService.GetGridMetricsAsync(filtro);
+                TotalAtividades = metricas.TotalAtividades;
+                QtdAtividadesAtrasadas = metricas.AtividadesAtrasadas;
+
+                _logger.LogInformation("Métricas calculadas - Total: {TotalAtividades}, Atrasadas: {QtdAtrasadas}",
+                    TotalAtividades, QtdAtividadesAtrasadas);
+
+                _logger.LogInformation("=== DADOS DO GRID CARREGADOS COM SUCESSO ===");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro crítico ao carregar dados do grid através do GridService");
+                throw;
+            }
+        }
+
+        private string ObterTituloPeriodo()
+        {
+            var qtdDias = (PeriodoFim - PeriodoInicio).Days + 1;
+
+            return Periodo?.ToLower() switch
+            {
+                "semana" or "7dias" => $"Semana de {PeriodoInicio:dd/MM} a {PeriodoFim:dd/MM/yyyy}",
+                "15dias" => $"Últimos 15 dias ({PeriodoInicio:dd/MM} a {PeriodoFim:dd/MM/yyyy})",
+                "30dias" => $"Últimos 30 dias ({PeriodoInicio:dd/MM} a {PeriodoFim:dd/MM/yyyy})",
+                "mes" => $"Mês de {PeriodoInicio:MMMM/yyyy}",
+                "customizado" => $"Período customizado ({PeriodoInicio:dd/MM} a {PeriodoFim:dd/MM/yyyy})",
+                _ => $"Período de {qtdDias} dias ({PeriodoInicio:dd/MM} a {PeriodoFim:dd/MM/yyyy})"
+            };
+        }
+
+        private DateTime CalcularPeriodoAnterior()
+        {
+            var qtdDias = (PeriodoFim - PeriodoInicio).Days + 1;
+            return PeriodoInicio.AddDays(-qtdDias);
+        }
+
+        private DateTime CalcularProximoPeriodo()
+        {
+            var qtdDias = (PeriodoFim - PeriodoInicio).Days + 1;
+            return PeriodoInicio.AddDays(qtdDias);
+        }
     }
 }

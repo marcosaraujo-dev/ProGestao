@@ -1,5 +1,4 @@
 ﻿@page
-@using ProGestao.ViewModels
 @using ProGestao.ViewModels.Atividade
 @model ProGestao.Pages.Grid.IndexModel
 @{
@@ -7,293 +6,378 @@
     ViewData["PageDescription"] = "Visualização em grid das atividades por semana";
 }
 
-@* CSS específico da página *@
 @section Styles {
     <link rel="stylesheet" href="~/css/components/dropdown-fix.css" asp-append-version="true">
     <link rel="stylesheet" href="~/css/pages/grid.css" asp-append-version="true">
-
+    
     <style>
-        /* ✅ CORREÇÃO: Coluna de nome menor e responsiva */
+        /* ===== LAYOUT PRINCIPAL ===== */
         .user-column {
-            width: 180px !important;
-            min-width: 150px !important;
-            max-width: 200px !important;
+            width: 200px !important;
+            min-width: 180px !important;
+            max-width: 220px !important;
+            position: sticky;
+            left: 0;
+            background: inherit;
+            z-index: 1015;
         }
 
-        /* ✅ CORREÇÃO: Colunas dos dias com largura fixa */
         .day-column {
-            width: 120px !important;
-            min-width: 100px !important;
+            width: 140px !important;
+            min-width: 120px !important;
         }
 
-        /* ✅ NOVO: Estilos para informações do projeto */
-        .activity-project {
-            margin-top: 2px;
-            font-size: 0.75rem;
-        }
-
-        .project-indicator {
-            font-size: 0.8rem;
-            margin-left: 4px;
-            opacity: 0.7;
-        }
-
-        /* ✅ CORREÇÃO: Cards de atividade melhorados */
+        /* ===== CARDS DAS ATIVIDADES - ULTRA COMPACTO ===== */
         .activity-item {
             background: #fff;
             border: 1px solid #e9ecef;
-            border-radius: 4px;
-            padding: 6px 8px;
-            margin-bottom: 4px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border-radius: 4px !important;
+            padding: 3px 5px !important;
+            margin-bottom: 2px !important;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1) !important;
             transition: all 0.2s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            max-height: 55px !important;
+            min-height: 40px !important;
         }
 
-            .activity-item:hover {
-                box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-                transform: translateY(-1px);
-            }
+        .activity-item:hover {
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15) !important;
+            transform: translateY(-1px);
+            z-index: 1020;
+        }
 
         .activity-title {
-            font-weight: 500;
-            font-size: 0.85rem;
-            line-height: 1.2;
-            color: #2c3e50;
+            font-weight: 600;
+            font-size: 0.7rem !important;
+            line-height: 1 !important;
+            color: #1e293b;
+            margin-bottom: 1px !important;
+            display: -webkit-box;
+            -webkit-line-clamp: 1 !important;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-height: 1em !important;
+            white-space: nowrap;
         }
 
         .activity-status {
             display: inline-block;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-size: 0.7rem;
-            font-weight: 500;
+            padding: 1px 3px !important;
+            border-radius: 2px !important;
+            font-size: 0.55rem !important;
+            font-weight: 600;
             color: white;
-            text-shadow: 0 1px 1px rgba(0,0,0,0.2);
-        }
-
-        /* Em telas menores */
-        @@media (max-width: 768px) {
-            .user-column
-
-        {
-            width: 120px !important;
-            min-width: 100px !important;
-        }
-
-        .day-column {
-            width: 80px !important;
-            min-width: 70px !important;
-        }
-
-        .activity-title {
-            font-size: 0.8rem;
+            text-shadow: none;
+            letter-spacing: 0.1px;
+            text-transform: uppercase;
+            margin-bottom: 1px !important;
         }
 
         .activity-project {
-            display: none; /* Oculta projeto em mobile */
+            margin-top: 1px !important;
+            font-size: 0.6rem !important;
+            color: #64748b;
+            font-style: italic;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+            line-height: 1 !important;
+            /* Limita o texto a um tamanho máximo */
+            max-height: 0.8em !important;
         }
 
+        .activity-preview {
+            margin-top: 1px !important;
+            font-size: 0.55rem !important;
+            color: #94a3b8;
+            border-top: 1px solid #f1f5f9;
+            padding-top: 1px !important;
+            line-height: 1 !important;
         }
 
-        /* Status por cor */
-        .status-em-andamento .activity-status {
-            background-color: #007bff !important;
+        .activity-meta {
+            margin: 0 !important;
         }
 
-        .status-pendente .activity-status {
-            background-color: #6c757d !important;
+        .activity-content {
+            max-height: 50px !important;
+            overflow: hidden;
+            padding: 0 !important;
         }
 
-        .status-concluida .activity-status {
-            background-color: #28a745 !important;
+        /* Esconde informações extras se o card ficar muito cheio */
+        .activity-item .activity-preview {
+            display: none !important;
         }
 
-        .status-pausada .activity-status {
-            background-color: #ffc107 !important;
-            color: #212529 !important;
-        }
-
-        .status-cancelada .activity-status {
-            background-color: #dc3545 !important;
-        }
-
+        /* ===== LINKS E FOCUS ===== */
         .activity-link {
             text-decoration: none;
             color: inherit;
             display: block;
-            transition: all 0.2s ease;
         }
 
-            .activity-link:hover {
-                text-decoration: none;
-                color: inherit;
-            }
-
-        /* CARD CLICÁVEL - Melhorias visuais */
-        .activity-item {
-            background: #fff;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            padding: 8px 10px;
-            margin-bottom: 6px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
-            transition: all 0.2s ease;
-            cursor: pointer; /* Indica que é clicável */
-            position: relative;
+        .activity-link:hover {
+            text-decoration: none;
+            color: inherit;
         }
 
-            .activity-item:hover {
-                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-                transform: translateY(-2px);
-                border-color: #cbd5e1;
-                background: #f8fafc; /* Mudança sutil de cor no hover */
-            }
-
-        /*  ÍCONE DE LINK - Aparece no hover */
-        .activity-link-icon {
-            font-size: 0.7rem;
-            color: #94a3b8;
-            opacity: 0;
-            transition: opacity 0.2s ease;
-        }
-
-        .activity-link:hover .activity-link-icon {
-            opacity: 1;
-        }
-
-        /*  TÍTULO - Flex para acomodar ícone */
-        .activity-title {
-            font-weight: 600;
-            font-size: 0.85rem;
-            line-height: 1.3;
-            color: #1e293b;
-            margin-bottom: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        /*  STATUS - Mantém estilos */
-        .activity-status {
-            display: inline-block;
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-size: 0.7rem;
-            font-weight: 600;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-            letter-spacing: 0.3px;
-            text-transform: uppercase;
-            transition: all 0.2s ease;
-        }
-
-        /*  META INFORMAÇÕES */
-        .activity-meta {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            margin-bottom: 3px;
-        }
-
-        /*  PROJETO */
-        .activity-project {
-            margin-top: 4px;
-            font-size: 0.75rem;
-            color: #64748b;
-            font-style: italic;
-        }
-
-        .project-indicator {
-            font-size: 0.8rem;
-            margin-left: 4px;
-            opacity: 0.8;
-        }
-
-        /*  Preview de informações */
-        .activity-preview {
-            margin-top: 4px;
-            font-size: 0.7rem;
-            color: #94a3b8;
-            border-top: 1px solid #f1f5f9;
-            padding-top: 3px;
-        }
-
-        /* EFEITO DE CLIQUE */
-        .activity-item:active {
-            transform: translateY(0);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-
-        /*  RESPONSIVIDADE */
-        @@media (max-width: 768px) {
-            .activity-link-icon
-
-        {
-            display: none; /* Oculta ícone em mobile */
-        }
-
-        .activity-preview {
-            font-size: 0.65rem;
-        }
-
-        .activity-project {
-            display: none; /* Oculta projeto em mobile para economizar espaço */
-        }
-
-        }
-
-        /* ACESSIBILIDADE - Focus para navegação por teclado */
         .activity-link:focus {
             outline: 2px solid #2563eb;
             outline-offset: 2px;
             border-radius: 6px;
         }
 
-            .activity-link:focus .activity-item {
-                box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-                border-color: #2563eb;
-            }
-
-        /* MELHOR CONTRASTE para text no hover */
-        .activity-link:hover .activity-title {
-            color: #0f172a;
+        .activity-link:focus .activity-item {
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+            border-color: #2563eb;
         }
 
-        .activity-link:hover .activity-project {
-            color: #475569;
+        /* ===== CONTAINERS - ULTRA COMPACTO ===== */
+        .activities-container {
+            min-height: 25px !important;
+            padding: 1px !important;
+            max-height: 200px !important;
+            overflow-y: auto;
+        }
+
+        .activity-cell {
+            vertical-align: top;
+            padding: 3px !important;
+            background: #fafbfc;
+            border-right: 1px solid #e9ecef;
+            border-bottom: 1px solid #e9ecef;
+            max-height: 220px !important;
+            overflow: hidden;
+        }
+
+        /* ===== FORÇA ALTURA MÍNIMA DA LINHA ===== */
+        tbody tr {
+            height: auto !important;
+            min-height: 60px !important;
+        }
+
+        tbody td {
+            vertical-align: top !important;
+            padding: 3px !important;
+        }
+
+        .empty-day {
+            color: #9ca3af;
+            font-style: italic;
+            font-size: 0.8rem;
+            text-align: center;
+            padding: 20px 10px;
+        }
+
+        /* ===== ESTADOS ESPECIAIS ===== */
+        .today {
+            background-color: #eff6ff !important;
+        }
+
+        .weekend {
+            background-color: #f9fafb !important;
+        }
+
+        /* ===== DROPDOWN CORRIGIDO - POSICIONAMENTO FORÇADO ===== */
+        .dropdown {
+            position: relative !important;
+        }
+
+        .dropdown-menu-custom {
+            position: absolute !important;
+            top: calc(100% + 2px) !important;
+            left: 0 !important;
+            right: auto !important;
+            margin: 0 !important;
+            z-index: 1055 !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+            border: 1px solid #e9ecef !important;
+            border-radius: 8px !important;
+            transform: none !important;
+            will-change: auto !important;
+        }
+
+        .dropdown-menu-custom.show {
+            position: absolute !important;
+            top: calc(100% + 2px) !important;
+            left: 0 !important;
+            transform: none !important;
+            inset: auto !important;
+        }
+
+        /* Força o dropdown a ficar próximo */
+        .dropdown-toggle::after {
+            margin-left: 0.5rem;
+        }
+
+        #dropdownPeriodo {
+            position: relative !important;
+        }
+
+        /* Override do Bootstrap */
+        .dropdown-menu[data-bs-popper] {
+            top: calc(100% + 2px) !important;
+            left: 0 !important;
+            margin-top: 0 !important;
+            transform: none !important;
+        }
+
+        .period-controls {
+            align-items: center !important;
+            gap: 15px !important;
+        }
+
+        .period-controls .dropdown {
+            position: relative;
+        }
+
+        /* ===== SCROLL PERSONALIZADO ===== */
+        .activities-container::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .activities-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 2px;
+        }
+
+        .activities-container::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 2px;
+        }
+
+        .activities-container::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        /* ===== RESPONSIVIDADE - EXTRA COMPACTO ===== */
+        @@media (max-width: 768px) {
+            .user-column {
+                width: 150px !important;
+                min-width: 130px !important;
+            }
+            
+            .day-column {
+                width: 100px !important;
+                min-width: 90px !important;
+            }
+            
+            .activity-item {
+                max-height: 60px !important; 
+                min-height: 45px !important;
+                width: 98% !important; 
+                margin-left: auto !important;
+                margin-right: auto !important;
+            }
+            
+            .activity-title {
+                font-size: 0.65rem !important;
+                -webkit-line-clamp: 1 !important;
+                max-height: 0.8em !important;
+                margin-bottom: 0 !important;
+                line-height: 1 !important;
+            }
+            
+            .activity-status {
+                padding: 0px 2px !important;
+                font-size: 0.5rem !important;
+                margin-bottom: 0 !important;
+            }
+            
+            .activity-project {
+                display: none !important;
+            }
+            
+            .activity-preview {
+                display: none !important;
+            }
+            
+            .activities-container {
+                padding: 0px !important;
+                max-height: 120px !important;
+                min-height: 15px !important;
+            }
+            
+            .activity-cell {
+                padding: 1px !important;
+            }
+            
+            .activity-content {
+                max-height: 85px !important;
+            }
+
+            tbody tr {
+                min-height: 35px !important;
+            }
+            
+            .period-controls {
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 10px !important;
+            }
+            
+            .period-controls .dropdown button,
+            .period-controls .form-select {
+                width: 100% !important;
+                min-width: auto !important;
+            }
+
+            .dropdown-menu-custom {
+                position: fixed !important;
+                top: auto !important;
+                left: 10px !important;
+                right: 10px !important;
+                width: auto !important;
+                max-width: none !important;
+                bottom: 20px !important;
+            }
+        }
+        @@media (max-width: 768px) {
+            tbody tr
+
+        {
+            min-height: 70px !important; /* Aumentado de 35px para 70px */
+        }
+
         }
     </style>
 }
 
-<div class="">
+<div class="container-fluid">
     <!-- Page Header -->
     <div class="header-blue">
         <div class="container">
             <h2 class="mb-0">
-                <i class="fas fa-calendar-alt  me-2"></i>
+                <i class="fas fa-calendar-alt me-2"></i>
                 Grid Semanal
             </h2>
             <p class="page-subtitle">
-                Visualização das atividades da equipe organizadas por semana
+                Visualização das atividades da equipe organizadas por período
             </p>
         </div>
     </div>
-   
 
     <!-- Controls Row -->
     <div class="row mb-4">
         <div class="col-12">
             <div class="grid-controls d-flex justify-content-between align-items-center flex-wrap gap-3">
-
-                <!-- Week Navigation -->
+                
+                <!-- Navegação de Período -->
                 <div class="week-navigation">
-                    <div class="btn-group" role="group" aria-label="Navegação de semanas">
-                        <a href="@Url.Page("./Index", new { semana = Model.SemanaAnterior })"
+                    <div class="btn-group" role="group" aria-label="Navegação de períodos">
+                        <a href="@Url.Page("./Index", new { semana = Model.SemanaAnterior, periodo = Model.Periodo, equipeId = Model.EquipeId })"
                            class="btn btn-outline-primary">
                             <i class="fas fa-chevron-left me-1"></i>
                             Anterior
                         </a>
                         <button type="button" class="btn btn-primary position-relative">
-                            Semana Atual
+                            @Model.TituloSemana
                             @if (Model.TemAtividadesAtrasadas)
                             {
                                 <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
@@ -302,64 +386,82 @@
                                 </span>
                             }
                         </button>
-                        <a href="@Url.Page("./Index", new { semana = Model.ProximaSemana })"
+                        <a href="@Url.Page("./Index", new { semana = Model.ProximaSemana, periodo = Model.Periodo, equipeId = Model.EquipeId })"
                            class="btn btn-outline-primary">
-                            Próxima
+                            Próximo
                             <i class="fas fa-chevron-right ms-1"></i>
                         </a>
                     </div>
                 </div>
 
-                <!-- Period Dropdown -->
-                <div class="period-controls d-flex align-items-center gap-2">
-                    <!-- Filtros adicionais -->
-                    <select class="form-select form-select-sm equipe-filter-container" style="width: auto;"
-                            name="equipeId" onchange="this.form.submit()">
-                        <option value="">Todas as equipes</option>
-                        @foreach (var equipe in Model.Equipes)
-                        {
-                            <option value="@equipe.Id" selected="@(Model.FiltroEquipeId == equipe.Id)">
-                                @equipe.Nome
-                            </option>
-                        }
-                    </select>
+                <!-- Controles de Período e Filtros -->
+                <div class="period-controls">
+                    <form method="get" class="d-flex align-items-center gap-3 flex-wrap">
+                        <!-- Seletor de Período (maior e primeiro) -->
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary dropdown-toggle" type="button"
+                                    data-bs-toggle="dropdown" aria-expanded="false" 
+                                    style="min-width: 200px;" id="dropdownPeriodo">
+                                <i class="fas fa-calendar me-1"></i>
+                                @{
+                                    var periodoAtual = Model.PeriodosDisponiveis?.FirstOrDefault(p => p.Valor == Model.Periodo);
+                                    var nomePeriodo = periodoAtual?.Nome ?? "Esta Semana";
+                                }
+                                @nomePeriodo
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-custom" style="min-width: 250px;">
+                                @if (Model.PeriodosDisponiveis != null)
+                                {
+                                    @foreach (var periodo in Model.PeriodosDisponiveis)
+                                    {
+                                        <li>
+                                            <a class="dropdown-item @(periodo.Valor == Model.Periodo ? "active" : "")" 
+                                               href="@Url.Page("./Index", new { periodo = periodo.Valor, equipeId = Model.EquipeId })">
+                                                <i class="@periodo.Icone me-2"></i>
+                                                @periodo.Nome
+                                                <small class="text-muted ms-2">(@periodo.Descricao)</small>
+                                            </a>
+                                        </li>
+                                    }
+                                }
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#customPeriodModal">
+                                        <i class="fas fa-cog me-2"></i>
+                                        Período Customizado
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
 
-                    <!-- Filtro Período -->
-                    <div class="col-md-4">
-                        <select name="Periodo" class="form-select period-filter-container" onchange="this.form.submit()">
-                            @foreach (var periodo in Model.PeriodosDisponiveis)
-                            {
-                                <option value="@periodo.Valor" selected="@(periodo.Valor == Model.PeriodoAtual)">
-                                    @periodo.Nome
-                                </option>
-                            }
-                        </select>
-                    </div>
-                    <!-- Período Customizado -->
-                    <div class="col-md-4">
-                        <button type="button" class="btn btn-outline-secondary custom-period-btn w-100"
-                                data-bs-toggle="modal" data-bs-target="#customPeriodModal">
-                            <i class="fas fa-calendar-alt me-1"></i>Período Customizado
-                        </button>
-                    </div>
+                        <!-- Filtro de Equipe (maior) -->
+                        <div class="form-group mb-0">
+                            <select name="equipeId" class="form-select" onchange="this.form.submit()" style="min-width: 220px;">
+                                <option value="">📄 Todas as equipes</option>
+                                @if (Model.Equipes != null)
+                                {
+                                    @foreach (var equipe in Model.Equipes)
+                                    {
+                                        <option value="@equipe.Id" selected="@(Model.EquipeId == equipe.Id)">
+                                            👥 @equipe.Nome
+                                        </option>
+                                    }
+                                }
+                            </select>
+                        </div>
 
-                    <!-- Refresh Button -->
-                    <button type="button"
-                            class="btn btn-outline-secondary"
-                            onclick="location.reload()"
-                            title="Atualizar dados">
-                        <i class="fas fa-sync-alt"></i>
-                    </button>
+                        <input type="hidden" name="periodo" value="@Model.Periodo" />
+                    </form>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Grid Container -->
+    <!-- Grid Card -->
     <div class="row">
         <div class="col-12">
-            <div class="card shadow-sm grid-container">
-                <div class="card-header bg-light">
+            <div class="grid-container card">
+                <div class="card-header">
                     <div class="d-flex justify-content-between align-items-center">
                         <h5 class="card-title mb-0">
                             <i class="fas fa-th-large me-2"></i>
@@ -383,176 +485,171 @@
                     <!-- Grid responsivo -->
                     <div class="table-responsive grid-wrapper">
                         <table class="table table-bordered table-hover mb-0 week-grid">
-                            <!-- ✅ THEAD CORRIGIDO - Apenas cabeçalhos, sem loops de dados -->
+                            <!-- Cabeçalho da tabela -->
                             <thead class="table-light sticky-top">
                                 <tr>
                                     <th scope="col" class="user-column">
                                         <i class="fas fa-user me-1"></i>
                                         Desenvolvedor
                                     </th>
-                                    @foreach (var dia in Model.DiasSemana)
+                                    @if (Model.DiasSemana != null)
                                     {
-                                        <th scope="col" class="day-column text-center">
-                                            <div class="day-header">
-                                                <div class="day-name">@dia.DiaSemana</div>
-                                                <div class="day-number">@dia.Dia</div>
-                                                <small class="text-muted">@dia.Mes</small>
-                                            </div>
-                                        </th>
+                                        @foreach (var dia in Model.DiasSemana)
+                                        {
+                                            <th scope="col" class="day-column text-center @(dia.EhHoje ? "today" : "") @(dia.EhFimDeSemana ? "weekend" : "")">
+                                                <div class="day-header">
+                                                    <div class="day-name">@(dia.DiaSemana?.Length > 3 ? dia.DiaSemana.Substring(0, 3) : dia.DiaSemana)</div>
+                                                    <div class="day-number">@dia.Dia</div>
+                                                    <small class="text-muted">@dia.Mes</small>
+                                                </div>
+                                            </th>
+                                        }
                                     }
                                 </tr>
                             </thead>
 
-                            <!-- ✅ TBODY CORRIGIDO - Estrutura de loops aninhados correta -->
+                            <!-- Corpo da tabela -->
                             <tbody>
-                                @foreach (var usuario in Model.UsuariosGrid)
+                                @if (Model.UsuariosGrid == null || !Model.UsuariosGrid.Any())
                                 {
                                     <tr>
-                                        <!-- Primeira coluna: dados do usuário -->
-                                        <td class="user-cell">
-                                            <div class="user-info">
-                                                <div class="user-avatar">
-                                                    @usuario.Iniciais
-                                                </div>
-                                                <div class="user-details">
-                                                    <div class="user-name">@usuario.Nome</div>
-                                                    <small class="text-muted">@usuario.Cargo</small>
-                                                </div>
+                                        <td colspan="@((Model.DiasSemana?.Count ?? 0) + 1)" class="text-center p-4">
+                                            <div class="empty-state">
+                                                <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                                                <h5 class="text-muted">Nenhum usuário encontrado</h5>
+                                                <p class="text-muted mb-0">
+                                                    @if (Model.EquipeId.HasValue)
+                                                    {
+                                                        <text>Tente selecionar uma equipe diferente ou "Todas as equipes".</text>
+                                                    }
+                                                    else
+                                                    {
+                                                        <text>Verifique se existem usuários cadastrados no sistema.</text>
+                                                    }
+                                                </p>
                                             </div>
                                         </td>
-
-                                        <!-- Colunas dos dias: atividades do usuário -->
-                                        @foreach (var dia in Model.DiasSemana)
-                                        {
-                                            <td class="activity-cell">
-                                                @{
-                                                    var atividades = usuario.AtividadesPorDia.ContainsKey(dia.Data.Date)
-                                                    ? usuario.AtividadesPorDia[dia.Data.Date]
-                                                    : new List<AtividadeGridViewModel>();
-                                                }
-                                                @if (atividades.Any())
-                                                {
-                                                    <div class="activities-container">
-                                                        @foreach (var atividade in atividades)
+                                    </tr>
+                                }
+                                else
+                                {
+                                    @foreach (var usuario in Model.UsuariosGrid)
+                                    {
+                                        <tr>
+                                            <!-- Coluna do usuário -->
+                                            <td class="user-cell user-column">
+                                                <div class="user-info">
+                                                    <div class="user-avatar">
+                                                        @usuario.Iniciais
+                                                    </div>
+                                                    <div class="user-details">
+                                                        <div class="user-name">@usuario.Nome</div>
+                                                        <small class="text-muted">@usuario.Cargo</small>
+                                                        @if (usuario.TotalAtividades > 0)
                                                         {
-                                                            <!-- ✅ CARD CLICÁVEL - Envolvido em link -->
-                                                            <a href="@Url.Page("/Atividades/Details", new { id = atividade.Id })"
-                                                               class="activity-link"
-                                                               data-bs-toggle="tooltip"
-                                                               title="@GetTooltipContent(atividade)">
-
-                                                                <div class="activity-item @GetActivityCssClass(atividade)"
-                                                                     style="border-left: 4px solid @atividade.StatusCor;">
-
-                                                                    <div class="activity-content">
-                                                                        <!-- Título com projeto -->
-                                                                        <div class="activity-title">
-                                                                            @atividade.Nome
-                                                                            @if (!string.IsNullOrEmpty(atividade.ProjetoNome))
-                                                                            {
-                                                                                <small class="project-indicator">📁</small>
-                                                                            }
-                                                                            <!-- ✅ INDICADOR VISUAL de que é clicável -->
-                                                                            <i class="fas fa-external-link-alt activity-link-icon"></i>
-                                                                        </div>
-
-                                                                        <!-- Status e prioridade -->
-                                                                        <div class="activity-meta">
-                                                                            <span class="activity-status"
-                                                                                  style="background-color: @atividade.StatusCor;
-                                                         color: @GetContrastColor(atividade.StatusCor);
-                                                         border: 1px solid @GetBorderColor(atividade.StatusCor);">
-                                                                                @atividade.StatusNome
-                                                                            </span>
-
-                                                                            @if (atividade.Prioridade > 2)
-                                                                            {
-                                                                                <i class="fas fa-exclamation-triangle text-warning ms-1"
-                                                                                   title="Prioridade @atividade.PrioridadeTexto"></i>
-                                                                            }
-                                                                        </div>
-
-                                                                        <!-- Projeto se existir -->
-                                                                        @if (!string.IsNullOrEmpty(atividade.ProjetoNome))
-                                                                        {
-                                                                            <div class="activity-project">
-                                                                                <small class="text-muted">
-                                                                                    <i class="fas fa-folder-open me-1"></i>@atividade.ProjetoNome
-                                                                                </small>
-                                                                            </div>
-                                                                        }
-
-                                                                        <!-- ✅ INFORMAÇÕES ADICIONAIS (preview) -->
-                                                                        @if (atividade.DataFimPrevista.HasValue)
-                                                                        {
-                                                                            <div class="activity-preview">
-                                                                                <small class="text-muted">
-                                                                                    <i class="fas fa-clock me-1"></i>
-                                                                                    Previsão: @atividade.DataFimPrevista.Value.ToString("dd/MM/yyyy")
-                                                                                </small>
-                                                                            </div>
-                                                                        }
-                                                                    </div>
-                                                                </div>
-                                                            </a>
+                                                            <div class="user-stats mt-1">
+                                                                <small class="badge bg-primary">
+                                                                    @usuario.TotalAtividades atividades
+                                                                </small>
+                                                            </div>
                                                         }
                                                     </div>
-                                                }
-
-                                                else
-                                                {
-                                                    <div class="no-activities">
-                                                        <i class="fas fa-minus text-muted"></i>
-                                                    </div>
-                                                }
+                                                </div>
                                             </td>
-                                        }
-                                    </tr>
+
+                                            <!-- Colunas dos dias -->
+                                            @if (Model.DiasSemana != null)
+                                            {
+                                                @foreach (var dia in Model.DiasSemana)
+                                                {
+                                                    <td class="activity-cell @(dia.EhHoje ? "today" : "") @(dia.EhFimDeSemana ? "weekend" : "")">
+                                                        @{
+                                                            var dataKey = dia.Data.Date;
+                                                            var atividades = usuario.AtividadesPorDia?.ContainsKey(dataKey) == true 
+                                                                ? usuario.AtividadesPorDia[dataKey] 
+                                                                : new List<AtividadeGridViewModel>();
+                                                        }
+                                                        
+                                                        @if (atividades != null && atividades.Any())
+                                                        {
+                                                            <div class="activities-container">
+                                                                @foreach (var atividade in atividades)
+                                                                {
+                                                                    <a href="@Url.Page("/Atividades/Details", new { id = atividade.Id })"
+                                                                       class="activity-link"
+                                                                       data-bs-toggle="tooltip"
+                                                                       data-bs-placement="top"
+                                                                       title="📝 @atividade.Nome @(!string.IsNullOrEmpty(atividade.ProjetoNome) ? $" | 📁 {atividade.ProjetoNome}" : "") | 📊 @atividade.StatusNome | ⚡ @atividade.PrioridadeTexto">
+                                                                        
+                                                                        <div class="activity-item status-@atividade.StatusClasse @(atividade.EstaAtrasada ? "overdue" : "") @(atividade.Prioridade >= 3 ? "high-priority" : "")"
+                                                                             style="border-left: 4px solid @(atividade.StatusCor ?? "#6c757d");">
+                                                                            
+                                                                            <div class="activity-content">
+                                                                                <!-- Título - TEXTO TRUNCADO -->
+                                                                                <div class="activity-title" title="@atividade.Nome">
+                                                                                    @{
+                                                                                        var tituloTruncado = atividade.Nome.Length > 25 
+                                                                                            ? atividade.Nome.Substring(0, 25) + "..." 
+                                                                                            : atividade.Nome;
+                                                                                    }
+                                                                                    @tituloTruncado
+                                                                                    @if (atividade.Prioridade >= 3)
+                                                                                    {
+                                                                                        <i class="fas fa-exclamation-triangle text-warning ms-1"
+                                                                                           title="Prioridade @atividade.PrioridadeTexto"></i>
+                                                                                    }
+                                                                                </div>
+
+                                                                                <!-- Status -->
+                                                                                <div class="activity-meta">
+                                                                                    <span class="activity-status"
+                                                                                          style="background-color: @(atividade.StatusCor ?? "#6c757d");">
+                                                                                        @atividade.StatusNome
+                                                                                    </span>
+                                                                                </div>
+
+                                                                                <!-- Projeto se existir - TEXTO TRUNCADO -->
+                                                                                @if (!string.IsNullOrEmpty(atividade.ProjetoNome))
+                                                                                {
+                                                                                    <div class="activity-project" title="@atividade.ProjetoNome">
+                                                                                        @{
+                                                                                            var projetoTruncado = atividade.ProjetoNome.Length > 30 
+                                                                                                ? atividade.ProjetoNome.Substring(0, 30) + "..." 
+                                                                                                : atividade.ProjetoNome;
+                                                                                        }
+                                                                                        <i class="fas fa-folder-open me-1"></i>
+                                                                                        @projetoTruncado
+                                                                                    </div>
+                                                                                }
+
+                                                                                <!-- Preview de informações -->
+                                                                                @if (atividade.DataFimPrevista.HasValue)
+                                                                                {
+                                                                                    <div class="activity-preview">
+                                                                                        <i class="fas fa-clock me-1"></i>
+                                                                                        @atividade.DataFimPrevista.Value.ToString("dd/MM")
+                                                                                    </div>
+                                                                                }
+                                                                            </div>
+                                                                        </div>
+                                                                    </a>
+                                                                }
+                                                            </div>
+                                                        }
+                                                        else
+                                                        {
+                                                            <div class="empty-day">
+                                                                <i class="fas fa-calendar-times opacity-50"></i>
+                                                            </div>
+                                                        }
+                                                    </td>
+                                                }
+                                            }
+                                        </tr>
+                                    }
                                 }
                             </tbody>
                         </table>
-                    </div>
-                </div>
-
-                @if (!Model.UsuariosGrid.Any())
-                {
-                    <div class="card-body text-center py-5">
-                        <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
-                        <h5 class="text-muted">Nenhuma atividade encontrada</h5>
-                        <p class="text-muted">
-                            Não há atividades cadastradas para o período selecionado.
-                        </p>
-                        <a href="@Url.Page("/Atividades/Create")" class="btn btn-primary">
-                            <i class="fas fa-plus me-1"></i>
-                            Criar Nova Atividade
-                        </a>
-                    </div>
-                }
-            </div>
-        </div>
-    </div>
-
-    <!-- Legend -->
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body">
-                    <h6 class="card-title">
-                        <i class="fas fa-info-circle me-1"></i>
-                        Legenda
-                    </h6>
-                    <div class="legend-items d-flex flex-wrap gap-3">
-                        @foreach (var status in Model.StatusAtividades)
-                        {
-                            <div class="legend-item d-flex align-items-center">
-                                <div class="legend-color"
-                                     style="background-color: @status.Cor; 
-                                             color: @GetContrastColor(status.Cor);
-                                            border: 1px solid @GetBorderColor(@status.Cor);
-                                        width: 16px; height: 16px; border-radius: 2px;"></div>
-                                <span class="ms-2">@status.Nome</span>
-                            </div>
-                        }
                     </div>
                 </div>
             </div>
@@ -564,208 +661,150 @@
 <div class="modal fade" id="customPeriodModal" tabindex="-1" aria-labelledby="customPeriodModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form method="post" asp-page-handler="CustomPeriod" id="customPeriodForm">
+            <form method="post" asp-page-handler="PeriodoCustomizado">
                 <div class="modal-header">
                     <h5 class="modal-title" id="customPeriodModalLabel">
-                        <i class="fas fa-calendar-alt me-2"></i>Período Customizado
+                        <i class="fas fa-calendar-alt me-2"></i>
+                        Período Customizado
                     </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <label for="dataInicio" class="form-label">Data Início</label>
-                            <input type="date" class="form-control" id="dataInicio" name="dataInicio"
-                                   value="@DateTime.Today.ToString("yyyy-MM-dd")" required>
-                            <div class="invalid-feedback" id="dataInicioError"></div>
+                            <label for="dataInicio" class="form-label">Data Inicial</label>
+                            <input type="date" class="form-control" id="dataInicio" name="dataInicio" required
+                                   value="@Model.PeriodoInicio.ToString("yyyy-MM-dd")">
                         </div>
                         <div class="col-md-6">
-                            <label for="dataFim" class="form-label">Data Fim</label>
-                            <input type="date" class="form-control" id="dataFim" name="dataFim"
-                                   value="@DateTime.Today.AddDays(7).ToString("yyyy-MM-dd")" required>
-                            <div class="invalid-feedback" id="dataFimError"></div>
+                            <label for="dataFim" class="form-label">Data Final</label>
+                            <input type="date" class="form-control" id="dataFim" name="dataFim" required
+                                   value="@Model.PeriodoFim.ToString("yyyy-MM-dd")">
                         </div>
                     </div>
+                    <input type="hidden" name="equipeId" value="@Model.EquipeId" />
                     <div class="mt-3">
                         <small class="text-muted">
                             <i class="fas fa-info-circle me-1"></i>
-                            Máximo de 30 dias permitido
+                            Período máximo de 30 dias
                         </small>
-                    </div>
-                    <div class="alert alert-danger mt-2 d-none" id="periodError">
-                        <i class="fas fa-exclamation-triangle me-1"></i>
-                        <span id="periodErrorMessage"></span>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <input type="hidden" name="EquipeId" value="@Model.EquipeId" />
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>
                         Cancelar
                     </button>
-                    <button type="submit" class="btn btn-primary" id="applyPeriodBtn">
-                        <i class="fas fa-check me-1"></i>Aplicar
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-check me-1"></i>
+                        Aplicar
                     </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
-@* JavaScript específico da página *@
+
 @section Scripts {
-    <script src="~/js/services/DropdownService.js" asp-append-version="true"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-             const modal = document.getElementById('customPeriodModal');
             // Inicializa tooltips
             var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
             var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl);
+                return new bootstrap.Tooltip(tooltipTriggerEl, {
+                    html: true,
+                    sanitize: false
+                });
             });
 
-            // Configura dropdown de período
-            setupPeriodDropdown();
+            // Correção FORÇADA do posicionamento do dropdown
+            const dropdownButton = document.getElementById('dropdownPeriodo');
+            const dropdownMenu = document.querySelector('.dropdown-menu-custom');
+            
+            if (dropdownButton && dropdownMenu) {
+                // Remove configurações automáticas do Bootstrap que podem interferir
+                dropdownMenu.removeAttribute('data-bs-popper');
+                dropdownMenu.style.position = 'absolute';
+                dropdownMenu.style.inset = 'auto';
+                dropdownMenu.style.margin = '0';
+                dropdownMenu.style.transform = 'none';
+                
+                // Força posicionamento correto no click
+                dropdownButton.addEventListener('shown.bs.dropdown', function() {
+                    const rect = dropdownButton.getBoundingClientRect();
+                    const container = dropdownButton.closest('.dropdown');
+                    
+                    dropdownMenu.style.position = 'absolute';
+                    dropdownMenu.style.top = '100%';
+                    dropdownMenu.style.left = '0';
+                    dropdownMenu.style.right = 'auto';
+                    dropdownMenu.style.bottom = 'auto';
+                    dropdownMenu.style.transform = 'none';
+                    dropdownMenu.style.margin = '2px 0 0 0';
+                });
 
-            // Auto-refresh (opcional)
-            @if (Model.AutoRefresh)
-            {
-                    <text>
-                    setInterval(function() {
-                        location.reload();
-                    }, @Model.AutoRefreshInterval);
-                    </text>
-            }
-
-             // Função para mostrar erro
-            function showError(message) {
-                periodErrorMessage.textContent = message;
-                periodError.classList.remove('d-none');
-                applyBtn.disabled = false;
-                applyBtn.innerHTML = '<i class="fas fa-check me-1"></i>Aplicar';
-            }
-            // Função para esconder erro
-            function hideError() {
-                periodError.classList.add('d-none');
-            }
-
-            // Validação em tempo real
-            function validatePeriod() {
-                hideError();
-
-                if (!dataInicio.value || !dataFim.value) {
-                    return false;
-                }
-
-                const inicio = new Date(dataInicio.value);
-                const fim = new Date(dataFim.value);
-
-                if (inicio > fim) {
-                    showError('Data inicial não pode ser maior que data final.');
-                    dataInicio.classList.add('is-invalid');
-                    dataFim.classList.add('is-invalid');
-                    return false;
-                }
-
-                const diffTime = Math.abs(fim - inicio);
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-
-                if (diffDays > 30) {
-                    showError('Período não pode ser maior que 30 dias.');
-                    dataInicio.classList.add('is-invalid');
-                    dataFim.classList.add('is-invalid');
-                    return false;
-                }
-
-                // Remove classes de erro se validação passou
-                dataInicio.classList.remove('is-invalid');
-                dataFim.classList.remove('is-invalid');
-                return true;
-            }
-            // Eventos de validação
-            dataInicio.addEventListener('change', validatePeriod);
-            dataFim.addEventListener('change', validatePeriod);
-
-            // Configuração inicial quando modal abre
-            modal.addEventListener('show.bs.modal', function() {
-                hideError();
-                dataInicio.classList.remove('is-invalid');
-                dataFim.classList.remove('is-invalid');
-                applyBtn.disabled = false;
-                applyBtn.innerHTML = '<i class="fas fa-check me-1"></i>Aplicar';
-
-                // Define valores padrão se estiverem vazios
-                if (!dataInicio.value) {
-                    dataInicio.value = new Date().toISOString().split('T')[0];
-                }
-                if (!dataFim.value) {
-                    const nextWeek = new Date();
-                    nextWeek.setDate(nextWeek.getDate() + 7);
-                    dataFim.value = nextWeek.toISOString().split('T')[0];
-                }
-            });
-
-            // Validação no submit
-            form.addEventListener('submit', function(e) {
-                if (!validatePeriod()) {
-                    e.preventDefault();
-                    return false;
-                }
-
-                // Mostra loading
-                applyBtn.disabled = true;
-                applyBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processando...';
-
-                return true;
-            });
-        });
-
-        function setupPeriodDropdown() {
-            // Registra o dropdown no serviço
-            const dropdown = window.ProGestao.DropdownService.register(
-                'period-dropdown',
-                document.querySelector('[data-dropdown-id="period-dropdown"]'),
-                {
-                    debug: @Json.Serialize(Model.IsDebugMode)
-                }
-            );
-
-            // Observer para mudanças de período
-            window.ProGestao.DropdownService.addObserver(function(event, data) {
-                if (event === 'itemClick' && data.id === 'period-dropdown') {
-                    handlePeriodChange(data.item);
-                }
-            });
-        }
-
-        function handlePeriodChange(item) {
-            const periodValue = item.getAttribute('data-period-value');
-            const periodLabel = item.getAttribute('data-period-label');
-
-            if (periodValue) {
-                // Atualiza o label do botão
-                document.getElementById('period-label').textContent = periodLabel;
-
-                // Redireciona com o novo período
-                const url = new URL(window.location);
-                url.searchParams.set('periodo', periodValue);
-                window.location.href = url.toString();
-            }
-        }
-
-        // Função auxiliar para debug
-        @if (Model.IsDebugMode)
-        {
-                <text>
-                window.debugGrid = {
-                    toggleDropdownDebug: function() {
-                        document.body.classList.toggle('debug-zindex');
-                    },
-                    getDropdownInfo: function() {
-                        return window.ProGestao.DropdownService.dropdowns.get('period-dropdown');
+                // Reposiciona no resize
+                window.addEventListener('resize', function() {
+                    if (dropdownMenu.classList.contains('show')) {
+                        dropdownMenu.style.position = 'absolute';
+                        dropdownMenu.style.top = '100%';
+                        dropdownMenu.style.left = '0';
+                        dropdownMenu.style.transform = 'none';
                     }
-                };
-                console.log('Grid Debug mode enabled. Use window.debugGrid for debugging.');
-                </text>
-        }
+                });
+            }
+
+            // Validação do modal de período customizado
+            const form = document.querySelector('#customPeriodModal form');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    const dataInicio = new Date(document.getElementById('dataInicio').value);
+                    const dataFim = new Date(document.getElementById('dataFim').value);
+                    
+                    if (dataInicio > dataFim) {
+                        e.preventDefault();
+                        alert('Data inicial não pode ser maior que data final.');
+                        return;
+                    }
+                    
+                    const diffTime = Math.abs(dataFim - dataInicio);
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    
+                    if (diffDays > 30) {
+                        e.preventDefault();
+                        alert('Período não pode ser maior que 30 dias.');
+                        return;
+                    }
+                });
+            }
+
+            // Auto-scroll para hoje se existir
+            const todayColumn = document.querySelector('.today');
+            if (todayColumn) {
+                todayColumn.scrollIntoView({ behavior: 'smooth', inline: 'center' });
+            }
+
+            // Debug para desenvolvimento
+            if (window.console && '@(Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"))' === 'Development') {
+                console.log('=== GRID CONSOLIDADO DEBUG ===');
+                console.log('Usuários:', @(Model.UsuariosGrid?.Count ?? 0));
+                console.log('Atividades totais:', @Model.TotalAtividades);
+                console.log('Dias:', @(Model.DiasSemana?.Count ?? 0));
+                console.log('Período:', '@Model.Periodo');
+                
+                // Verificar atividades por usuário
+                @if (Model.UsuariosGrid != null)
+                {
+                    @foreach (var usuario in Model.UsuariosGrid)
+                    {
+                        <text>
+                        console.log('📊 @usuario.Nome: @usuario.TotalAtividades atividades');
+                        </text>
+                    }
+                }
+                console.log('================================');
+            }
+        });
     </script>
 }
 
@@ -774,89 +813,15 @@
     {
         var classes = new List<string> { "activity-item" };
 
-        if (atividade.Prioridade >= 3)
+        if (atividade?.Prioridade >= 3)
             classes.Add("high-priority");
 
-        if (atividade.EstaAtrasada)
+        if (atividade?.EstaAtrasada == true)
             classes.Add("overdue");
 
-        if (!string.IsNullOrEmpty(atividade.ProjetoNome))
+        if (!string.IsNullOrEmpty(atividade?.ProjetoNome))
             classes.Add("has-project");
 
         return string.Join(" ", classes);
     }
-
-    /// <summary>
-    /// Configuração do Conteúdo do tooltip
-    /// </summary>
-    private string GetTooltipContent(AtividadeGridViewModel atividade)
-    {
-        var tooltip = $"🔍 Clique para ver detalhes | {atividade.Nome}";
-
-        if (!string.IsNullOrEmpty(atividade.ProjetoNome))
-            tooltip += $" | Projeto: {atividade.ProjetoNome}";
-
-        if (!string.IsNullOrEmpty(atividade.Descricao))
-            tooltip += $" | {atividade.Descricao}";
-
-        tooltip += $" | Status: {atividade.StatusNome}";
-        tooltip += $" | Prioridade: {atividade.PrioridadeTexto}";
-
-        if (atividade.DataFimPrevista.HasValue)
-            tooltip += $" | Previsão: {atividade.DataFimPrevista:dd/MM/yyyy}";
-
-        return tooltip;
-    }
-
-    /// <summary>
-    /// Calcula cor do texto baseada no fundo
-    /// Garante legibilidade automática
-    /// </summary>
-    private string GetContrastColor(string backgroundColor)
-    {
-        if (string.IsNullOrEmpty(backgroundColor))
-            return "white";
-
-        // Remove # se existir
-        var hex = backgroundColor.Replace("#", "");
-
-        // Se não for hex válido, retorna branco
-        if (hex.Length != 6)
-            return "white";
-
-        try
-        {
-            // Converte para RGB
-            var r = Convert.ToInt32(hex.Substring(0, 2), 16);
-            var g = Convert.ToInt32(hex.Substring(2, 2), 16);
-            var b = Convert.ToInt32(hex.Substring(4, 2), 16);
-
-            // Calcula luminância
-            var luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-
-            // Retorna branco para cores escuras, preto para cores claras
-            return luminance > 0.5 ? "black" : "white";
-        }
-        catch
-        {
-            return "white"; // Fallback seguro
-        }
-    }
-
-    /// <summary>
-    ///  Calcula cor da borda baseada no fundo
-    /// Cria borda sutil mais escura
-    /// </summary>
-    private string GetBorderColor(string backgroundColor)
-    {
-        if (string.IsNullOrEmpty(backgroundColor))
-            return "rgba(255,255,255,0.2)";
-
-        // Para cores escuras, borda branca sutil
-        // Para cores claras, borda escura sutil
-        var textColor = GetContrastColor(backgroundColor);
-        return textColor == "white" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.2)";
-    }
-
-
 }

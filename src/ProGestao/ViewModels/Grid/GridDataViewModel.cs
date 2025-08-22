@@ -10,5 +10,12 @@ namespace ProGestao.ViewModels.Grid
     {
         public List<UsuarioGridViewModel> Usuarios { get; set; } = new();
         public List<DiaGridViewModel> Dias { get; set; } = new();
+
+        public GridMetricsViewModel? Metricas { get; set; }
+
+        public int TotalUsuarios => Usuarios.Count;
+        public int TotalDias => Dias.Count;
+        public DateTime? PrimeiroDia => Dias.FirstOrDefault()?.Data;
+        public DateTime? UltimoDia => Dias.LastOrDefault()?.Data;
     }
 }

@@ -39,6 +39,13 @@ namespace ProGestao.ViewModels
         public string? Descricao { get; set; }
 
         /// <summary>
+        /// Controle do período Ativo (ex: true, false)
+        /// </summary>
+        [Display(Name = "Ativo")]
+        public bool Ativo { get; set; }
+
+
+        /// <summary>
         /// Indica se este período está atualmente selecionado
         /// Propriedade calculada, não persistida
         /// </summary>

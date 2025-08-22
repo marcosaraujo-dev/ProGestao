@@ -11,14 +11,9 @@
         public int DiaNumero { get; set; }
         public string Mes { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Verifica se é fim de semana
-        /// </summary>
-        public bool IsFimDeSemana => Data.DayOfWeek == DayOfWeek.Saturday || Data.DayOfWeek == DayOfWeek.Sunday;
-
-        /// <summary>
-        /// Verifica se é hoje
-        /// </summary>
-        public bool IsHoje => Data.Date == DateTime.Today;
+        public bool EhHoje => Data.Date == DateTime.Today;
+        public bool EhFimDeSemana => Data.DayOfWeek == DayOfWeek.Saturday || Data.DayOfWeek == DayOfWeek.Sunday;
+        public string DiaAbreviado => DiaSemana.Length > 3 ? DiaSemana.Substring(0, 3) : DiaSemana;
+        public string CssClass => $"day-column {(EhHoje ? "today" : "")} {(EhFimDeSemana ? "weekend" : "")}".Trim();
     }
 }
