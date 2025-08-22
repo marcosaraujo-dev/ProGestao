@@ -152,8 +152,9 @@
    4. USER COLUMN STYLING
    ============================================================= */
 .user-column {
-	min-width: 200px;
-	max-width: 250px;
+	width: 200px !important;
+	min-width: 180px !important;
+	max-width: 220px !important;
 	position: sticky;
 	left: 0;
 	z-index: var(--z-sticky, 1020);
@@ -213,8 +214,8 @@
    5. DAY COLUMNS STYLING
    ============================================================= */
 .day-column {
-	min-width: 120px;
-	width: 120px;
+	width: 120px !important;
+	min-width: 100px !important;
 	text-align: center;
 }
 
@@ -252,79 +253,67 @@
 	border-right: 1px solid #e9ecef;
 	border-bottom: 1px solid #e9ecef;
 	min-height: 80px;
+	max-width: 100px;
 	background: #fafafa;
 	position: relative;
 }
 
-/*
 .activities-container {
-	display: flex;
-	flex-direction: column;
-	gap: 0.375rem;
-	min-height: 60px;
+	min-height: 40px !important;
+	padding: 4px !important;
+	max-height: 300px !important;
+	overflow-y: auto !important;
 }
-*/
 
-.activities-container {
-            min-height: 40px;
-            padding: 4px;
-            max-height: 300px; /* Controla altura máxima da coluna */
-            overflow-y: auto; /* Scroll se necessário */
-        }
 .activity-cell {
-	vertical-align: top;
-	padding: 8px;
-	background: #fafbfc;
-	border-right: 1px solid #e9ecef;
-	border-bottom: 1px solid #e9ecef;
+	vertical-align: top !important;
+	padding: 8px !important;
+	background: #fafbfc !important;
+	border-right: 1px solid #e9ecef !important;
+	border-bottom: 1px solid #e9ecef !important;
 }
+
 .activity-item {
-	background: #fff;
-	border-radius: 6px;
-	padding: 0.5rem;
-	border-left: 4px solid #28a745;
-	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-	transition: all 0.2s ease;
-	cursor: pointer;
-	position: relative;
-	overflow: hidden;
-	max-height: 75px !important; /* Aumentado de 55px para 75px */
-	min-height: 55px !important; /* Aumentado de 40px para 55px */
-	width: 95% !important; /* Largura reduzida para 95% */
-	margin-left: auto !important;
-	margin-right: auto !important;
+	background: #fff !important;
+	border: 1px solid #e9ecef !important;
+	border-radius: 6px !important;
+	padding: 8px 10px !important;
+	margin: 4px auto !important;
+	box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+	max-height: 105px !important;
+	min-height: 65px !important;
+	width: 85% !important; 
+	overflow: hidden !important;
+	position: relative !important;
 }
 
 	.activity-item:hover {
-		transform: translateY(-1px);
-		box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
-		z-index: calc(var(--z-grid) + 1);
+		box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+		transform: translateY(-2px) !important;
+		z-index: 1020 !important;
 	}
 
 .activity-content {
-	display: flex;
-	flex-direction: column;
-	gap: 0.25rem;
-	max-height: 70px !important;
-	overflow: hidden;
+	max-height: 95px !important;
+	overflow: hidden !important;
+	padding: 0 !important;
+	width: 100% !important;
 }
 
 .activity-title {
-	font-weight: 600;
-	font-size: 0.85rem;
-	line-height: 1.3;
-	color: #1e293b;
-	margin-bottom: 4px;
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	display: -webkit-box;
-	-webkit-line-clamp: 2; /* Máximo 2 linhas */
-	-webkit-box-orient: vertical;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	max-height: 2.6em; /* 2 linhas * line-height */
+	font-size: 0.85rem !important;
+	line-height: 1.3 !important;
+	font-weight: 600 !important;
+	color: #1e293b !important;
+	margin-bottom: 4px !important;
+	display: -webkit-box !important;
+	-webkit-line-clamp: 2 !important;
+	-webkit-box-orient: vertical !important;
+	overflow: hidden !important;
+	text-overflow: ellipsis !important;
+	max-height: 2.6em !important;
 }
+
 	.activity-title span {
 		display: blockactivity-item white-space: nowrap;
 		overflow: hidden;
@@ -332,35 +321,34 @@
 		max-width: 100px; /* Controle específico da largura */
 	}
 .activity-meta {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: 0.25rem;
-	margin: 2px 0;
+	margin: 3px 0 !important;
+	overflow: hidden !important;
 }
 
 .activity-status {
-	display: inline-block;
-	padding: 3px 8px;
-	border-radius: 4px;
-	font-size: 0.7rem;
-	font-weight: 600;
-	color: white;
-	text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-	letter-spacing: 0.3px;
-	text-transform: uppercase;
+	display: inline-block !important;
+	padding: 3px 8px !important;
+	border-radius: 4px !important;
+	font-size: 0.7rem !important;
+	font-weight: 600 !important;
+	color: white !important;
+	margin-bottom: 3px !important;
+	white-space: nowrap !important;
 }
 
 .activity-project {
-	margin-top: 4px;
-	font-size: 0.75rem;
-	color: #64748b;
-	font-style: italic;
-	/* Controle de texto longo */
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	max-width: 100%;
+	font-size: 0.75rem !important;
+	color: #64748b !important;
+	font-style: italic !important;
+	margin-top: 4px !important;
+	display: block !important; 
+	visibility: visible !important;
+	opacity: 1 !important; 
+	white-space: nowrap !important;
+	overflow: hidden !important;
+	text-overflow: ellipsis !important;
+	max-width: 100% !important;
+	line-height: 1.2 !important;
 }
 
 .project-indicator {
@@ -602,23 +590,35 @@
 	}
 
 	.activity-item {
-		max-height: 60px !important; 
-		min-height: 45px !important; 
-		width: 98% !important; 
+		max-height: 70px !important;
+		min-height: 50px !important;
+		padding: 6px 8px !important;
+		width: 98% !important;
 	}
 
 	.activity-title {
-		font-size: 0.6875rem;
+		font-size: 0.8rem !important;
 		-webkit-line-clamp: 1;
 	}
 	
 	.activity-content {
-		max-height: 55px !important; /* Ajustado para mobile */
+		max-height: 60px !important; 
 	}
 
 	.activity-status {
 		font-size: 0.5625rem;
 		padding: 0.0625rem 0.25rem;
+	}
+
+	.activity-project {
+		font-size: 0.7rem !important;
+		display: none !important;
+	}
+
+	.activity-title {
+		font-size: 0.8rem !important;
+		-webkit-line-clamp: 1 !important;
+		max-height: 1.3em !important;
 	}
 
 	.grid-controls {
@@ -636,6 +636,16 @@
 
 	tbody tr {
 		min-height: 90px !important; /* Aumentado de 35px para 70px */
+	}
+
+	.user-column {
+		width: 150px !important;
+		min-width: 130px !important;
+	}
+
+	.day-column {
+		width: 100px !important;
+		min-width: 90px !important;
 	}
 }
 

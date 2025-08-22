@@ -10,343 +10,7 @@
     <link rel="stylesheet" href="~/css/components/dropdown-fix.css" asp-append-version="true">
     <link rel="stylesheet" href="~/css/pages/grid.css" asp-append-version="true">
     
-    <style>
-        /* ===== LAYOUT PRINCIPAL ===== */
-        .user-column {
-            width: 200px !important;
-            min-width: 180px !important;
-            max-width: 220px !important;
-            position: sticky;
-            left: 0;
-            background: inherit;
-            z-index: 1015;
-        }
-
-        .day-column {
-            width: 140px !important;
-            min-width: 120px !important;
-        }
-
-        /* ===== CARDS DAS ATIVIDADES - ULTRA COMPACTO ===== */
-        .activity-item {
-            background: #fff;
-            border: 1px solid #e9ecef;
-            border-radius: 4px !important;
-            padding: 3px 5px !important;
-            margin-bottom: 2px !important;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.1) !important;
-            transition: all 0.2s ease;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-            max-height: 55px !important;
-            min-height: 40px !important;
-        }
-
-        .activity-item:hover {
-            box-shadow: 0 2px 6px rgba(0,0,0,0.15) !important;
-            transform: translateY(-1px);
-            z-index: 1020;
-        }
-
-        .activity-title {
-            font-weight: 600;
-            font-size: 0.7rem !important;
-            line-height: 1 !important;
-            color: #1e293b;
-            margin-bottom: 1px !important;
-            display: -webkit-box;
-            -webkit-line-clamp: 1 !important;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-height: 1em !important;
-            white-space: nowrap;
-        }
-
-        .activity-status {
-            display: inline-block;
-            padding: 1px 3px !important;
-            border-radius: 2px !important;
-            font-size: 0.55rem !important;
-            font-weight: 600;
-            color: white;
-            text-shadow: none;
-            letter-spacing: 0.1px;
-            text-transform: uppercase;
-            margin-bottom: 1px !important;
-        }
-
-        .activity-project {
-            margin-top: 1px !important;
-            font-size: 0.6rem !important;
-            color: #64748b;
-            font-style: italic;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 100%;
-            line-height: 1 !important;
-            /* Limita o texto a um tamanho máximo */
-            max-height: 0.8em !important;
-        }
-
-        .activity-preview {
-            margin-top: 1px !important;
-            font-size: 0.55rem !important;
-            color: #94a3b8;
-            border-top: 1px solid #f1f5f9;
-            padding-top: 1px !important;
-            line-height: 1 !important;
-        }
-
-        .activity-meta {
-            margin: 0 !important;
-        }
-
-        .activity-content {
-            max-height: 50px !important;
-            overflow: hidden;
-            padding: 0 !important;
-        }
-
-        /* Esconde informações extras se o card ficar muito cheio */
-        .activity-item .activity-preview {
-            display: none !important;
-        }
-
-        /* ===== LINKS E FOCUS ===== */
-        .activity-link {
-            text-decoration: none;
-            color: inherit;
-            display: block;
-        }
-
-        .activity-link:hover {
-            text-decoration: none;
-            color: inherit;
-        }
-
-        .activity-link:focus {
-            outline: 2px solid #2563eb;
-            outline-offset: 2px;
-            border-radius: 6px;
-        }
-
-        .activity-link:focus .activity-item {
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-            border-color: #2563eb;
-        }
-
-        /* ===== CONTAINERS - ULTRA COMPACTO ===== */
-        .activities-container {
-            min-height: 25px !important;
-            padding: 1px !important;
-            max-height: 200px !important;
-            overflow-y: auto;
-        }
-
-        .activity-cell {
-            vertical-align: top;
-            padding: 3px !important;
-            background: #fafbfc;
-            border-right: 1px solid #e9ecef;
-            border-bottom: 1px solid #e9ecef;
-            max-height: 220px !important;
-            overflow: hidden;
-        }
-
-        /* ===== FORÇA ALTURA MÍNIMA DA LINHA ===== */
-        tbody tr {
-            height: auto !important;
-            min-height: 60px !important;
-        }
-
-        tbody td {
-            vertical-align: top !important;
-            padding: 3px !important;
-        }
-
-        .empty-day {
-            color: #9ca3af;
-            font-style: italic;
-            font-size: 0.8rem;
-            text-align: center;
-            padding: 20px 10px;
-        }
-
-        /* ===== ESTADOS ESPECIAIS ===== */
-        .today {
-            background-color: #eff6ff !important;
-        }
-
-        .weekend {
-            background-color: #f9fafb !important;
-        }
-
-        /* ===== DROPDOWN CORRIGIDO - POSICIONAMENTO FORÇADO ===== */
-        .dropdown {
-            position: relative !important;
-        }
-
-        .dropdown-menu-custom {
-            position: absolute !important;
-            top: calc(100% + 2px) !important;
-            left: 0 !important;
-            right: auto !important;
-            margin: 0 !important;
-            z-index: 1055 !important;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
-            border: 1px solid #e9ecef !important;
-            border-radius: 8px !important;
-            transform: none !important;
-            will-change: auto !important;
-        }
-
-        .dropdown-menu-custom.show {
-            position: absolute !important;
-            top: calc(100% + 2px) !important;
-            left: 0 !important;
-            transform: none !important;
-            inset: auto !important;
-        }
-
-        /* Força o dropdown a ficar próximo */
-        .dropdown-toggle::after {
-            margin-left: 0.5rem;
-        }
-
-        #dropdownPeriodo {
-            position: relative !important;
-        }
-
-        /* Override do Bootstrap */
-        .dropdown-menu[data-bs-popper] {
-            top: calc(100% + 2px) !important;
-            left: 0 !important;
-            margin-top: 0 !important;
-            transform: none !important;
-        }
-
-        .period-controls {
-            align-items: center !important;
-            gap: 15px !important;
-        }
-
-        .period-controls .dropdown {
-            position: relative;
-        }
-
-        /* ===== SCROLL PERSONALIZADO ===== */
-        .activities-container::-webkit-scrollbar {
-            width: 4px;
-        }
-
-        .activities-container::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 2px;
-        }
-
-        .activities-container::-webkit-scrollbar-thumb {
-            background: #c1c1c1;
-            border-radius: 2px;
-        }
-
-        .activities-container::-webkit-scrollbar-thumb:hover {
-            background: #a8a8a8;
-        }
-
-        /* ===== RESPONSIVIDADE - EXTRA COMPACTO ===== */
-        @@media (max-width: 768px) {
-            .user-column {
-                width: 150px !important;
-                min-width: 130px !important;
-            }
-            
-            .day-column {
-                width: 100px !important;
-                min-width: 90px !important;
-            }
-            
-            .activity-item {
-                max-height: 60px !important; 
-                min-height: 45px !important;
-                width: 98% !important; 
-                margin-left: auto !important;
-                margin-right: auto !important;
-            }
-            
-            .activity-title {
-                font-size: 0.65rem !important;
-                -webkit-line-clamp: 1 !important;
-                max-height: 0.8em !important;
-                margin-bottom: 0 !important;
-                line-height: 1 !important;
-            }
-            
-            .activity-status {
-                padding: 0px 2px !important;
-                font-size: 0.5rem !important;
-                margin-bottom: 0 !important;
-            }
-            
-            .activity-project {
-                display: none !important;
-            }
-            
-            .activity-preview {
-                display: none !important;
-            }
-            
-            .activities-container {
-                padding: 0px !important;
-                max-height: 120px !important;
-                min-height: 15px !important;
-            }
-            
-            .activity-cell {
-                padding: 1px !important;
-            }
-            
-            .activity-content {
-                max-height: 85px !important;
-            }
-
-            tbody tr {
-                min-height: 35px !important;
-            }
-            
-            .period-controls {
-                flex-direction: column !important;
-                align-items: stretch !important;
-                gap: 10px !important;
-            }
-            
-            .period-controls .dropdown button,
-            .period-controls .form-select {
-                width: 100% !important;
-                min-width: auto !important;
-            }
-
-            .dropdown-menu-custom {
-                position: fixed !important;
-                top: auto !important;
-                left: 10px !important;
-                right: 10px !important;
-                width: auto !important;
-                max-width: none !important;
-                bottom: 20px !important;
-            }
-        }
-        @@media (max-width: 768px) {
-            tbody tr
-
-        {
-            min-height: 70px !important; /* Aumentado de 35px para 70px */
-        }
-
-        }
-    </style>
+    
 }
 
 <div class="container-fluid">
@@ -722,6 +386,12 @@
             const dropdownMenu = document.querySelector('.dropdown-menu-custom');
             
             if (dropdownButton && dropdownMenu) {
+                 const dropdown = new bootstrap.Dropdown(dropdownButton, {
+                    autoClose: true,
+                    boundary: 'viewport',
+                    offset: [0, 2],
+                    placement: 'bottom-start'
+                });
                 // Remove configurações automáticas do Bootstrap que podem interferir
                 dropdownMenu.removeAttribute('data-bs-popper');
                 dropdownMenu.style.position = 'absolute';
@@ -729,29 +399,32 @@
                 dropdownMenu.style.margin = '0';
                 dropdownMenu.style.transform = 'none';
                 
-                // Força posicionamento correto no click
+                // Força posicionamento correto
                 dropdownButton.addEventListener('shown.bs.dropdown', function() {
-                    const rect = dropdownButton.getBoundingClientRect();
-                    const container = dropdownButton.closest('.dropdown');
-                    
-                    dropdownMenu.style.position = 'absolute';
-                    dropdownMenu.style.top = '100%';
-                    dropdownMenu.style.left = '0';
-                    dropdownMenu.style.right = 'auto';
-                    dropdownMenu.style.bottom = 'auto';
-                    dropdownMenu.style.transform = 'none';
-                    dropdownMenu.style.margin = '2px 0 0 0';
-                });
-
-                // Reposiciona no resize
-                window.addEventListener('resize', function() {
-                    if (dropdownMenu.classList.contains('show')) {
+                    setTimeout(() => {
                         dropdownMenu.style.position = 'absolute';
-                        dropdownMenu.style.top = '100%';
+                        dropdownMenu.style.top = 'calc(100% + 2px)';
                         dropdownMenu.style.left = '0';
                         dropdownMenu.style.transform = 'none';
-                    }
+                        dropdownMenu.style.margin = '0';
+                        dropdownMenu.style.inset = 'auto';
+                    }, 1);
                 });
+                
+                // Observer para detectar mudanças
+                const observer = new MutationObserver(function(mutations) {
+                    mutations.forEach(function(mutation) {
+                        if (mutation.attributeName === 'style' && dropdownMenu.classList.contains('show')) {
+                            dropdownMenu.style.transform = 'none';
+                            dropdownMenu.style.top = 'calc(100% + 2px)';
+                            dropdownMenu.style.left = '0';
+                        }
+                    });
+                });
+                
+                observer.observe(dropdownMenu, { attributes: true, attributeFilter: ['style'] });
+
+
             }
 
             // Validação do modal de período customizado
