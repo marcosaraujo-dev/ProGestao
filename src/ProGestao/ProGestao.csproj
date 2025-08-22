@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="wwwroot\css\pages\timeline.css" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.8" PrivateAssets="all" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.8">
@@ -28,6 +32,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="wwwroot\css\pages\timeline.css" />
     <None Include="wwwroot\css\pages\grid.css" />
   </ItemGroup>
 

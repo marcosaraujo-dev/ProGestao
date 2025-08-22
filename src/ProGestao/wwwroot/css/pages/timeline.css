@@ -1,0 +1,95 @@
+﻿/* =============================================================
+   PROGESTAO - GRID LAYOUT CSS
+   Arquivo: wwwroot/css/pages/grid.css
+   Versão: 1.0
+   Descrição: Estilos específicos para o Grid Semanal
+   ============================================================= */
+
+/* =============================================================
+   1. CARDS TIMELINE LAYOUT
+   ============================================================= */
+
+.timeline-item {
+	margin-bottom: 1rem !important; /* Reduzido de 2rem */
+}
+
+.timeline-date {
+	margin-bottom: 1rem !important; /* Reduzido de 2rem */
+}
+
+/* Cards menores */
+.timeline-content {
+	padding: 0.75rem !important; /* Reduzido de 1rem */
+	border-radius: 6px !important;
+}
+
+	/* Header mais compacto */
+	.timeline-content .d-flex.justify-content-between {
+		margin-bottom: 0.5rem !important; /* Reduzido */
+	}
+
+	.timeline-content h6 {
+		font-size: 0.95rem !important;
+		margin-bottom: 0.25rem !important;
+		line-height: 1.3 !important;
+	}
+
+	.timeline-content small {
+		font-size: 0.8rem !important;
+	}
+
+/* Detalhes mais compactos */
+.timeline-details {
+	padding-top: 0.5rem !important;
+	margin-top: 0.5rem !important;
+	font-size: 0.8rem !important;
+}
+
+	.timeline-details .row {
+		margin: 0 !important;
+	}
+
+	.timeline-details .col-md-6 {
+		padding: 0 0.25rem !important;
+		margin-bottom: 0.25rem !important;
+	}
+
+/* Badges menores */
+.timeline-content .badge {
+	font-size: 0.7rem !important;
+	padding: 0.2rem 0.5rem !important;
+}
+
+/* Marcadores menores */
+.timeline-marker {
+	width: 18px !important;
+	height: 18px !important;
+	font-size: 9px !important;
+	top: 3px !important;
+	left: 11px !important;
+}
+
+/* Linha da timeline mais próxima */
+.timeline::before {
+	left: 20px !important;
+}
+
+.timeline-item, .timeline-date {
+	padding-left: 50px !important;
+}
+
+/* Responsivo - mobile ainda mais compacto */
+@media (max-width: 768px) {
+	.timeline-content {
+		padding: 0.5rem !important;
+	}
+
+	.timeline-item {
+		margin-bottom: 0.75rem !important;
+	}
+
+	.timeline-details .col-md-6 {
+		flex: 1 1 100% !important;
+		max-width: 100% !important;
+	}
+}

@@ -500,6 +500,22 @@
                 console.log('================================');
             }
         });
+
+        window.addEventListener("load", function () {
+            // Força o scroll para o topo
+            window.scrollTo(0, 0);
+
+            // Remove autofocus que pode centralizar o campo
+            document.querySelectorAll('[autofocus]').forEach(el => {
+                el.removeAttribute('autofocus');
+                el.blur();
+            });
+
+            // Remove âncoras da URL
+            if (window.location.hash) {
+                history.replaceState(null, null, window.location.pathname + window.location.search);
+            }
+        });
     </script>
 }
 
