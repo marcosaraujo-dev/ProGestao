@@ -386,13 +386,8 @@
                 history.replaceState(null, null, window.location.pathname + window.location.search);
             }
 
-           // Foca nos controles do grid após carregamento
-            setTimeout(() => {
-                const gridControls = document.querySelector('.grid-controls');
-                if (gridControls) {
-                    gridControls.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-            }, 100);
+            // Mantém foco no topo da página
+            setTimeout(() => window.scrollTo(0, 0), 100);
 
             // Inicializa tooltips
             var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
@@ -473,11 +468,7 @@
                 });
             }
 
-            // Auto-scroll para hoje se existir
-            const todayColumn = document.querySelector('.today');
-            if (todayColumn) {
-                todayColumn.scrollIntoView({ behavior: 'smooth', inline: 'center' });
-            }
+            // Removido auto-scroll para coluna 'today' para manter foco no topo
 
             // Debug para desenvolvimento
             if (window.console && '@(Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"))' === 'Development') {
