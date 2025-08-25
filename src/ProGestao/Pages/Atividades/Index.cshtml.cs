@@ -103,6 +103,7 @@ namespace ProGestao.Pages.Atividades
                 HorasEstimadas = a.HorasEstimadas,
                 HorasReais = a.HorasReais,
                 Prioridade = a.Prioridade,
+                DataCriacao = a.DataCriacao,
                 Observacoes = a.Observacoes
             }).ToList();
         }

@@ -29,9 +29,10 @@ namespace ProGestao.Configuration
             services.AddScoped<IAtividadeQueryService, AtividadeQueryService>();
             services.AddScoped<IAtividadeCommandService, AtividadeCommandService>();
             services.AddScoped<IAtividadeValidationService, AtividadeValidationService>();
+           
 
             // ==============================
-            // PROJETO SERVICES (NOVOS)
+            // PROJETO SERVICES
             // ==============================
             services.AddScoped<IProjetoQueryService, ProjetoQueryService>();
             services.AddScoped<IProjetoCommandService, ProjetoCommandService>();
@@ -43,6 +44,7 @@ namespace ProGestao.Configuration
             // OUTROS SERVICES
             // ==============================
             services.AddScoped<ILookupService, LookupService>();
+            services.AddScoped<ITimelineService, TimelineService>();
 
             // Service Legacy (para compatibilidade durante transição)
             services.AddScoped<IAtividadeService, AtividadeServiceLegacy>();
@@ -69,7 +71,7 @@ namespace ProGestao.Configuration
             // Business Services
             services.AddBusinessServices();
 
-            // Existing Services (manter os existentes)
+            
             services.AddScoped<GridService>();
             services.AddScoped<IGridService, GridService>();
 

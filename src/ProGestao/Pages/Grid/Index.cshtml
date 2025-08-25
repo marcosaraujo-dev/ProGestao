@@ -252,8 +252,8 @@
                                                                                 <!-- Título - TEXTO TRUNCADO -->
                                                                                 <div class="activity-title" title="@atividade.Nome">
                                                                                     @{
-                                                                                        var tituloTruncado = atividade.Nome.Length > 25 
-                                                                                            ? atividade.Nome.Substring(0, 25) + "..." 
+                                                                                        var tituloTruncado = atividade.Nome.Length > 10 
+                                                                                            ? atividade.Nome.Substring(0, 10) + "..." 
                                                                                             : atividade.Nome;
                                                                                     }
                                                                                     @tituloTruncado

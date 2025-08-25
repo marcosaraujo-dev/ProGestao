@@ -3,43 +3,58 @@
 @{
     ViewData["Title"] = "Timeline de Atividades";
 }
-@section Styles {
-    <link rel="stylesheet" href="~/css/pages/timeline.css" asp-append-version="true">
-
-
-}
-
 
 <div class="header-blue">
     <div class="container">
         <h2 class="mb-0">
             <i class="fas fa-timeline me-2"></i>Timeline de Atividades
+            <small class="ms-3 opacity-75">
+                <i class="fas fa-info-circle" 
+                   data-bs-toggle="tooltip" 
+                   data-bs-placement="bottom" 
+                   title="Visualização cronológica de eventos das atividades do time"></i>
+            </small>
         </h2>
     </div>
 </div>
 
 <div class="container">
-    <!-- Filtros -->
+    <!-- Filtros Melhorados -->
     <div class="row mb-4">
         <div class="col-md-12">
             <div class="card">
                 <div class="card-header card-header-blue">
-                    <h5 class="mb-0">Filtros da Timeline</h5>
+                    <h5 class="mb-0">
+                        <i class="fas fa-filter me-2"></i>Filtros da Timeline
+                        <small class="ms-2 opacity-75">
+                            <i class="fas fa-question-circle" 
+                               data-bs-toggle="tooltip" 
+                               title="Use os filtros para personalizar a visualização da timeline"></i>
+                        </small>
+                    </h5>
                 </div>
                 <div class="card-body">
-                    <form method="get" class="row g-3">
+                    <form method="get" class="row g-3" id="timelineFilterForm">
                         <div class="col-md-3">
-                            <label class="form-label">Período</label>
-                            <select name="periodo" class="form-select">
+                            <label class="form-label">
+                                <i class="fas fa-calendar-days me-1"></i>Período
+                            </label>
+                            <select name="PeriodoDias" class="form-select" id="periodoSelect">
                                 <option value="7" selected="@(Model.PeriodoDias == 7)">Últimos 7 dias</option>
                                 <option value="15" selected="@(Model.PeriodoDias == 15)">Últimos 15 dias</option>
                                 <option value="30" selected="@(Model.PeriodoDias == 30)">Últimos 30 dias</option>
                                 <option value="60" selected="@(Model.PeriodoDias == 60)">Últimos 60 dias</option>
                             </select>
                         </div>
+                        
                         <div class="col-md-3">
-                            <label class="form-label">Usuários</label>
-                            <select name="usuarioIds" class="form-select" multiple>
+                            <label class="form-label">
+                                <i class="fas fa-users me-1"></i>Usuários
+                                <i class="fas fa-info-circle ms-1" 
+                                   data-bs-toggle="tooltip" 
+                                   title="Filtra eventos apenas dos usuários selecionados. Deixe vazio para mostrar todos."></i>
+                            </label>
+                            <select name="UsuarioIds" class="form-select" multiple size="3">
                                 @foreach (var usuario in Model.Usuarios)
                                 {
                                     <option value="@usuario.Id"
@@ -48,11 +63,19 @@
                                     </option>
                                 }
                             </select>
-                            <small class="text-muted">Ctrl+clique para múltipla seleção</small>
+                            <small class="text-muted">
+                                <i class="fas fa-mouse-pointer me-1"></i>Ctrl+clique para seleção múltipla
+                            </small>
                         </div>
+                        
                         <div class="col-md-3">
-                            <label class="form-label">Projetos</label>
-                            <select name="projetoIds" class="form-select" multiple>
+                            <label class="form-label">
+                                <i class="fas fa-project-diagram me-1"></i>Projetos
+                                <i class="fas fa-info-circle ms-1" 
+                                   data-bs-toggle="tooltip" 
+                                   title="Filtra eventos apenas dos projetos selecionados. Deixe vazio para mostrar todos."></i>
+                            </label>
+                            <select name="ProjetoIds" class="form-select" multiple size="3">
                                 @foreach (var projeto in Model.Projetos)
                                 {
                                     <option value="@projeto.Id"
@@ -61,14 +84,20 @@
                                     </option>
                                 }
                             </select>
+                            <small class="text-muted">
+                                <i class="fas fa-mouse-pointer me-1"></i>Ctrl+clique para seleção múltipla
+                            </small>
                         </div>
+                        
                         <div class="col-md-3 d-flex align-items-end">
-                            <button type="submit" class="btn btn-search me-2">
-                                <i class="fas fa-search me-1"></i>Filtrar
-                            </button>
-                            <a href="/Timeline" class="btn btn-outline-secondary">
-                                <i class="fas fa-times me-1"></i>Limpar
-                            </a>
+                            <div class="d-grid w-100 gap-2">
+                                <button type="submit" class="btn btn-search">
+                                    <i class="fas fa-search me-1"></i>Aplicar Filtros
+                                </button>
+                                <a href="/Timeline" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times me-1"></i>Limpar Todos
+                                </a>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -76,255 +105,477 @@
         </div>
     </div>
 
-    <!-- Timeline -->
-    
-    <!-- Controles de Visualização da Timeline -->
-<div class="row mb-3">
-    <div class="col-12">
-        <div class="d-flex justify-content-between align-items-center">
-            <h6 class="mb-0">
-                <i class="fas fa-clock me-2"></i>Timeline - @Model.AtividadesTimeline.Count() atividades encontradas
-            </h6>
-            
-            <!-- Toggle de Visualização -->
-            <div class="btn-group" role="group" aria-label="Opções de visualização">
-                <input type="radio" class="btn-check" name="viewMode" id="view-timeline" value="timeline" checked>
-                <label class="btn btn-outline-primary btn-sm" for="view-timeline" title="Timeline Vertical">
-                    <i class="fas fa-timeline"></i>
-                </label>
+    <!-- Informações da Timeline com Tipos de Visualização -->
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <div class="d-flex align-items-center">
+                <h6 class="mb-0 me-3">
+                    <i class="fas fa-clock me-2"></i>
+                    <strong>@Model.TotalEventos</strong> eventos encontrados
+                </h6>
+                @if (Model.AtividadesTimeline.Any())
+                {
+                    <small class="text-muted">
+                        de <strong>@Model.DataMaisAntiga.ToString("dd/MM/yyyy")</strong> 
+                        até <strong>@Model.DataMaisRecente.ToString("dd/MM/yyyy")</strong>
+                    </small>
+                }
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="d-flex justify-content-end align-items-center gap-2">
+                <!-- Tipos de Visualização -->
+                <div class="btn-group btn-group-sm me-2" role="group">
+                    <button type="button" class="btn btn-outline-primary active" data-view="timeline" title="Timeline Cronológica">
+                        <i class="fas fa-stream me-1"></i>Timeline
+                    </button>
+                    <button type="button" class="btn btn-outline-primary" data-view="cards" title="Visualização em Cards">
+                        <i class="fas fa-th-large me-1"></i>Cards
+                    </button>
+                    <button type="button" class="btn btn-outline-primary" data-view="list" title="Lista Compacta">
+                        <i class="fas fa-list me-1"></i>Lista
+                    </button>
+                </div>
 
-                <input type="radio" class="btn-check" name="viewMode" id="view-grid" value="grid">
-                <label class="btn btn-outline-primary btn-sm" for="view-grid" title="Grid Compacto">
-                    <i class="fas fa-th"></i>
-                </label>
+                <!-- Opções de Agrupamento -->
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-sort me-1"></i>Agrupar
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#" data-group="date">
+                            <i class="fas fa-calendar me-2"></i>Por Data
+                        </a></li>
+                        <li><a class="dropdown-item" href="#" data-group="user">
+                            <i class="fas fa-user me-2"></i>Por Usuário
+                        </a></li>
+                        <li><a class="dropdown-item" href="#" data-group="project">
+                            <i class="fas fa-project-diagram me-2"></i>Por Projeto
+                        </a></li>
+                        <li><a class="dropdown-item" href="#" data-group="event">
+                            <i class="fas fa-tag me-2"></i>Por Tipo de Evento
+                        </a></li>
+                    </ul>
+                </div>
 
-                <input type="radio" class="btn-check" name="viewMode" id="view-list" value="list">
-                <label class="btn btn-outline-primary btn-sm" for="view-list" title="Lista Compacta">
-                    <i class="fas fa-list"></i>
-                </label>
+                <button class="btn btn-outline-info btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#timelineHelpModal">
+                    <i class="fas fa-question-circle me-1"></i>Ajuda
+                </button>
             </div>
         </div>
     </div>
-</div>
 
-<!-- OPÇÃO 1: Timeline Vertical Compacta (Padrão) -->
-<div id="timeline-view" class="timeline-container">
-    <div class="timeline">
-        @foreach (var grupo in Model.AtividadesTimeline.GroupBy(a => a.DataReferencia.Date).OrderByDescending(g => g.Key))
-        {
-            <div class="timeline-date">
-                <i class="fas fa-calendar-day me-2"></i>
-                @grupo.Key.ToString("dddd, dd 'de' MMMM 'de' yyyy", new System.Globalization.CultureInfo("pt-BR"))
-            </div>
-
-            @foreach (var atividade in grupo.OrderByDescending(a => a.DataReferencia))
-            {
-                <div class="timeline-item">
-                    <div class="timeline-marker timeline-marker-@atividade.TipoEvento.ToLower()">
-                        @switch (atividade.TipoEvento.ToLower())
-                        {
-                            case "criacao": <i class="fas fa-plus"></i> break;
-                            case "inicio": <i class="fas fa-play"></i> break;
-                            case "conclusao": <i class="fas fa-check"></i> break;
-                            case "atualizacao": <i class="fas fa-edit"></i> break;
-                            default: <i class="fas fa-circle"></i> break;
-                        }
-                    </div>
-                    
-                    <div class="timeline-content">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div class="flex-grow-1">
-                                <h6 class="timeline-title mb-1">@atividade.AtividadeNome</h6>
-                                <small class="timeline-project">
-                                    <i class="fas fa-project-diagram me-1"></i>@atividade.ProjetoNome
-                                </small>
-                            </div>
-                            <div class="text-end">
-                                <span class="badge timeline-badge" style="background-color: @atividade.StatusCor">
-                                    @atividade.StatusNome
-                                </span>
-                                <div class="timeline-time">@atividade.DataReferencia.ToString("HH:mm")</div>
-                            </div>
-                        </div>
-
-                        <div class="timeline-details">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <small><i class="fas fa-user me-1"></i><strong>Responsável:</strong> @atividade.UsuarioNome</small>
-                                </div>
-                                <div class="col-md-6">
-                                    <small><i class="fas fa-tag me-1"></i><strong>Tipo:</strong> @atividade.TipoEvento</small>
-                                </div>
-                            </div>
+    <!-- Timeline Melhorada -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">
+                            <i class="fas fa-timeline me-2"></i>Linha do Tempo
+                        </h6>
+                        <div id="currentGrouping" class="badge bg-secondary">
+                            <i class="fas fa-calendar me-1"></i>Agrupado por Data
                         </div>
                     </div>
                 </div>
-            }
-        }
-    </div>
-</div>
+                <div class="card-body">
+                    @if (Model.AtividadesTimeline.Any())
+                    {
+                        <!-- Visualização Timeline (Padrão) -->
+                        <div class="view-content" id="timelineView">
+                            <div class="timeline">
+                                @foreach (var grupo in Model.AtividadesTimeline.GroupBy(a => a.DataReferencia.Date).OrderByDescending(g => g.Key))
+                                {
+                                    <div class="timeline-date">
+                                        <h6 class="text-primary mb-3">
+                                            <i class="fas fa-calendar me-2"></i>
+                                            @grupo.Key.ToString("dddd, dd 'de' MMMM 'de' yyyy", new System.Globalization.CultureInfo("pt-BR"))
+                                            <span class="badge bg-secondary ms-2">@grupo.Count() eventos</span>
+                                        </h6>
+                                    </div>
 
-<!-- OPÇÃO 2: Grid Compacto (2 colunas em desktop) -->
-<div id="grid-view" class="timeline-container" style="display: none;">
-    @foreach (var grupo in Model.AtividadesTimeline.GroupBy(a => a.DataReferencia.Date).OrderByDescending(g => g.Key))
-    {
-        <div class="timeline-date mb-3">
-            <i class="fas fa-calendar-day me-2"></i>
-            @grupo.Key.ToString("dddd, dd 'de' MMMM 'de' yyyy", new System.Globalization.CultureInfo("pt-BR"))
-        </div>
-
-        <div class="row mb-4">
-            @foreach (var atividade in grupo.OrderByDescending(a => a.DataReferencia))
-            {
-                <div class="col-lg-6 col-md-12 mb-3">
-                    <div class="card h-100 border-left-colored" style="border-left: 4px solid @atividade.StatusCor;">
-                        <div class="card-body p-3">
-                            <div class="d-flex align-items-center mb-2">
-                                <span class="timeline-marker timeline-marker-@atividade.TipoEvento.ToLower() position-static me-2">
-                                    @switch (atividade.TipoEvento.ToLower())
+                                    @foreach (var atividade in grupo.OrderByDescending(a => a.DataReferencia))
                                     {
-                                        case "criacao": <i class="fas fa-plus"></i> break;
-                                        case "inicio": <i class="fas fa-play"></i> break;
-                                        case "conclusao": <i class="fas fa-check"></i> break;
-                                        case "atualizacao": <i class="fas fa-edit"></i> break;
-                                        default: <i class="fas fa-circle"></i> break;
+                                        <div class="timeline-item">
+                                            <div class="timeline-marker timeline-marker-@atividade.TipoEvento.ToLower()" 
+                                                 data-bs-toggle="tooltip" 
+                                                 title="@GetEventTooltip(atividade.TipoEvento)">
+                                                @switch (atividade.TipoEvento)
+                                                {
+                                                    case "Criacao":
+                                                        <i class="fas fa-plus"></i>
+                                                        break;
+                                                    case "Inicio":
+                                                        <i class="fas fa-play"></i>
+                                                        break;
+                                                    case "Conclusao":
+                                                        <i class="fas fa-check"></i>
+                                                        break;
+                                                    case "Atualizacao":
+                                                        <i class="fas fa-edit"></i>
+                                                        break;
+                                                    default:
+                                                        <i class="fas fa-circle"></i>
+                                                        break;
+                                                }
+                                            </div>
+                                            <div class="timeline-content">
+                                                <div class="d-flex justify-content-between align-items-start">
+                                                    <div class="flex-grow-1">
+                                                        <h6 class="mb-1">
+                                                            <strong>@atividade.AtividadeNome</strong>
+                                                            <span class="badge bg-@atividade.TipoEvento.ToLower() ms-2">
+                                                                @atividade.TipoEventoTexto
+                                                            </span>
+                                                        </h6>
+                                                        <div class="timeline-details">
+                                                            <div class="row g-0">
+                                                                <div class="col-md-4">
+                                                                    <small class="text-muted">
+                                                                        <i class="fas fa-user me-1"></i>
+                                                                        <strong>Responsável:</strong> @atividade.UsuarioNome
+                                                                    </small>
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    <small class="text-muted">
+                                                                        <i class="fas fa-project-diagram me-1"></i>
+                                                                        <strong>Projeto:</strong> @atividade.ProjetoNome
+                                                                    </small>
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    <small class="text-muted">
+                                                                        <i class="fas fa-tag me-1" 
+                                                                           data-bs-toggle="tooltip" 
+                                                                           title="Tipo/categoria da atividade definida no cadastro"></i>
+                                                                        <strong>Tipo:</strong> @atividade.TipoAtividadeNome
+                                                                    </small>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="text-end">
+                                                        <small class="text-muted">
+                                                            <i class="fas fa-clock me-1"></i>
+                                                            @atividade.DataReferencia.ToString("HH:mm")
+                                                        </small>
+                                                    </div>
+                                                </div>
+
+                                                @if (!string.IsNullOrEmpty(atividade.Descricao))
+                                                {
+                                                    <p class="small text-muted mt-2 mb-0">
+                                                        <i class="fas fa-comment me-1"></i>@atividade.Descricao
+                                                    </p>
+                                                }
+
+                                                <div class="mt-2">
+                                                    <span class="badge bg-@atividade.PrioridadeCor me-2">
+                                                        <i class="fas fa-flag me-1"></i>@atividade.PrioridadeTexto
+                                                    </span>
+                                                    <span class="badge" style="background-color: @atividade.StatusCor">
+                                                        <i class="fas fa-circle me-1"></i>@atividade.StatusNome
+                                                    </span>
+                                                    <a href="/Atividades/Details/@atividade.Id" 
+                                                       class="btn btn-outline-primary btn-sm ms-2"
+                                                       data-bs-toggle="tooltip" 
+                                                       title="Ver detalhes completos da atividade">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
                                     }
-                                </span>
-                                <div class="flex-grow-1">
-                                    <h6 class="card-title mb-1 text-truncate" title="@atividade.AtividadeNome">@atividade.AtividadeNome</h6>
-                                    <small class="text-muted">
-                                        <i class="fas fa-project-diagram me-1"></i>@atividade.ProjetoNome
-                                    </small>
-                                </div>
-                                <div class="text-end">
-                                    <span class="badge" style="background-color: @atividade.StatusCor; font-size: 0.7rem;">
-                                        @atividade.StatusNome
-                                    </span>
-                                    <div style="font-size: 0.75rem; color: #6c757d;">@atividade.DataReferencia.ToString("HH:mm")</div>
-                                </div>
+                                }
                             </div>
+                        </div>
+
+                        <!-- Visualização em Cards -->
+                        <div class="view-content d-none" id="cardsView">
                             <div class="row">
-                                <div class="col-6">
-                                    <small class="text-muted">
-                                        <i class="fas fa-user me-1"></i>@atividade.UsuarioNome
-                                    </small>
-                                </div>
-                                <div class="col-6 text-end">
-                                    <small class="text-muted">
-                                        <i class="fas fa-tag me-1"></i>@atividade.TipoEvento
-                                    </small>
-                                </div>
+                                @foreach (var atividade in Model.AtividadesTimeline.OrderByDescending(a => a.DataReferencia))
+                                {
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="card h-100 activity-card">
+                                            <div class="card-header bg-@atividade.TipoEvento.ToLower() text-white">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <span class="badge bg-light text-dark">
+                                                        @atividade.TipoEventoTexto
+                                                    </span>
+                                                    <small>@atividade.DataReferencia.ToString("dd/MM HH:mm")</small>
+                                                </div>
+                                            </div>
+                                            <div class="card-body">
+                                                <h6 class="card-title">@atividade.AtividadeNome</h6>
+                                                <p class="card-text small text-muted">
+                                                    <i class="fas fa-user me-1"></i>@atividade.UsuarioNome<br>
+                                                    <i class="fas fa-project-diagram me-1"></i>@atividade.ProjetoNome<br>
+                                                    <i class="fas fa-tag me-1"></i>@atividade.TipoAtividadeNome
+                                                </p>
+                                                @if (!string.IsNullOrEmpty(atividade.Descricao))
+                                                {
+                                                    <p class="card-text small">@atividade.Descricao</p>
+                                                }
+                                            </div>
+                                            <div class="card-footer bg-light">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <div>
+                                                        <span class="badge bg-@atividade.PrioridadeCor me-1">
+                                                            @atividade.PrioridadeTexto
+                                                        </span>
+                                                        <span class="badge" style="background-color: @atividade.StatusCor">
+                                                            @atividade.StatusNome
+                                                        </span>
+                                                    </div>
+                                                    <a href="/Atividades/Details/@atividade.Id" 
+                                                       class="btn btn-outline-primary btn-sm">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
                             </div>
+                        </div>
+
+                        <!-- Visualização em Lista -->
+                        <div class="view-content d-none" id="listView">
+                            <div class="list-group">
+                                @foreach (var atividade in Model.AtividadesTimeline.OrderByDescending(a => a.DataReferencia))
+                                {
+                                    <div class="list-group-item">
+                                        <div class="d-flex w-100 justify-content-between align-items-start">
+                                            <div class="flex-grow-1">
+                                                <div class="d-flex align-items-center mb-1">
+                                                    <span class="timeline-marker timeline-marker-@atividade.TipoEvento.ToLower() me-2 position-static" 
+                                                          style="width: 20px; height: 20px; font-size: 10px;"
+                                                          data-bs-toggle="tooltip" 
+                                                          title="@GetEventTooltip(atividade.TipoEvento)">
+                                                        @switch (atividade.TipoEvento)
+                                                        {
+                                                            case "Criacao":
+                                                                <i class="fas fa-plus"></i>
+                                                                break;
+                                                            case "Inicio":
+                                                                <i class="fas fa-play"></i>
+                                                                break;
+                                                            case "Conclusao":
+                                                                <i class="fas fa-check"></i>
+                                                                break;
+                                                            case "Atualizacao":
+                                                                <i class="fas fa-edit"></i>
+                                                                break;
+                                                            default:
+                                                                <i class="fas fa-circle"></i>
+                                                                break;
+                                                        }
+                                                    </span>
+                                                    <h6 class="mb-0 me-2">@atividade.AtividadeNome</h6>
+                                                    <span class="badge bg-@atividade.TipoEvento.ToLower()">
+                                                        @atividade.TipoEventoTexto
+                                                    </span>
+                                                </div>
+                                                <div class="row g-0">
+                                                    <div class="col-md-3">
+                                                        <small class="text-muted">
+                                                            <i class="fas fa-user me-1"></i>@atividade.UsuarioNome
+                                                        </small>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <small class="text-muted">
+                                                            <i class="fas fa-project-diagram me-1"></i>@atividade.ProjetoNome
+                                                        </small>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <small class="text-muted">
+                                                            <i class="fas fa-tag me-1"></i>@atividade.TipoAtividadeNome
+                                                        </small>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <span class="badge bg-@atividade.PrioridadeCor me-1">
+                                                            @atividade.PrioridadeTexto
+                                                        </span>
+                                                        <span class="badge" style="background-color: @atividade.StatusCor">
+                                                            @atividade.StatusNome
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="text-end">
+                                                <small class="text-muted d-block">
+                                                    @atividade.DataReferencia.ToString("dd/MM/yyyy HH:mm")
+                                                </small>
+                                                <a href="/Atividades/Details/@atividade.Id" 
+                                                   class="btn btn-outline-primary btn-sm mt-1">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-timeline fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">Nenhuma atividade encontrada</h5>
+                            <p class="text-muted">
+                                Não há eventos no período selecionado com os filtros aplicados.
+                                <br>Tente ampliar o período ou ajustar os filtros.
+                            </p>
+                            <a href="/Atividades/Create" class="btn btn-primary">
+                                <i class="fas fa-plus me-1"></i>Criar Nova Atividade
+                            </a>
+                        </div>
+                    }
+                </div>
+                
+                <!-- Rodapé Explicativo -->
+                <div class="card-footer bg-light">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="mb-2"><i class="fas fa-info-circle me-2"></i>Como interpretar a timeline</h6>
+                            <small class="text-muted">
+                                • <strong>Data de referência:</strong> cada evento usa a data específica da ação (criação, início, conclusão, etc.)<br>
+                                • <strong>Ordem:</strong> eventos são ordenados cronologicamente, do mais recente para o mais antigo<br>
+                                • <strong>Agrupamento:</strong> eventos do mesmo dia são agrupados para facilitar visualização
+                            </small>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="mb-2"><i class="fas fa-lightbulb me-2"></i>Dicas de uso</h6>
+                            <small class="text-muted">
+                                • Use filtros por usuário para ver atividades de membros específicos<br>
+                                • Filtre por projeto para acompanhar progresso de iniciativas específicas<br>
+                                • Passe o mouse sobre os ícones para ver explicações detalhadas
+                            </small>
                         </div>
                     </div>
                 </div>
-            }
+            </div>
         </div>
-    }
+    </div>
 </div>
 
-<!-- OPÇÃO 3: Lista Ultra Compacta -->
-<div id="list-view" class="timeline-container" style="display: none;">
-    @foreach (var grupo in Model.AtividadesTimeline.GroupBy(a => a.DataReferencia.Date).OrderByDescending(g => g.Key))
-    {
-        <div class="timeline-date mb-2">
-            <i class="fas fa-calendar-day me-2"></i>
-            @grupo.Key.ToString("dddd, dd 'de' MMMM 'de' yyyy", new System.Globalization.CultureInfo("pt-BR"))
-        </div>
-
-        <div class="list-group mb-4">
-            @foreach (var atividade in grupo.OrderByDescending(a => a.DataReferencia))
-            {
-                <div class="list-group-item list-group-item-action d-flex align-items-center py-2">
-                    <span class="timeline-marker timeline-marker-@atividade.TipoEvento.ToLower() position-static me-3" style="width: 20px; height: 20px;">
-                        @switch (atividade.TipoEvento.ToLower())
-                        {
-                            case "criacao": <i class="fas fa-plus"></i> break;
-                            case "inicio": <i class="fas fa-play"></i> break;
-                            case "conclusao": <i class="fas fa-check"></i> break;
-                            case "atualizacao": <i class="fas fa-edit"></i> break;
-                            default: <i class="fas fa-circle"></i> break;
-                        }
-                    </span>
-                    
-                    <div class="flex-grow-1">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <strong class="d-block">@atividade.AtividadeNome</strong>
-                                <small class="text-muted">
-                                    <i class="fas fa-project-diagram me-1"></i>@atividade.ProjetoNome
-                                    <span class="mx-2">•</span>
-                                    <i class="fas fa-user me-1"></i>@atividade.UsuarioNome
-                                </small>
-                            </div>
-                            <div class="text-end">
-                                <span class="badge" style="background-color: @atividade.StatusCor; font-size: 0.7rem;">
-                                    @atividade.StatusNome
-                                </span>
-                                <div style="font-size: 0.75rem; color: #6c757d;">@atividade.DataReferencia.ToString("HH:mm")</div>
-                            </div>
-                        </div>
+<!-- Modal de Ajuda -->
+<div class="modal fade" id="timelineHelpModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-question-circle me-2"></i>Como usar a Timeline
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-timeline me-2"></i>Tipos de Eventos</h6>
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <span class="badge bg-success me-2"><i class="fas fa-plus"></i></span>
+                                <strong>Criação:</strong> Quando a atividade foi criada no sistema
+                            </li>
+                            <li class="mb-2">
+                                <span class="badge bg-primary me-2"><i class="fas fa-play"></i></span>
+                                <strong>Início:</strong> Data de início real da atividade
+                            </li>
+                            <li class="mb-2">
+                                <span class="badge bg-info me-2"><i class="fas fa-check"></i></span>
+                                <strong>Conclusão:</strong> Quando a atividade foi finalizada
+                            </li>
+                            <li class="mb-2">
+                                <span class="badge bg-warning me-2"><i class="fas fa-edit"></i></span>
+                                <strong>Atualização:</strong> Modificações nos dados da atividade
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-eye me-2"></i>Tipos de Visualização</h6>
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <span class="badge bg-primary me-2"><i class="fas fa-stream"></i></span>
+                                <strong>Timeline:</strong> Visualização cronológica com marcadores
+                            </li>
+                            <li class="mb-2">
+                                <span class="badge bg-success me-2"><i class="fas fa-th-large"></i></span>
+                                <strong>Cards:</strong> Eventos exibidos como cartões organizados
+                            </li>
+                            <li class="mb-2">
+                                <span class="badge bg-info me-2"><i class="fas fa-list"></i></span>
+                                <strong>Lista:</strong> Visualização compacta em formato de lista
+                            </li>
+                        </ul>
                     </div>
                 </div>
-            }
+                <hr>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-filter me-2"></i>Usando os Filtros</h6>
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <i class="fas fa-calendar me-2 text-primary"></i>
+                                <strong>Período:</strong> Define quantos dias atrás buscar eventos
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-users me-2 text-success"></i>
+                                <strong>Usuários:</strong> Filtra eventos de pessoas específicas
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-project-diagram me-2 text-warning"></i>
+                                <strong>Projetos:</strong> Mostra apenas atividades de projetos selecionados
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-keyboard me-2"></i>Atalhos do Teclado</h6>
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <kbd>Ctrl + 1</kbd> <strong>Timeline</strong>
+                            </li>
+                            <li class="mb-2">
+                                <kbd>Ctrl + 2</kbd> <strong>Cards</strong>
+                            </li>
+                            <li class="mb-2">
+                                <kbd>Ctrl + 3</kbd> <strong>Lista</strong>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="alert alert-info">
+                    <i class="fas fa-lightbulb me-2"></i>
+                    <strong>Dica:</strong> Use Ctrl+clique nos campos de múltipla seleção para selecionar vários itens de uma vez. 
+                    Sua preferência de visualização é salva automaticamente.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Fechar
+                </button>
+            </div>
         </div>
-    }
+    </div>
 </div>
 
-</div>
-<script>
-// JavaScript para alternar entre visualizações
-document.addEventListener('DOMContentLoaded', function() {
-    const viewButtons = document.querySelectorAll('input[name="viewMode"]');
-    const containers = {
-        'timeline': document.getElementById('timeline-view'),
-        'grid': document.getElementById('grid-view'),
-        'list': document.getElementById('list-view')
-    };
-
-    viewButtons.forEach(button => {
-        button.addEventListener('change', function() {
-            // Esconder todas as visualizações
-            Object.values(containers).forEach(container => {
-                if (container) container.style.display = 'none';
-            });
-            
-            // Mostrar visualização selecionada
-            const selectedContainer = containers[this.value];
-            if (selectedContainer) {
-                selectedContainer.style.display = 'block';
-            }
-            
-            // Salvar preferência no localStorage
-            localStorage.setItem('timeline-view-preference', this.value);
-        });
-    });
-
-    // Carregar preferência salva
-    const savedView = localStorage.getItem('timeline-view-preference') || 'timeline';
-    const savedButton = document.getElementById(`view-${savedView}`);
-    if (savedButton) {
-        savedButton.checked = true;
-        savedButton.dispatchEvent(new Event('change'));
-    }
-});
-</script>
-
+<!-- CSS Melhorado -->
 <style>
     .timeline {
         position: relative;
         padding: 0;
     }
 
-        .timeline::before {
-            content: '';
-            position: absolute;
-            left: 30px;
-            top: 0;
-            bottom: 0;
-            width: 2px;
-            background: #dee2e6;
-        }
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 30px;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background: linear-gradient(to bottom, var(--bs-primary), var(--bs-info));
+        border-radius: 2px;
+    }
 
     .timeline-date {
         margin-bottom: 2rem;
@@ -341,68 +592,455 @@ document.addEventListener('DOMContentLoaded', function() {
         position: absolute;
         left: 20px;
         top: 5px;
-        width: 20px;
-        height: 20px;
+        width: 22px;
+        height: 22px;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         color: white;
-        font-size: 10px;
+        font-size: 11px;
         z-index: 1;
+        border: 2px solid white;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        cursor: help;
     }
 
-    .timeline-marker-criacao {
-        background-color: #28a745;
-    }
-
-    .timeline-marker-inicio {
-        background-color: #007bff;
-    }
-
-    .timeline-marker-conclusao {
-        background-color: #17a2b8;
-    }
-
-    .timeline-marker-atualizacao {
-        background-color: #ffc107;
-    }
+    .timeline-marker-criacao { background-color: #28a745; }
+    .timeline-marker-inicio { background-color: #007bff; }
+    .timeline-marker-conclusao { background-color: #17a2b8; }
+    .timeline-marker-atualizacao { background-color: #ffc107; }
 
     .timeline-content {
         background: white;
-        border: 1px solid #dee2e6;
-        border-radius: 8px;
-        padding: 1rem;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        border: 1px solid #e0e0e0;
+        border-radius: 12px;
+        padding: 1.25rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        position: relative;
     }
 
-        .timeline-content:hover {
-            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
-            transform: translateY(-2px);
-            transition: all 0.3s ease;
-        }
+    .timeline-content::before {
+        content: '';
+        position: absolute;
+        left: -8px;
+        top: 20px;
+        width: 0;
+        height: 0;
+        border-top: 8px solid transparent;
+        border-bottom: 8px solid transparent;
+        border-right: 8px solid white;
+    }
+
+    .timeline-content:hover {
+        box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        transform: translateY(-2px);
+        border-color: var(--bs-primary);
+    }
 
     .timeline-details {
         border-top: 1px solid #f8f9fa;
-        margin-top: 0.5rem;
-        padding-top: 0.5rem;
+        margin-top: 0.75rem;
+        padding-top: 0.75rem;
     }
+
+    .timeline-legend {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.25rem;
+    }
+
+    .badge {
+        cursor: help;
+    }
+
+    /* Estilos melhorados para badges da legenda */
+    .badge-evento {
+        font-size: 0.75rem;
+        padding: 0.5rem 0.8rem;
+        border-radius: 20px;
+        font-weight: 600;
+        text-shadow: 0 1px 1px rgba(0,0,0,0.2);
+        cursor: help;
+        transition: all 0.3s ease;
+    }
+
+    .badge-evento:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    .badge-criacao { background-color: #28a745; color: white; }
+    .badge-inicio { background-color: #007bff; color: white; }
+    .badge-conclusao { background-color: #17a2b8; color: white; }
+    .badge-atualizacao { background-color: #ffc107; color: #333; }
+
+    /* Estilos para área da legenda */
+    .bg-light {
+        background-color: #f8f9fa !important;
+        border: 1px solid #e9ecef;
+    }
+
+    .activity-card:hover {
+        box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        transform: translateY(-3px);
+    }
+
+    /* Estilos para List View */
+    .list-group-item {
+        transition: all 0.2s ease;
+        border-left: 3px solid transparent;
+    }
+
+    .list-group-item:hover {
+        background-color: #f8f9fa;
+        border-left-color: var(--bs-primary);
+    }
+
+    /* View Content Animation */
+    .view-content {
+        animation: fadeIn 0.3s ease-in;
+    }
+
+    @@keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Marcadores nas diferentes views */
+    .timeline-marker-criacao { background-color: #28a745; }
+    .timeline-marker-inicio { background-color: #007bff; }
+    .timeline-marker-conclusao { background-color: #17a2b8; }
+    .timeline-marker-atualizacao { background-color: #ffc107; }
 
     @@media (max-width: 768px) {
-        .timeline::before
+        .timeline::before {
+            left: 15px;
+        }
 
-    {
-        left: 15px;
-    }
+        .timeline-marker {
+            left: 5px;
+        }
 
-    .timeline-marker {
-        left: 5px;
-    }
+        .timeline-item,
+        .timeline-date {
+            padding-left: 40px;
+        }
 
-    .timeline-item,
-    .timeline-date {
-        padding-left: 40px;
-    }
+        .timeline-legend {
+            flex-direction: column;
+            align-items: flex-start;
+            margin-top: 0.5rem;
+        }
 
+        /* Cards responsivos */
+        .activity-card {
+            margin-bottom: 1rem;
+        }
+
+        /* Lista responsiva */
+        .list-group-item .row {
+            flex-direction: column;
+        }
     }
 </style>
+
+<!-- JavaScript para melhorias de UX -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Inicializar tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        // Auto-submit form quando período for alterado
+        const periodoSelect = document.getElementById('periodoSelect');
+        if (periodoSelect) {
+            periodoSelect.addEventListener('change', function() {
+                document.getElementById('timelineFilterForm').submit();
+            });
+        }
+
+        // Controle dos tipos de visualização
+        const viewButtons = document.querySelectorAll('[data-view]');
+        const viewContents = document.querySelectorAll('.view-content');
+
+        viewButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const viewType = this.dataset.view;
+
+                // Atualizar botões ativos
+                viewButtons.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+
+                // Mostrar/ocultar conteúdo
+                viewContents.forEach(content => {
+                    content.classList.add('d-none');
+                });
+
+                const targetView = document.getElementById(viewType + 'View');
+                if (targetView) {
+                    targetView.classList.remove('d-none');
+                }
+
+                // Salvar preferência do usuário
+                localStorage.setItem('timeline-view-preference', viewType);
+            });
+        });
+
+        // Restaurar preferência de visualização
+        const savedView = localStorage.getItem('timeline-view-preference');
+        if (savedView) {
+            const savedButton = document.querySelector(`[data-view="${savedView}"]`);
+            if (savedButton) {
+                savedButton.click();
+            }
+        }
+
+        // Controle de agrupamento
+        const groupButtons = document.querySelectorAll('[data-group]');
+        let currentGrouping = 'date'; // Default
+        
+        groupButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const newGroupType = this.dataset.group;
+                
+                // Não fazer nada se já é o agrupamento atual
+                if (newGroupType === currentGrouping) return;
+                
+                currentGrouping = newGroupType;
+                
+                // Atualizar visual dos botões
+                groupButtons.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Atualizar indicador de agrupamento atual
+                updateGroupingIndicator(newGroupType);
+                
+                // Reorganizar os dados
+                regroupTimelineData(newGroupType);
+                
+                // Mostrar feedback
+                showNotification(`Reagrupando por ${this.textContent.trim()}`, 'success');
+            });
+        });
+
+        // Função para atualizar indicador de agrupamento
+        function updateGroupingIndicator(groupType) {
+            const indicator = document.getElementById('currentGrouping');
+            if (indicator) {
+                const groupInfo = {
+                    'date': { icon: 'fa-calendar', text: 'Agrupado por Data' },
+                    'user': { icon: 'fa-user', text: 'Agrupado por Usuário' },
+                    'project': { icon: 'fa-project-diagram', text: 'Agrupado por Projeto' },
+                    'event': { icon: 'fa-tag', text: 'Agrupado por Tipo de Evento' }
+                };
+                
+                const info = groupInfo[groupType];
+                indicator.innerHTML = `<i class="fas ${info.icon} me-1"></i>${info.text}`;
+            }
+        }
+
+        // Função principal de reagrupamento
+        function regroupTimelineData(groupType) {
+            const timelineContainer = document.getElementById('timelineView');
+            if (!timelineContainer) return;
+
+            // Coletar todos os itens da timeline
+            const timelineItems = Array.from(timelineContainer.querySelectorAll('.timeline-item'));
+            const timelineDates = Array.from(timelineContainer.querySelectorAll('.timeline-date'));
+            
+            if (timelineItems.length === 0) return;
+
+            // Limpar container
+            const timeline = timelineContainer.querySelector('.timeline');
+            timeline.innerHTML = '';
+
+            // Extrair dados dos elementos
+            const items = timelineItems.map(item => ({
+                element: item.cloneNode(true),
+                data: extractItemData(item)
+            }));
+
+            // Agrupar conforme tipo selecionado
+            const groupedItems = groupItemsByType(items, groupType);
+            
+            // Renderizar grupos
+            renderGroupedTimeline(timeline, groupedItems, groupType);
+        }
+
+        // Extrair dados do elemento para agrupamento
+        function extractItemData(element) {
+            const content = element.querySelector('.timeline-content');
+            if (!content) return {};
+
+            return {
+                usuario: content.querySelector('.timeline-details .col-md-4:nth-child(1) small')?.textContent?.replace('Responsável:', '').trim() || '',
+                projeto: content.querySelector('.timeline-details .col-md-4:nth-child(2) small')?.textContent?.replace('Projeto:', '').trim() || '',
+                tipoEvento: element.querySelector('.badge')?.textContent?.trim() || '',
+                dataReferencia: element.querySelector('.text-end small')?.textContent?.replace(/\s+/g, ' ').trim() || '',
+                atividade: content.querySelector('h6 strong')?.textContent?.trim() || ''
+            };
+        }
+
+        // Agrupar itens por tipo
+        function groupItemsByType(items, groupType) {
+            const groups = {};
+            
+            items.forEach(item => {
+                let groupKey;
+                
+                switch (groupType) {
+                    case 'user':
+                        groupKey = item.data.usuario || 'Sem usuário';
+                        break;
+                    case 'project':
+                        groupKey = item.data.projeto || 'Sem projeto';
+                        break;
+                    case 'event':
+                        groupKey = item.data.tipoEvento || 'Sem tipo';
+                        break;
+                    case 'date':
+                    default:
+                        // Para data, extrair apenas a data (sem hora)
+                        const dateMatch = item.data.dataReferencia.match(/(\d{2}:\d{2})/);
+                        if (dateMatch) {
+                            groupKey = new Date().toLocaleDateString('pt-BR'); // Usar data atual como fallback
+                        } else {
+                            groupKey = 'Data não informada';
+                        }
+                        break;
+                }
+                
+                if (!groups[groupKey]) {
+                    groups[groupKey] = [];
+                }
+                groups[groupKey].push(item);
+            });
+
+            return groups;
+        }
+
+        // Renderizar timeline agrupada
+        function renderGroupedTimeline(container, groups, groupType) {
+            // Ordenar chaves dos grupos
+            const sortedGroupKeys = Object.keys(groups).sort();
+            
+            sortedGroupKeys.forEach(groupKey => {
+                // Criar cabeçalho do grupo
+                const groupHeader = createGroupHeader(groupKey, groups[groupKey].length, groupType);
+                container.appendChild(groupHeader);
+                
+                // Adicionar itens do grupo
+                groups[groupKey].forEach(item => {
+                    container.appendChild(item.element);
+                });
+            });
+        }
+
+        // Criar cabeçalho do grupo
+        function createGroupHeader(groupKey, itemCount, groupType) {
+            const header = document.createElement('div');
+            header.className = 'timeline-date';
+            
+            let icon;
+            switch (groupType) {
+                case 'user': icon = 'fa-user'; break;
+                case 'project': icon = 'fa-project-diagram'; break;
+                case 'event': icon = 'fa-tag'; break;
+                default: icon = 'fa-calendar'; break;
+            }
+            
+            header.innerHTML = `
+                <h6 class="text-primary mb-3">
+                    <i class="fas ${icon} me-2"></i>
+                    ${groupKey}
+                    <span class="badge bg-secondary ms-2">${itemCount} eventos</span>
+                </h6>
+            `;
+            
+            return header;
+        }
+
+        // Highlight de elementos ativos
+        const timelineItems = document.querySelectorAll('.timeline-item, .activity-card, .list-group-item');
+        timelineItems.forEach(item => {
+            item.addEventListener('mouseenter', function() {
+                this.style.transform = 'scale(1.02)';
+            });
+            item.addEventListener('mouseleave', function() {
+                this.style.transform = 'scale(1)';
+            });
+        });
+
+        // Função para mostrar notificações
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 250px;';
+            notification.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Auto-remover após 3 segundos
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 3000);
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case '1':
+                        e.preventDefault();
+                        document.querySelector('[data-view="timeline"]')?.click();
+                        break;
+                    case '2':
+                        e.preventDefault();
+                        document.querySelector('[data-view="cards"]')?.click();
+                        break;
+                    case '3':
+                        e.preventDefault();
+                        document.querySelector('[data-view="list"]')?.click();
+                        break;
+                }
+            }
+        });
+
+        // Loading states para melhor UX
+        const filterForm = document.getElementById('timelineFilterForm');
+        if (filterForm) {
+            filterForm.addEventListener('submit', function() {
+                const submitBtn = this.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Carregando...';
+                    submitBtn.disabled = true;
+                }
+            });
+        }
+    });
+</script>
+
+@functions {
+    private string GetEventTooltip(string tipoEvento)
+    {
+        return tipoEvento.ToLower() switch
+        {
+            "criacao" => "Atividade foi criada no sistema",
+            "inicio" => "Atividade foi iniciada (data de início preenchida)",
+            "conclusao" => "Atividade foi concluída (data final real preenchida)",
+            "atualizacao" => "Algum dado da atividade foi modificado",
+            _ => "Evento da atividade"
+        };
+    }
+}

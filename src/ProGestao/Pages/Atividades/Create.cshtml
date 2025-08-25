@@ -573,7 +573,10 @@
     </div>
 </div>
 
+@* ⚠️ ÚNICA SEÇÃO SCRIPTS - Consolidada para evitar duplicação *@
 @section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Gerenciar seções do wizard visualmente
@@ -648,8 +651,12 @@
                 }
             }
 
-            // Atualizar preview em tempo real
-            form.addEventListener('input', ProGestao.Utils.debounce(updatePreview, 300));
+            // Atualizar preview em tempo real - usando função de debounce se disponível
+            const debouncedUpdate = typeof ProGestao !== 'undefined' && ProGestao.Utils && ProGestao.Utils.debounce
+                ? ProGestao.Utils.debounce(updatePreview, 300)
+                : updatePreview;
+
+            form.addEventListener('input', debouncedUpdate);
             form.addEventListener('change', updatePreview);
 
             // Floating labels
@@ -677,10 +684,27 @@
                 // Verificar estado inicial
                 checkLabel();
             });
+
+            // Configurar auto-preenchimento de data se vazio
+            const dataInicio = document.querySelector('input[name="Atividade.DataInicio"]');
+            if (dataInicio && !dataInicio.value) {
+                const hoje = new Date().toISOString().split('T')[0];
+                dataInicio.value = hoje;
+            }
+
+            // Controlar exibição de exemplos baseado na seleção de projeto
+            const projetoSelect = document.getElementById('selectProjeto');
+            const exemplosSemProjeto = document.getElementById('exemplosSemProjeto');
+
+            if (projetoSelect && exemplosSemProjeto) {
+                function toggleExemplos() {
+                    const showExemplos = !projetoSelect.value;
+                    exemplosSemProjeto.style.display = showExemplos ? 'block' : 'none';
+                }
+
+                projetoSelect.addEventListener('change', toggleExemplos);
+                toggleExemplos(); // Estado inicial
+            }
         });
     </script>
-}
-
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
 }
