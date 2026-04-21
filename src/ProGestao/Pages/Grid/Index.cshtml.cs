@@ -174,12 +174,17 @@ namespace ProGestao.Pages.Grid
 
         private (DateTime inicio, DateTime fim) ObterPeriodoCustomizado()
         {
+            var dataInicio = Semana ?? DateTime.Today;
+            
             if (Request.Query.ContainsKey("dataFim") &&
                 DateTime.TryParse(Request.Query["dataFim"], out var dataFim))
             {
-                return (PeriodoInicio, dataFim);
+                _logger.LogInformation("Período customizado - Início: {DataInicio}, Fim: {DataFim}", dataInicio, dataFim);
+                return (dataInicio, dataFim);
             }
-            return ObterPeriodoSemana(Semana ?? DateTime.Today);
+            
+            _logger.LogWarning("Parâmetro dataFim não encontrado para período customizado, usando período de semana");
+            return ObterPeriodoSemana(dataInicio);
         }
 
         private void ConfigurarPeriodosDisponiveis()

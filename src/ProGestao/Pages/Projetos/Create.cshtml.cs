@@ -127,11 +127,16 @@ namespace ProGestao.Pages.Projetos
             {
                 _logger.LogDebug("Carregando dados para dropdowns");
 
-                var statusProjetosTask = _lookupService.GetStatusProjetosAsync();
-                var responsaveisTask = _lookupService.GetResponsaveisAsync();
+                StatusProjetos = await _lookupService.GetStatusProjetosAsync();
+                Responsaveis = await _lookupService.GetResponsaveisAsync();
 
-                StatusProjetos = await statusProjetosTask;
-                Responsaveis = await responsaveisTask;
+                _logger.LogInformation("Dados dos dropdowns carregados: {StatusCount} status, {ResponsaveisCount} responsáveis",
+                    StatusProjetos.Count, Responsaveis.Count);
+                    
+                if (Responsaveis.Count == 0)
+                {
+                    _logger.LogWarning("Nenhum responsável foi encontrado! Verifique se existem usuários ativos no banco.");
+                }
 
                 _logger.LogDebug("Dados dos dropdowns carregados: {StatusCount} status, {ResponsaveisCount} respons�veis",
                     StatusProjetos.Count, Responsaveis.Count);

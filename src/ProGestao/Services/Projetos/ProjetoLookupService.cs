@@ -76,6 +76,8 @@ namespace ProGestao.Services.Projetos
         {
             try
             {
+                _logger.LogInformation("Iniciando busca de responsáveis");
+                
                 var usuarios = await _context.Usuarios
                     .Include(u => u.Equipe)
                     .Where(u => u.Ativo)
@@ -83,7 +85,9 @@ namespace ProGestao.Services.Projetos
                     .AsNoTracking()
                     .ToListAsync();
 
-                return usuarios.Select(u => new UsuarioLookupViewModel
+                _logger.LogInformation("Usuários encontrados para responsáveis: {Count}", usuarios.Count);
+                
+                var result = usuarios.Select(u => new UsuarioLookupViewModel
                 {
                     Id = u.Id,
                     Nome = u.Nome,
@@ -91,6 +95,9 @@ namespace ProGestao.Services.Projetos
                     Cargo = u.Cargo,
                     EquipeNome = u.Equipe?.Nome
                 }).ToList();
+                
+                _logger.LogInformation("Retornando {Count} responsáveis", result.Count);
+                return result;
             }
             catch (Exception ex)
             {
