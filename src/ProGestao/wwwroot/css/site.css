@@ -411,14 +411,14 @@ body {
     .btn-group .dropdown-toggle-split {
         padding-left: 0.5rem;
         padding-right: 0.5rem;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
     .btn-group .dropdown-toggle-split::after {
-        margin: 0 !important;
-        vertical-align: middle !important;
+        margin: 0;
+        vertical-align: middle;
     }
 
 .card-footer {
@@ -472,25 +472,25 @@ body {
 
 /* Para qualquer card que precise ter botão alinhado embaixo */
 .card.equal-height-card {
-    display: flex !important;
-    flex-direction: column !important;
-    height: 100% !important;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 
     .card.equal-height-card .card-body {
-        display: flex !important;
-        flex-direction: column !important;
-        flex: 1 !important;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
     }
 
     .card.equal-height-card .card-footer,
     .card.equal-height-card .button-area {
-        margin-top: auto !important;
+        margin-top: auto;
     }
 
 .button-bottom {
-    margin-top: auto !important;
-    padding-top: 1rem !important;
+    margin-top: auto;
+    padding-top: 1rem;
 }
 
 /* =============================================================
