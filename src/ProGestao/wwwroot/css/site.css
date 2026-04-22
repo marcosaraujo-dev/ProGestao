@@ -89,6 +89,10 @@
     --transition-fast: 0.15s ease-in-out;
     --transition-normal: 0.3s ease-in-out;
     --transition-slow: 0.5s ease-in-out;
+    /* =====  DROPDOWN ANIMATION  ===== */
+    --dropdown-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --dropdown-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --dropdown-border-radius: 0.375rem;
     /* =====  Z-INDEX HIERARCHY  ===== */
     --z-base: 1;
     --z-card: 1;
@@ -1119,13 +1123,19 @@ body {
 }
 
 /* Force z-index utility para emergências */
-.force-dropdown-top {
+.force-dropdown-top,
+.dropdown-force-top {
     z-index: 9999 !important;
 }
 
-    .force-dropdown-top .dropdown-menu {
+    .force-dropdown-top .dropdown-menu,
+    .dropdown-force-top .dropdown-menu {
         z-index: 9999 !important;
     }
+
+.dropdown-no-animation .dropdown-menu {
+    transition: none !important;
+}
 
 /* =============================================================
    17. RESPONSIVIDADE
