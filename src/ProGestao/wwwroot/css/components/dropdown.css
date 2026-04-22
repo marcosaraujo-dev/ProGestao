@@ -6,18 +6,9 @@
    ============================================================= */
 
 /* =============================================================
-   1. VARIÁVEIS CSS PARA Z-INDEX HIERARCHY
+   1. VARIÁVEIS CSS PARA DROPDOWN (z-index consolidado em site.css)
    ============================================================= */
 :root {
-	/* Z-Index Hierarchy - ProGestao */
-	--z-dropdown: 1050; /* Dropdowns */
-	--z-modal: 1055; /* Modais */
-	--z-tooltip: 1070; /* Tooltips */
-	--z-navbar: 1030; /* Navbar fixa */
-	--z-sticky: 1020; /* Elementos sticky */
-	--z-grid: 1010; /* Grid base */
-	--z-table: 1005; /* Tabelas */
-	--z-card: 1000; /* Cards */
 	/* Dropdown Animation Variables */
 	--dropdown-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 	--dropdown-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);

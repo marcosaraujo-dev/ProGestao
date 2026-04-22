@@ -90,15 +90,16 @@
     --transition-normal: 0.3s ease-in-out;
     --transition-slow: 0.5s ease-in-out;
     /* =====  Z-INDEX HIERARCHY  ===== */
-    --z-dropdown: 1050;
-    --z-navbar-dropdown: 1060; /* Fix para dropdown navbar */
-    --z-modal: 1055;
-    --z-tooltip: 1070;
-    --z-navbar: 1030;
-    --z-sticky: 1020;
-    --z-grid: 1010;
-    --z-table: 1005;
-    --z-card: 1000;
+    --z-base: 1;
+    --z-card: 1;
+    --z-table: 2;
+    --z-grid: 3;
+    --z-sticky: 10;
+    --z-navbar: 1030;           /* Bootstrap padrão */
+    --z-dropdown: 1050;         /* Bootstrap padrão */
+    --z-navbar-dropdown: 1060;  /* Fix para dropdown navbar */
+    --z-modal: 1055;            /* Bootstrap padrão */
+    --z-tooltip: 1070;          /* Bootstrap padrão */
     /* =====  LARGURAS DE CONTAINER  ===== */
     --container-sm: 640px;
     --container-md: 768px;
