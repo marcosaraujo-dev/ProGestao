@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ProGestao.Data;
 using ProGestao.ViewModels.Atividade;
+using ProGestao.ViewModels.Ausencia;
 using ProGestao.ViewModels.Grid;
 using ProGestao.ViewModels.Usuarios;
 using System.Globalization;
@@ -11,6 +12,7 @@ namespace ProGestao.Services
     {
         Task<GridDataViewModel> GetGridDataAsync(GridFilterViewModel filter);
         Task<IEnumerable<AtividadeGridViewModel>> GetAtividadesPorPeriodoAsync(DateTime dataInicio, DateTime dataFim, int? equipeId = null);
+        Task<IEnumerable<AusenciaGridViewModel>> GetAusenciasPorPeriodoAsync(DateTime dataInicio, DateTime dataFim, int? equipeId = null);
         Task<IEnumerable<UsuarioGridViewModel>> GetUsuariosAtivosAsync(int? equipeId = null);
         Task<GridMetricsViewModel> GetGridMetricsAsync(GridFilterViewModel filter);
     }
@@ -50,6 +52,12 @@ namespace ProGestao.Services
                 var atividadesList = atividades.ToList();
                 _logger.LogInformation("Atividades carregadas: {QtdAtividades}", atividadesList.Count);
 
+                // 2.1 Carrega ausências
+                _logger.LogInformation("Carregando ausências...");
+                var ausencias = await GetAusenciasPorPeriodoAsync(filter.DataInicio, filter.DataFim, filter.EquipeId);
+                var ausenciasList = ausencias.ToList();
+                _logger.LogInformation("Ausências carregadas: {QtdAusencias}", ausenciasList.Count);
+
                 // Debug das atividades carregadas
                 foreach (var atividade in atividadesList.Take(5)) // Só as primeiras 5 para não encher o log
                 {
@@ -63,9 +71,9 @@ namespace ProGestao.Services
                 var dias = GerarDiasPeriodo(filter.DataInicio, filter.DataFim);
                 _logger.LogInformation("Dias gerados: {QtdDias}", dias.Count);
 
-                // 4. Mapeia atividades para usuários
-                _logger.LogInformation("Mapeando atividades para usuários...");
-                var usuariosComAtividades = MapearAtividadesParaUsuarios(usuariosList, atividadesList, filter.DataInicio, filter.DataFim);
+                // 4. Mapeia atividades e ausências para usuários
+                _logger.LogInformation("Mapeando atividades e ausências para usuários...");
+                var usuariosComAtividades = MapearAtividadesParaUsuarios(usuariosList, atividadesList, ausenciasList, filter.DataInicio, filter.DataFim);
                 var usuariosFinais = usuariosComAtividades.ToList();
 
                 // Debug do mapeamento
@@ -139,6 +147,45 @@ namespace ProGestao.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao carregar atividades do período");
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<AusenciaGridViewModel>> GetAusenciasPorPeriodoAsync(
+            DateTime dataInicio, DateTime dataFim, int? equipeId = null)
+        {
+            try
+            {
+                var query = _context.Ausencias
+                    .AsNoTracking()
+                    .Include(a => a.TipoAusencia)
+                    .Include(a => a.Usuario)
+                    .Where(a => a.Ativo &&
+                               a.DataInicio <= dataFim &&
+                               a.DataFim >= dataInicio);
+
+                if (equipeId.HasValue)
+                {
+                    query = query.Where(a => a.Usuario != null && a.Usuario.EquipeId == equipeId.Value);
+                }
+
+                var ausenciasList = await query
+                    .OrderBy(a => a.DataInicio)
+                    .ToListAsync();
+
+                return ausenciasList.Select(a => new AusenciaGridViewModel
+                {
+                    Id = a.Id,
+                    TipoNome = a.TipoAusencia?.Nome ?? string.Empty,
+                    TipoCor = a.TipoAusencia?.Cor ?? "#007bff",
+                    DataInicio = a.DataInicio,
+                    DataFim = a.DataFim,
+                    UsuarioId = a.UsuarioId
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao carregar ausências do período");
                 throw;
             }
         }
@@ -229,17 +276,24 @@ namespace ProGestao.Services
         private IEnumerable<UsuarioGridViewModel> MapearAtividadesParaUsuarios(
             IEnumerable<UsuarioGridViewModel> usuarios,
             IEnumerable<AtividadeGridViewModel> atividades,
+            IEnumerable<AusenciaGridViewModel> ausencias,
             DateTime dataInicio,
             DateTime dataFim)
         {
-            _logger.LogInformation("=== INICIANDO MAPEAMENTO DE ATIVIDADES ===");
+            _logger.LogInformation("=== INICIANDO MAPEAMENTO DE ATIVIDADES E AUSÊNCIAS ===");
 
             var atividadesPorUsuario = atividades
                 .GroupBy(a => a.UsuarioId)
                 .ToDictionary(g => g.Key, g => g.ToList());
 
+            var ausenciasPorUsuario = ausencias
+                .GroupBy(a => a.UsuarioId)
+                .ToDictionary(g => g.Key, g => g.ToList());
+
             _logger.LogInformation("Atividades agrupadas por usuário: {QtdUsuarios} usuários com atividades",
                 atividadesPorUsuario.Count);
+            _logger.LogInformation("Ausências agrupadas por usuário: {QtdUsuarios} usuários com ausências",
+                ausenciasPorUsuario.Count);
 
             foreach (var usuario in usuarios)
             {
@@ -248,6 +302,7 @@ namespace ProGestao.Services
 
                 // SEMPRE inicializa o dicionário vazio primeiro
                 usuario.AtividadesPorDia = InicializarDicionarioVazio(dataInicio, dataFim);
+                usuario.AusenciasPorDia = InicializarDicionarioAusenciasVazio(dataInicio, dataFim);
                 _logger.LogInformation("Dicionário inicializado com {QtdDias} dias para usuário {Nome}",
                     usuario.AtividadesPorDia.Count, usuario.Nome);
 
@@ -305,9 +360,35 @@ namespace ProGestao.Services
                 {
                     _logger.LogInformation("Usuário {Nome} não possui atividades no período", usuario.Nome);
                 }
+
+                // Mapeia ausências para os dias correspondentes
+                if (ausenciasPorUsuario.TryGetValue(usuario.Id, out var ausenciasUsuario))
+                {
+                    _logger.LogInformation("Usuário {Nome} tem {QtdAusencias} ausências",
+                        usuario.Nome, ausenciasUsuario.Count);
+
+                    foreach (var ausencia in ausenciasUsuario)
+                    {
+                        var inicioAusencia = ausencia.DataInicio.Date;
+                        var fimAusencia = ausencia.DataFim.Date;
+
+                        var inicioEfetivo = inicioAusencia < dataInicio ? dataInicio : inicioAusencia;
+                        var fimEfetivo = fimAusencia > dataFim ? dataFim : fimAusencia;
+
+                        var dataAtual = inicioEfetivo.Date;
+                        while (dataAtual <= fimEfetivo.Date)
+                        {
+                            if (usuario.AusenciasPorDia.ContainsKey(dataAtual))
+                            {
+                                usuario.AusenciasPorDia[dataAtual].Add(ausencia);
+                            }
+                            dataAtual = dataAtual.AddDays(1);
+                        }
+                    }
+                }
             }
 
-            _logger.LogInformation("=== MAPEAMENTO DE ATIVIDADES CONCLUÍDO ===");
+            _logger.LogInformation("=== MAPEAMENTO DE ATIVIDADES E AUSÊNCIAS CONCLUÍDO ===");
             return usuarios;
         }
 
@@ -319,6 +400,20 @@ namespace ProGestao.Services
             while (dataAtual <= dataFim.Date)
             {
                 dicionario[dataAtual] = new List<AtividadeGridViewModel>();
+                dataAtual = dataAtual.AddDays(1);
+            }
+
+            return dicionario;
+        }
+
+        private Dictionary<DateTime, List<AusenciaGridViewModel>> InicializarDicionarioAusenciasVazio(DateTime dataInicio, DateTime dataFim)
+        {
+            var dicionario = new Dictionary<DateTime, List<AusenciaGridViewModel>>();
+            var dataAtual = dataInicio.Date;
+
+            while (dataAtual <= dataFim.Date)
+            {
+                dicionario[dataAtual] = new List<AusenciaGridViewModel>();
                 dataAtual = dataAtual.AddDays(1);
             }
 

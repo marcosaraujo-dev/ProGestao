@@ -10,5 +10,6 @@ namespace ProGestao.ViewModels.Ausencia
         public string TipoCor { get; set; } = "#007bff";
         public DateTime DataInicio { get; set; }
         public DateTime DataFim { get; set; }
+        public int UsuarioId { get; set; }
     }
 }

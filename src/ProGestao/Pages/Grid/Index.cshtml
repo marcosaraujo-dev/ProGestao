@@ -1,5 +1,6 @@
 ﻿@page
 @using ProGestao.ViewModels.Atividade
+@using ProGestao.ViewModels.Ausencia
 @model ProGestao.Pages.Grid.IndexModel
 @{
     ViewData["Title"] = "Grid Semanal";
@@ -223,12 +224,29 @@
                                             {
                                                 @foreach (var dia in Model.DiasSemana)
                                                 {
-                                                    <td class="activity-cell @(dia.EhHoje ? "today" : "") @(dia.EhFimDeSemana ? "weekend" : "")">
+                                                    <td class="activity-cell @(dia.EhHoje ? "today" : "") @(dia.EhFimDeSemana ? "weekend" : "") @(usuario.TemAusenciasNoDia(dia.Data) ? "has-ausencia" : "")">
                                                         @{
                                                             var dataKey = dia.Data.Date;
                                                             var atividades = usuario.AtividadesPorDia?.ContainsKey(dataKey) == true 
                                                                 ? usuario.AtividadesPorDia[dataKey] 
                                                                 : new List<AtividadeGridViewModel>();
+                                                            var ausenciasDia = usuario.ObterAusenciasDoDia(dia.Data);
+                                                        }
+
+                                                        @if (ausenciasDia.Any())
+                                                        {
+                                                            <div class="ausencia-indicators">
+                                                                @foreach (var ausencia in ausenciasDia)
+                                                                {
+                                                                    <div class="ausencia-badge" style="background-color: @ausencia.TipoCor;"
+                                                                         data-bs-toggle="tooltip"
+                                                                         data-bs-placement="top"
+                                                                         title="🚫 @ausencia.TipoNome (@ausencia.DataInicio.ToString("dd/MM") - @ausencia.DataFim.ToString("dd/MM"))">
+                                                                        <i class="fas fa-calendar-minus me-1"></i>
+                                                                        @ausencia.TipoNome
+                                                                    </div>
+                                                                }
+                                                            </div>
                                                         }
                                                         
                                                         @if (atividades != null && atividades.Any())
@@ -294,9 +312,12 @@
                                                         }
                                                         else
                                                         {
-                                                            <div class="empty-day">
-                                                                <i class="fas fa-calendar-times opacity-50"></i>
-                                                            </div>
+                                                            @if (!ausenciasDia.Any())
+                                                            {
+                                                                <div class="empty-day">
+                                                                    <i class="fas fa-calendar-times opacity-50"></i>
+                                                                </div>
+                                                            }
                                                         }
                                                     </td>
                                                 }

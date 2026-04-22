@@ -1,4 +1,5 @@
 ﻿using ProGestao.ViewModels.Atividade;
+using ProGestao.ViewModels.Ausencia;
 using ProGestao.ViewModels.Grid;
 using System.ComponentModel.DataAnnotations;
 
@@ -33,6 +34,12 @@ namespace ProGestao.ViewModels.Usuarios
         // Propriedade existente mantida
         public Dictionary<DateTime, List<AtividadeGridViewModel>> AtividadesPorDia { get; set; } =
             new Dictionary<DateTime, List<AtividadeGridViewModel>>();
+
+        /// <summary>
+        /// Ausências do usuário agrupadas por dia para exibição no grid
+        /// </summary>
+        public Dictionary<DateTime, List<AusenciaGridViewModel>> AusenciasPorDia { get; set; } =
+            new Dictionary<DateTime, List<AusenciaGridViewModel>>();
 
         // Propriedades calculadas
         public int TotalAtividades => Dias.Sum(d => d.Atividades.Count);
@@ -79,6 +86,18 @@ namespace ProGestao.ViewModels.Usuarios
         public bool TemAtividadesNoDia(DateTime data)
         {
             return ContarAtividadesDoDia(data) > 0;
+        }
+
+        public List<AusenciaGridViewModel> ObterAusenciasDoDia(DateTime data)
+        {
+            return AusenciasPorDia.TryGetValue(data.Date, out var ausencias)
+                ? ausencias
+                : new List<AusenciaGridViewModel>();
+        }
+
+        public bool TemAusenciasNoDia(DateTime data)
+        {
+            return ObterAusenciasDoDia(data).Any();
         }
     }
 }

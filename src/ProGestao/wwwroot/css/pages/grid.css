@@ -1027,7 +1027,106 @@
 }
 
 /* =============================================================
-   18. BROWSER SPECIFIC FIXES (dropdown)
+   18. ABSENCE INDICATORS
+   ============================================================= */
+
+/* Célula com ausência — fundo listrado */
+.activity-cell.has-ausencia {
+    background: repeating-linear-gradient(
+        -45deg,
+        #fafbfc,
+        #fafbfc 4px,
+        #f0f0f0 4px,
+        #f0f0f0 8px
+    );
+}
+
+.activity-cell.has-ausencia.today {
+    background: repeating-linear-gradient(
+        -45deg,
+        #eff6ff,
+        #eff6ff 4px,
+        #dbeafe 4px,
+        #dbeafe 8px
+    );
+}
+
+/* Container dos indicadores de ausência */
+.ausencia-indicators {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 6px;
+}
+
+/* Badge de ausência com cor do tipo */
+.ausencia-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    cursor: default;
+}
+
+    .ausencia-badge i {
+        font-size: 0.65rem;
+        flex-shrink: 0;
+    }
+
+/* Responsivo — ausências */
+@media (max-width: 768px) {
+    .ausencia-badge {
+        font-size: 0.6rem;
+        padding: 2px 5px;
+    }
+
+        .ausencia-badge i {
+            display: none;
+        }
+}
+
+@media (max-width: 576px) {
+    .ausencia-badge {
+        font-size: 0.55rem;
+        padding: 1px 4px;
+    }
+}
+
+/* Print — ausências */
+@media print {
+    .ausencia-badge {
+        box-shadow: none;
+        border: 1px solid currentColor;
+    }
+
+    .activity-cell.has-ausencia {
+        background: repeating-linear-gradient(
+            -45deg,
+            #fff,
+            #fff 4px,
+            #eee 4px,
+            #eee 8px
+        ) !important;
+    }
+}
+
+/* High contrast — ausências */
+@media (prefers-contrast: high) {
+    .ausencia-badge {
+        border: 2px solid;
+    }
+}
+
+/* =============================================================
+   19. BROWSER SPECIFIC FIXES (dropdown)
    ============================================================= */
 
 /* Safari fix for backdrop-filter */
