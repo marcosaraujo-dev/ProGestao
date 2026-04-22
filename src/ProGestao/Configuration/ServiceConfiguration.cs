@@ -4,6 +4,7 @@ using ProGestao.Services;
 using ProGestao.Services.Atividades;
 using ProGestao.Services.Interfaces;
 using ProGestao.Services.Projetos;
+using ProGestao.Services.Ausencias;
 using ProGestao.Services.TiposAusencia;
 using ProGestao.Services.Usuarios;
 
@@ -46,6 +47,13 @@ namespace ProGestao.Configuration
             // ==============================
             services.AddScoped<ITipoAusenciaQueryService, TipoAusenciaQueryService>();
             services.AddScoped<ITipoAusenciaCommandService, TipoAusenciaCommandService>();
+
+            // ==============================
+            // AUSÊNCIA SERVICES
+            // ==============================
+            services.AddScoped<IAusenciaQueryService, AusenciaQueryService>();
+            services.AddScoped<IAusenciaCommandService, AusenciaCommandService>();
+            services.AddScoped<IAusenciaValidationService, AusenciaValidationService>();
 
             // ==============================
             // OUTROS SERVICES

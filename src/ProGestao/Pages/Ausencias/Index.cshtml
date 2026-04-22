@@ -1,0 +1,175 @@
+@page
+@model ProGestao.Pages.Ausencias.IndexModel
+@{
+    ViewData["Title"] = "Ausências";
+}
+
+<div class="header-blue">
+    <div class="container">
+        <h2 class="mb-0">
+            <i class="fas fa-calendar-minus me-2"></i>Ausências
+        </h2>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Mensagens de feedback -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-1"></i>@TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-1"></i>@TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+        </div>
+    }
+
+    <!-- Filtros -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-filter me-2"></i>Filtros
+            </h5>
+        </div>
+        <div class="card-body">
+            <form method="get">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-3">
+                        <label for="FiltroUsuarioId" class="form-label">
+                            <i class="fas fa-user me-1"></i>Usuário
+                        </label>
+                        <select asp-for="FiltroUsuarioId" asp-items="Model.UsuariosSelectList"
+                                class="form-select">
+                            <option value="">Todos</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="FiltroTipoAusenciaId" class="form-label">
+                            <i class="fas fa-tags me-1"></i>Tipo de Ausência
+                        </label>
+                        <select asp-for="FiltroTipoAusenciaId" asp-items="Model.TiposAusenciaSelectList"
+                                class="form-select">
+                            <option value="">Todos</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="FiltroDataInicio" class="form-label">
+                            <i class="fas fa-calendar me-1"></i>Data Início
+                        </label>
+                        <input asp-for="FiltroDataInicio" type="date" class="form-control" />
+                    </div>
+                    <div class="col-md-2">
+                        <label for="FiltroDataFim" class="form-label">
+                            <i class="fas fa-calendar me-1"></i>Data Fim
+                        </label>
+                        <input asp-for="FiltroDataFim" type="date" class="form-control" />
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-search me-1"></i>Filtrar
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tabela de Ausências -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header card-header-blue">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h5 class="mb-0">
+                                <i class="fas fa-list me-2"></i>Lista de Ausências
+                            </h5>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <a asp-page="./Create" class="btn btn-success">
+                                <i class="fas fa-plus me-1"></i>Nova Ausência
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (Model.Ausencias.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Usuário</th>
+                                        <th>Tipo</th>
+                                        <th>Período</th>
+                                        <th>Observação</th>
+                                        <th class="text-center">Status</th>
+                                        <th class="text-end">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var ausencia in Model.Ausencias)
+                                    {
+                                        <tr>
+                                            <td class="fw-bold">@ausencia.UsuarioNome</td>
+                                            <td>
+                                                <span class="badge" style="background-color: @ausencia.TipoAusenciaCor;">
+                                                    @ausencia.TipoAusenciaNome
+                                                </span>
+                                            </td>
+                                            <td>
+                                                @ausencia.DataInicio.ToString("dd/MM/yyyy") — @ausencia.DataFim.ToString("dd/MM/yyyy")
+                                            </td>
+                                            <td class="text-muted">@(ausencia.Observacao ?? "—")</td>
+                                            <td class="text-center">
+                                                @if (ausencia.Ativo)
+                                                {
+                                                    <span class="badge bg-success">Ativo</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary">Inativo</span>
+                                                }
+                                            </td>
+                                            <td class="text-end">
+                                                <a asp-page="./Edit" asp-route-id="@ausencia.Id"
+                                                   class="btn btn-outline-warning btn-sm" title="Editar">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                @if (ausencia.Ativo)
+                                                {
+                                                    <form method="post" asp-page-handler="Desativar" asp-route-id="@ausencia.Id"
+                                                          class="d-inline"
+                                                          onsubmit="return confirm('Tem certeza que deseja desativar esta ausência?');">
+                                                        <button type="submit" class="btn btn-outline-danger btn-sm" title="Desativar">
+                                                            <i class="fas fa-ban"></i>
+                                                        </button>
+                                                    </form>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-calendar-minus fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">Nenhuma ausência encontrada.</p>
+                            <a asp-page="./Create" class="btn btn-primary">
+                                <i class="fas fa-plus me-1"></i>Registrar primeira ausência
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

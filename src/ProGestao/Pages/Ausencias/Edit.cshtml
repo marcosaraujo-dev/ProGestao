@@ -1,0 +1,107 @@
+@page "{id:int}"
+@model ProGestao.Pages.Ausencias.EditModel
+@{
+    ViewData["Title"] = "Editar Ausência";
+}
+
+<div class="header-blue">
+    <div class="container">
+        <h2 class="mb-0">
+            <i class="fas fa-edit me-2"></i>Editar Ausência
+        </h2>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <form method="post">
+                <input type="hidden" asp-for="Ausencia.Id" />
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-calendar-minus me-2"></i>Informações da Ausência
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                        <!-- Usuário -->
+                        <div class="mb-3">
+                            <label asp-for="Ausencia.UsuarioId" class="form-label">
+                                <i class="fas fa-user me-1"></i>Usuário *
+                            </label>
+                            <select asp-for="Ausencia.UsuarioId" asp-items="Model.UsuariosSelectList"
+                                    class="form-select">
+                                <option value="">Selecione um usuário</option>
+                            </select>
+                            <span asp-validation-for="Ausencia.UsuarioId" class="text-danger"></span>
+                        </div>
+
+                        <!-- Tipo de Ausência -->
+                        <div class="mb-3">
+                            <label asp-for="Ausencia.TipoAusenciaId" class="form-label">
+                                <i class="fas fa-tags me-1"></i>Tipo de Ausência *
+                            </label>
+                            <select asp-for="Ausencia.TipoAusenciaId" asp-items="Model.TiposAusenciaSelectList"
+                                    class="form-select">
+                                <option value="">Selecione um tipo</option>
+                            </select>
+                            <span asp-validation-for="Ausencia.TipoAusenciaId" class="text-danger"></span>
+                        </div>
+
+                        <!-- Data Início -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Ausencia.DataInicio" class="form-label">
+                                    <i class="fas fa-calendar me-1"></i>Data Início *
+                                </label>
+                                <input asp-for="Ausencia.DataInicio" type="date" class="form-control" />
+                                <span asp-validation-for="Ausencia.DataInicio" class="text-danger"></span>
+                            </div>
+
+                            <!-- Data Fim -->
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Ausencia.DataFim" class="form-label">
+                                    <i class="fas fa-calendar me-1"></i>Data Fim *
+                                </label>
+                                <input asp-for="Ausencia.DataFim" type="date" class="form-control" />
+                                <span asp-validation-for="Ausencia.DataFim" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <!-- Observação -->
+                        <div class="mb-3">
+                            <label asp-for="Ausencia.Observacao" class="form-label">
+                                <i class="fas fa-align-left me-1"></i>Observação
+                            </label>
+                            <textarea asp-for="Ausencia.Observacao" class="form-control" rows="3"
+                                      placeholder="Observação opcional sobre a ausência"></textarea>
+                            <span asp-validation-for="Ausencia.Observacao" class="text-danger"></span>
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>Máximo 500 caracteres
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botões de Ação -->
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a asp-page="./Index" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>Salvar Alterações
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<partial name="_ValidationScriptsPartial" />
