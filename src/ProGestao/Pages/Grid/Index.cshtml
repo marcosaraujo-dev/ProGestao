@@ -8,8 +8,6 @@
 
 @section Styles {
     <link rel="stylesheet" href="~/css/pages/grid.css" asp-append-version="true">
-   
-    
 }
 
 <div class="container-fluid">
@@ -388,60 +386,15 @@
             // Mantém foco no topo da página
             setTimeout(() => window.scrollTo(0, 0), 100);
 
-            // Inicializa tooltips
+            // Inicializa tooltips com container body para evitar corte pelo overflow do grid-wrapper
             var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
             var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
                 return new bootstrap.Tooltip(tooltipTriggerEl, {
                     html: true,
-                    sanitize: false
+                    sanitize: false,
+                    container: 'body'
                 });
             });
-
-            // Correção FORÇADA do posicionamento do dropdown
-            const dropdownButton = document.getElementById('dropdownPeriodo');
-            const dropdownMenu = document.querySelector('.dropdown-menu-custom');
-            
-            if (dropdownButton && dropdownMenu) {
-                 const dropdown = new bootstrap.Dropdown(dropdownButton, {
-                    autoClose: true,
-                    boundary: 'viewport',
-                    offset: [0, 2],
-                    placement: 'bottom-start'
-                });
-                // Remove configurações automáticas do Bootstrap que podem interferir
-                dropdownMenu.removeAttribute('data-bs-popper');
-                dropdownMenu.style.position = 'absolute';
-                dropdownMenu.style.inset = 'auto';
-                dropdownMenu.style.margin = '0';
-                dropdownMenu.style.transform = 'none';
-                
-                // Força posicionamento correto
-                dropdownButton.addEventListener('shown.bs.dropdown', function() {
-                    setTimeout(() => {
-                        dropdownMenu.style.position = 'absolute';
-                        dropdownMenu.style.top = 'calc(100% + 2px)';
-                        dropdownMenu.style.left = '0';
-                        dropdownMenu.style.transform = 'none';
-                        dropdownMenu.style.margin = '0';
-                        dropdownMenu.style.inset = 'auto';
-                    }, 1);
-                });
-                
-                // Observer para detectar mudanças
-                const observer = new MutationObserver(function(mutations) {
-                    mutations.forEach(function(mutation) {
-                        if (mutation.attributeName === 'style' && dropdownMenu.classList.contains('show')) {
-                            dropdownMenu.style.transform = 'none';
-                            dropdownMenu.style.top = 'calc(100% + 2px)';
-                            dropdownMenu.style.left = '0';
-                        }
-                    });
-                });
-                
-                observer.observe(dropdownMenu, { attributes: true, attributeFilter: ['style'] });
-
-
-            }
 
             // Validação do modal de período customizado
             const form = document.querySelector('#customPeriodModal form');
