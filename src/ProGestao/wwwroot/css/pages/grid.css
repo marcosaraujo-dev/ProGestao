@@ -315,7 +315,8 @@
 }
 
 	.activity-title span {
-		display: blockactivity-item white-space: nowrap;
+		display: block;
+		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
 		max-width: 100px; /* Controle específico da largura */
