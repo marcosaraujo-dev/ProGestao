@@ -1,0 +1,106 @@
+@page
+@model ProGestao.Pages.TiposAusencia.CreateModel
+@{
+    ViewData["Title"] = "Novo Tipo de Ausência";
+}
+
+<div class="header-blue">
+    <div class="container">
+        <h2 class="mb-0">
+            <i class="fas fa-plus me-2"></i>Novo Tipo de Ausência
+        </h2>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <form method="post">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-tags me-2"></i>Informações do Tipo de Ausência
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                        <!-- Nome -->
+                        <div class="mb-3">
+                            <label asp-for="TipoAusencia.Nome" class="form-label">
+                                <i class="fas fa-tag me-1"></i>Nome *
+                            </label>
+                            <input asp-for="TipoAusencia.Nome" class="form-control"
+                                   placeholder="Ex: Férias, Folga, Licença Médica" />
+                            <span asp-validation-for="TipoAusencia.Nome" class="text-danger"></span>
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>Máximo 50 caracteres
+                            </div>
+                        </div>
+
+                        <!-- Cor -->
+                        <div class="mb-3">
+                            <label asp-for="TipoAusencia.Cor" class="form-label">
+                                <i class="fas fa-palette me-1"></i>Cor *
+                            </label>
+                            <div class="input-group" style="max-width: 300px;">
+                                <input type="color" asp-for="TipoAusencia.Cor"
+                                       class="form-control form-control-color" title="Escolha uma cor" />
+                                <input type="text" id="corHexDisplay" class="form-control"
+                                       value="@Model.TipoAusencia.Cor" readonly />
+                            </div>
+                            <span asp-validation-for="TipoAusencia.Cor" class="text-danger"></span>
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>Formato hexadecimal (#XXXXXX)
+                            </div>
+                        </div>
+
+                        <!-- Descrição -->
+                        <div class="mb-3">
+                            <label asp-for="TipoAusencia.Descricao" class="form-label">
+                                <i class="fas fa-align-left me-1"></i>Descrição
+                            </label>
+                            <textarea asp-for="TipoAusencia.Descricao" class="form-control" rows="3"
+                                      placeholder="Descrição opcional do tipo de ausência"></textarea>
+                            <span asp-validation-for="TipoAusencia.Descricao" class="text-danger"></span>
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>Máximo 200 caracteres
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botões de Ação -->
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a asp-page="./Index" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save me-1"></i>Criar Tipo de Ausência
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var colorInput = document.getElementById('TipoAusencia_Cor');
+            var hexDisplay = document.getElementById('corHexDisplay');
+
+            if (colorInput && hexDisplay) {
+                colorInput.addEventListener('input', function () {
+                    hexDisplay.value = this.value;
+                });
+            }
+        });
+    </script>
+}
+
+<partial name="_ValidationScriptsPartial" />

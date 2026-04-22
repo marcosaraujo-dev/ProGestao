@@ -1,0 +1,123 @@
+@page
+@model ProGestao.Pages.TiposAusencia.IndexModel
+@{
+    ViewData["Title"] = "Tipos de Ausência";
+}
+
+<div class="header-blue">
+    <div class="container">
+        <h2 class="mb-0">
+            <i class="fas fa-tags me-2"></i>Tipos de Ausência
+        </h2>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Mensagens de feedback -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-1"></i>@TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-1"></i>@TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header card-header-blue">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h5 class="mb-0">
+                                <i class="fas fa-list me-2"></i>Lista de Tipos de Ausência
+                            </h5>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <a asp-page="./Create" class="btn btn-success">
+                                <i class="fas fa-plus me-1"></i>Novo Tipo
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (Model.TiposAusencia.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>Cor</th>
+                                        <th>Descrição</th>
+                                        <th class="text-center">Status</th>
+                                        <th class="text-end">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var tipo in Model.TiposAusencia)
+                                    {
+                                        <tr>
+                                            <td class="fw-bold">@tipo.Nome</td>
+                                            <td>
+                                                <span class="d-inline-flex align-items-center">
+                                                    <span class="rounded-circle me-2"
+                                                          style="width: 20px; height: 20px; display: inline-block; background-color: @tipo.Cor;">
+                                                    </span>
+                                                    <code>@tipo.Cor</code>
+                                                </span>
+                                            </td>
+                                            <td class="text-muted">@(tipo.Descricao ?? "—")</td>
+                                            <td class="text-center">
+                                                @if (tipo.Ativo)
+                                                {
+                                                    <span class="badge bg-success">Ativo</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary">Inativo</span>
+                                                }
+                                            </td>
+                                            <td class="text-end">
+                                                <a asp-page="./Edit" asp-route-id="@tipo.Id"
+                                                   class="btn btn-outline-warning btn-sm" title="Editar">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                @if (tipo.Ativo)
+                                                {
+                                                    <form method="post" asp-page-handler="Desativar" asp-route-id="@tipo.Id"
+                                                          class="d-inline"
+                                                          onsubmit="return confirm('Tem certeza que deseja desativar o tipo &quot;@tipo.Nome&quot;?');">
+                                                        <button type="submit" class="btn btn-outline-danger btn-sm" title="Desativar">
+                                                            <i class="fas fa-ban"></i>
+                                                        </button>
+                                                    </form>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-tags fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">Nenhum tipo de ausência cadastrado.</p>
+                            <a asp-page="./Create" class="btn btn-primary">
+                                <i class="fas fa-plus me-1"></i>Criar primeiro tipo
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
