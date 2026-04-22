@@ -5,6 +5,7 @@ using ProGestao.Services.Atividades;
 using ProGestao.Services.Interfaces;
 using ProGestao.Services.Projetos;
 using ProGestao.Services.Ausencias;
+using ProGestao.Services.Gantt;
 using ProGestao.Services.TiposAusencia;
 using ProGestao.Services.Usuarios;
 
@@ -54,6 +55,11 @@ namespace ProGestao.Configuration
             services.AddScoped<IAusenciaQueryService, AusenciaQueryService>();
             services.AddScoped<IAusenciaCommandService, AusenciaCommandService>();
             services.AddScoped<IAusenciaValidationService, AusenciaValidationService>();
+
+            // ==============================
+            // GANTT SERVICE
+            // ==============================
+            services.AddScoped<IGanttService, GanttService>();
 
             // ==============================
             // OUTROS SERVICES
