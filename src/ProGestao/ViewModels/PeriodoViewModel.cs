@@ -162,6 +162,24 @@ namespace ProGestao.ViewModels
         }
 
         /// <summary>
+        /// Cria instância para visão mensal compacta
+        /// </summary>
+        /// <returns>PeriodoViewModel configurado para visão mensal</returns>
+        public static PeriodoViewModel Mensal()
+        {
+            var diasDoMes = DateTime.DaysInMonth(DateTime.Now.Year, DateTime.Now.Month);
+
+            return new PeriodoViewModel
+            {
+                Nome = "Mensal",
+                Valor = "mensal",
+                Icone = "fas fa-calendar-days",
+                Descricao = "Visão compacta do mês",
+                QtdDias = diasDoMes
+            };
+        }
+
+        /// <summary>
         /// Retorna todos os períodos disponíveis
         /// </summary>
         /// <returns>Lista de períodos padrão</returns>
@@ -172,7 +190,8 @@ namespace ProGestao.ViewModels
                 Semana(),
                 QuinzeDias(),
                 MesAtual(),
-                TrintaDias()
+                TrintaDias(),
+                Mensal()
             };
         }
 
@@ -245,6 +264,7 @@ namespace ProGestao.ViewModels
                 "15dias" => PeriodoViewModel.QuinzeDias(),
                 "mes" => PeriodoViewModel.MesAtual(),
                 "30dias" => PeriodoViewModel.TrintaDias(),
+                "mensal" => PeriodoViewModel.Mensal(),
                 "custom" => PeriodoViewModel.Custom(),
                 _ => null
             };
@@ -265,6 +285,7 @@ namespace ProGestao.ViewModels
                 "semana" => 7,
                 "15dias" => 15,
                 "mes" => DateTime.DaysInMonth(referencia.Year, referencia.Month),
+                "mensal" => DateTime.DaysInMonth(referencia.Year, referencia.Month),
                 "30dias" => 30,
                 "custom" => periodo.QtdDias,
                 _ => 7
@@ -286,6 +307,7 @@ namespace ProGestao.ViewModels
                 "semana" => GetStartOfWeek(referencia),
                 "15dias" => referencia.AddDays(-14),
                 "mes" => new DateTime(referencia.Year, referencia.Month, 1),
+                "mensal" => new DateTime(referencia.Year, referencia.Month, 1),
                 "30dias" => referencia.AddDays(-29),
                 "custom" => referencia,
                 _ => GetStartOfWeek(referencia)

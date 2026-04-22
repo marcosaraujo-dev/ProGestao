@@ -146,7 +146,7 @@
                 <div class="card-body p-0">
                     <!-- Grid responsivo -->
                     <div class="table-responsive grid-wrapper">
-                        <table class="table table-bordered table-hover mb-0 week-grid">
+                        <table class="table table-bordered table-hover mb-0 week-grid @(Model.EhVisaoMensal ? "grid-compact" : "")">
                             <!-- Cabeçalho da tabela -->
                             <thead class="table-light sticky-top">
                                 <tr>
@@ -158,13 +158,25 @@
                                     {
                                         @foreach (var dia in Model.DiasSemana)
                                         {
-                                            <th scope="col" class="day-column text-center @(dia.EhHoje ? "today" : "") @(dia.EhFimDeSemana ? "weekend" : "")">
-                                                <div class="day-header">
-                                                    <div class="day-name">@(dia.DiaSemana?.Length > 3 ? dia.DiaSemana.Substring(0, 3) : dia.DiaSemana)</div>
-                                                    <div class="day-number">@dia.Dia</div>
-                                                    <small class="text-muted">@dia.Mes</small>
-                                                </div>
-                                            </th>
+                                            @if (Model.EhVisaoMensal)
+                                            {
+                                                <th scope="col" class="day-column day-column-compact text-center @(dia.EhHoje ? "today" : "") @(dia.EhFimDeSemana ? "weekend" : "")">
+                                                    <div class="day-header day-header-compact">
+                                                        <div class="day-number">@dia.Dia</div>
+                                                        <small class="day-abbrev">@(dia.DiaSemana?.Length > 1 ? dia.DiaSemana.Substring(0, 1) : dia.DiaSemana)</small>
+                                                    </div>
+                                                </th>
+                                            }
+                                            else
+                                            {
+                                                <th scope="col" class="day-column text-center @(dia.EhHoje ? "today" : "") @(dia.EhFimDeSemana ? "weekend" : "")">
+                                                    <div class="day-header">
+                                                        <div class="day-name">@(dia.DiaSemana?.Length > 3 ? dia.DiaSemana.Substring(0, 3) : dia.DiaSemana)</div>
+                                                        <div class="day-number">@dia.Dia</div>
+                                                        <small class="text-muted">@dia.Mes</small>
+                                                    </div>
+                                                </th>
+                                            }
                                         }
                                     }
                                 </tr>
@@ -224,102 +236,155 @@
                                             {
                                                 @foreach (var dia in Model.DiasSemana)
                                                 {
-                                                    <td class="activity-cell @(dia.EhHoje ? "today" : "") @(dia.EhFimDeSemana ? "weekend" : "") @(usuario.TemAusenciasNoDia(dia.Data) ? "has-ausencia" : "")">
-                                                        @{
-                                                            var dataKey = dia.Data.Date;
-                                                            var atividades = usuario.AtividadesPorDia?.ContainsKey(dataKey) == true 
-                                                                ? usuario.AtividadesPorDia[dataKey] 
-                                                                : new List<AtividadeGridViewModel>();
-                                                            var ausenciasDia = usuario.ObterAusenciasDoDia(dia.Data);
-                                                        }
+                                                    var dataKey = dia.Data.Date;
+                                                    var atividades = usuario.AtividadesPorDia?.ContainsKey(dataKey) == true 
+                                                        ? usuario.AtividadesPorDia[dataKey] 
+                                                        : new List<AtividadeGridViewModel>();
+                                                    var ausenciasDia = usuario.ObterAusenciasDoDia(dia.Data);
 
-                                                        @if (ausenciasDia.Any())
+                                                    @if (Model.EhVisaoMensal)
+                                                    {
+                                                        @* === VISÃO COMPACTA MENSAL === *@
+                                                        var temConteudo = atividades.Any() || ausenciasDia.Any();
+                                                        var popoverTitle = $"{dia.DiaSemana}, {dia.Dia}/{dia.Mes} — {usuario.Nome}";
+                                                        var popoverContent = temConteudo ? BuildPopoverContent(atividades, ausenciasDia) : "";
+                                                        var cellCss = $"activity-cell activity-cell-compact {(dia.EhHoje ? "today" : "")} {(dia.EhFimDeSemana ? "weekend" : "")} {(ausenciasDia.Any() ? "has-ausencia" : "")}";
+
+                                                        if (temConteudo)
                                                         {
-                                                            <div class="ausencia-indicators">
-                                                                @foreach (var ausencia in ausenciasDia)
-                                                                {
-                                                                    <div class="ausencia-badge" style="background-color: @ausencia.TipoCor;"
-                                                                         data-bs-toggle="tooltip"
-                                                                         data-bs-placement="top"
-                                                                         title="🚫 @ausencia.TipoNome (@ausencia.DataInicio.ToString("dd/MM") - @ausencia.DataFim.ToString("dd/MM"))">
-                                                                        <i class="fas fa-calendar-minus me-1"></i>
-                                                                        @ausencia.TipoNome
-                                                                    </div>
-                                                                }
-                                                            </div>
-                                                        }
-                                                        
-                                                        @if (atividades != null && atividades.Any())
-                                                        {
-                                                            <div class="activities-container">
-                                                                @foreach (var atividade in atividades)
-                                                                {
-                                                                    <a href="@Url.Page("/Atividades/Details", new { id = atividade.Id })"
-                                                                       class="activity-link"
-                                                                       data-bs-toggle="tooltip"
-                                                                       data-bs-placement="top"
-                                                                       title="📝 @atividade.Nome @(!string.IsNullOrEmpty(atividade.ProjetoNome) ? $" | 📁 {atividade.ProjetoNome}" : "") | 📊 @atividade.StatusNome | ⚡ @atividade.PrioridadeTexto">
-                                                                        
-                                                                        <div class="activity-item status-@atividade.StatusClasse @(atividade.EstaAtrasada ? "overdue" : "") @(atividade.Prioridade >= 3 ? "high-priority" : "")"
-                                                                             style="border-left: 4px solid @(atividade.StatusCor ?? "#6c757d");">
-                                                                            
-                                                                            <div class="activity-content">
-                                                                                <!-- Título -->
-                                                                                <div class="activity-title" title="@atividade.Nome">
-                                                                                    @atividade.Nome
-                                                                                    @if (atividade.Prioridade >= 3)
-                                                                                    {
-                                                                                        <i class="fas fa-exclamation-triangle text-warning ms-1"
-                                                                                           title="Prioridade @atividade.PrioridadeTexto"></i>
-                                                                                    }
-                                                                                </div>
-
-                                                                                <!-- Status -->
-                                                                                <div class="activity-meta">
-                                                                                    <span class="activity-status"
-                                                                                          style="background-color: @(atividade.StatusCor ?? "#6c757d");">
-                                                                                        @atividade.StatusNome
-                                                                                    </span>
-                                                                                </div>
-
-                                                                                <!-- Projeto se existir - TEXTO TRUNCADO -->
-                                                                                @if (!string.IsNullOrEmpty(atividade.ProjetoNome))
-                                                                                {
-                                                                                    <div class="activity-project" title="@atividade.ProjetoNome">
-                                                                                        @{
-                                                                                            var projetoTruncado = atividade.ProjetoNome.Length > 30 
-                                                                                                ? atividade.ProjetoNome.Substring(0, 30) + "..." 
-                                                                                                : atividade.ProjetoNome;
-                                                                                        }
-                                                                                        <i class="fas fa-folder-open me-1"></i>
-                                                                                        @projetoTruncado
-                                                                                    </div>
-                                                                                }
-
-                                                                                <!-- Preview de informações -->
-                                                                                @if (atividade.DataFimPrevista.HasValue)
-                                                                                {
-                                                                                    <div class="activity-preview">
-                                                                                        <i class="fas fa-clock me-1"></i>
-                                                                                        @atividade.DataFimPrevista.Value.ToString("dd/MM")
-                                                                                    </div>
-                                                                                }
-                                                                            </div>
-                                                                        </div>
-                                                                    </a>
-                                                                }
-                                                            </div>
+                                                            <td class="@cellCss"
+                                                                tabindex="0" role="button"
+                                                                data-bs-toggle="popover"
+                                                                data-bs-trigger="click"
+                                                                data-bs-placement="auto"
+                                                                data-bs-html="true"
+                                                                data-bs-title="@popoverTitle"
+                                                                data-bs-content="@popoverContent">
+                                                                <div class="compact-cell-content">
+                                                                    @if (ausenciasDia.Any())
+                                                                    {
+                                                                        @foreach (var ausencia in ausenciasDia)
+                                                                        {
+                                                                            <span class="compact-badge compact-badge-ausencia" style="background-color: @ausencia.TipoCor;" title="@ausencia.TipoNome">
+                                                                                <i class="fas fa-ban"></i>
+                                                                            </span>
+                                                                        }
+                                                                    }
+                                                                    @if (atividades.Any())
+                                                                    {
+                                                                        var grupos = atividades.GroupBy(a => a.StatusCor ?? "#6c757d");
+                                                                        @foreach (var grupo in grupos)
+                                                                        {
+                                                                            <span class="compact-badge" style="background-color: @grupo.Key;" title="@grupo.First().StatusNome: @grupo.Count()">
+                                                                                @grupo.Count()
+                                                                            </span>
+                                                                        }
+                                                                    }
+                                                                </div>
+                                                            </td>
                                                         }
                                                         else
                                                         {
-                                                            @if (!ausenciasDia.Any())
+                                                            <td class="@cellCss">
+                                                                <div class="compact-cell-content">
+                                                                    <span class="compact-empty">—</span>
+                                                                </div>
+                                                            </td>
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        @* === VISÃO DETALHADA PADRÃO === *@
+                                                        <td class="activity-cell @(dia.EhHoje ? "today" : "") @(dia.EhFimDeSemana ? "weekend" : "") @(ausenciasDia.Any() ? "has-ausencia" : "")">
+
+                                                            @if (ausenciasDia.Any())
                                                             {
-                                                                <div class="empty-day">
-                                                                    <i class="fas fa-calendar-times opacity-50"></i>
+                                                                <div class="ausencia-indicators">
+                                                                    @foreach (var ausencia in ausenciasDia)
+                                                                    {
+                                                                        <div class="ausencia-badge" style="background-color: @ausencia.TipoCor;"
+                                                                             data-bs-toggle="tooltip"
+                                                                             data-bs-placement="top"
+                                                                             title="🚫 @ausencia.TipoNome (@ausencia.DataInicio.ToString("dd/MM") - @ausencia.DataFim.ToString("dd/MM"))">
+                                                                            <i class="fas fa-calendar-minus me-1"></i>
+                                                                            @ausencia.TipoNome
+                                                                        </div>
+                                                                    }
                                                                 </div>
                                                             }
-                                                        }
-                                                    </td>
+                                                            
+                                                            @if (atividades != null && atividades.Any())
+                                                            {
+                                                                <div class="activities-container">
+                                                                    @foreach (var atividade in atividades)
+                                                                    {
+                                                                        <a href="@Url.Page("/Atividades/Details", new { id = atividade.Id })"
+                                                                           class="activity-link"
+                                                                           data-bs-toggle="tooltip"
+                                                                           data-bs-placement="top"
+                                                                           title="📝 @atividade.Nome @(!string.IsNullOrEmpty(atividade.ProjetoNome) ? $" | 📁 {atividade.ProjetoNome}" : "") | 📊 @atividade.StatusNome | ⚡ @atividade.PrioridadeTexto">
+                                                                            
+                                                                            <div class="activity-item status-@atividade.StatusClasse @(atividade.EstaAtrasada ? "overdue" : "") @(atividade.Prioridade >= 3 ? "high-priority" : "")"
+                                                                                 style="border-left: 4px solid @(atividade.StatusCor ?? "#6c757d");">
+                                                                                
+                                                                                <div class="activity-content">
+                                                                                    <!-- Título -->
+                                                                                    <div class="activity-title" title="@atividade.Nome">
+                                                                                        @atividade.Nome
+                                                                                        @if (atividade.Prioridade >= 3)
+                                                                                        {
+                                                                                            <i class="fas fa-exclamation-triangle text-warning ms-1"
+                                                                                               title="Prioridade @atividade.PrioridadeTexto"></i>
+                                                                                        }
+                                                                                    </div>
+
+                                                                                    <!-- Status -->
+                                                                                    <div class="activity-meta">
+                                                                                        <span class="activity-status"
+                                                                                              style="background-color: @(atividade.StatusCor ?? "#6c757d");">
+                                                                                            @atividade.StatusNome
+                                                                                        </span>
+                                                                                    </div>
+
+                                                                                    <!-- Projeto se existir - TEXTO TRUNCADO -->
+                                                                                    @if (!string.IsNullOrEmpty(atividade.ProjetoNome))
+                                                                                    {
+                                                                                        <div class="activity-project" title="@atividade.ProjetoNome">
+                                                                                            @{
+                                                                                                var projetoTruncado = atividade.ProjetoNome.Length > 30 
+                                                                                                    ? atividade.ProjetoNome.Substring(0, 30) + "..." 
+                                                                                                    : atividade.ProjetoNome;
+                                                                                            }
+                                                                                            <i class="fas fa-folder-open me-1"></i>
+                                                                                            @projetoTruncado
+                                                                                        </div>
+                                                                                    }
+
+                                                                                    <!-- Preview de informações -->
+                                                                                    @if (atividade.DataFimPrevista.HasValue)
+                                                                                    {
+                                                                                        <div class="activity-preview">
+                                                                                            <i class="fas fa-clock me-1"></i>
+                                                                                            @atividade.DataFimPrevista.Value.ToString("dd/MM")
+                                                                                        </div>
+                                                                                    }
+                                                                                </div>
+                                                                            </div>
+                                                                        </a>
+                                                                    }
+                                                                </div>
+                                                            }
+                                                            else
+                                                            {
+                                                                @if (!ausenciasDia.Any())
+                                                                {
+                                                                    <div class="empty-day">
+                                                                        <i class="fas fa-calendar-times opacity-50"></i>
+                                                                    </div>
+                                                                }
+                                                            }
+                                                        </td>
+                                                    }
                                                 }
                                             }
                                         </tr>
@@ -400,6 +465,26 @@
                 });
             });
 
+            // Inicializa popovers para visão compacta mensal
+            var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+            var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+                return new bootstrap.Popover(popoverTriggerEl, {
+                    html: true,
+                    sanitize: false,
+                    container: 'body',
+                    customClass: 'compact-popover'
+                });
+            });
+
+            // Fecha popovers ao clicar fora
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('[data-bs-toggle="popover"]') && !e.target.closest('.popover')) {
+                    popoverList.forEach(function(popover) {
+                        popover.hide();
+                    });
+                }
+            });
+
             // Validação do modal de período customizado
             const form = document.querySelector('#customPeriodModal form');
             if (form) {
@@ -463,5 +548,51 @@
             classes.Add("has-project");
 
         return string.Join(" ", classes);
+    }
+
+    private string BuildPopoverContent(
+        List<AtividadeGridViewModel> atividades,
+        List<AusenciaGridViewModel> ausencias)
+    {
+        var sb = new System.Text.StringBuilder();
+        sb.Append("<div class='compact-popover-body'>");
+
+        if (ausencias.Any())
+        {
+            sb.Append("<div class='popover-section'>");
+            sb.Append("<strong class='popover-section-title'><i class='fas fa-calendar-minus me-1'></i>Ausências</strong>");
+            sb.Append("<ul class='popover-list'>");
+            foreach (var a in ausencias)
+            {
+                sb.Append($"<li><span class='popover-dot' style='background:{a.TipoCor}'></span>{System.Net.WebUtility.HtmlEncode(a.TipoNome)}</li>");
+            }
+            sb.Append("</ul></div>");
+        }
+
+        if (atividades.Any())
+        {
+            sb.Append("<div class='popover-section'>");
+            sb.Append("<strong class='popover-section-title'><i class='fas fa-tasks me-1'></i>Atividades</strong>");
+            sb.Append("<ul class='popover-list'>");
+            foreach (var at in atividades)
+            {
+                var nome = at.Nome?.Length > 40 ? at.Nome.Substring(0, 40) + "..." : at.Nome;
+                var atrasadoIcon = at.EstaAtrasada ? " <i class='fas fa-exclamation-circle text-danger'></i>" : "";
+                sb.Append($"<li>");
+                sb.Append($"<span class='popover-dot' style='background:{at.StatusCor ?? "#6c757d"}'></span>");
+                sb.Append($"<a href='/Atividades/Details/{at.Id}' class='popover-link'>{System.Net.WebUtility.HtmlEncode(nome)}{atrasadoIcon}</a>");
+                sb.Append($"<small class='text-muted ms-1'>({System.Net.WebUtility.HtmlEncode(at.StatusNome)})</small>");
+                sb.Append("</li>");
+            }
+            sb.Append("</ul></div>");
+        }
+
+        if (!ausencias.Any() && !atividades.Any())
+        {
+            sb.Append("<p class='text-muted mb-0'>Nenhuma atividade ou ausência.</p>");
+        }
+
+        sb.Append("</div>");
+        return sb.ToString();
     }
 }

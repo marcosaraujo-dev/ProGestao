@@ -35,6 +35,7 @@ namespace ProGestao.Pages.Grid
         public List<PeriodoViewModel> PeriodosDisponiveis { get; private set; } = new();
 
         public bool TemAtividadesAtrasadas => QtdAtividadesAtrasadas > 0;
+        public bool EhVisaoMensal => Periodo?.ToLower() == "mensal";
         public string TituloSemana => ObterTituloPeriodo();
         public DateTime SemanaAnterior => CalcularPeriodoAnterior();
         public DateTime ProximaSemana => CalcularProximoPeriodo();
@@ -144,6 +145,7 @@ namespace ProGestao.Pages.Grid
                 "15dias" => (hoje.AddDays(-14), hoje),
                 "30dias" => (hoje.AddDays(-29), hoje),
                 "mes" => ObterPeriodoMesAtual(hoje),
+                "mensal" => ObterPeriodoMensal(dataBase),
                 "customizado" => ObterPeriodoCustomizado(),
                 _ => ObterPeriodoSemana(dataBase)
             };
@@ -172,6 +174,13 @@ namespace ProGestao.Pages.Grid
             return (primeiroDiaDoMes, ultimoDiaDoMes);
         }
 
+        private (DateTime inicio, DateTime fim) ObterPeriodoMensal(DateTime dataBase)
+        {
+            var primeiroDiaDoMes = new DateTime(dataBase.Year, dataBase.Month, 1);
+            var ultimoDiaDoMes = primeiroDiaDoMes.AddMonths(1).AddDays(-1);
+            return (primeiroDiaDoMes, ultimoDiaDoMes);
+        }
+
         private (DateTime inicio, DateTime fim) ObterPeriodoCustomizado()
         {
             var dataInicio = Semana ?? DateTime.Today;
@@ -194,7 +203,8 @@ namespace ProGestao.Pages.Grid
                 new() { Nome = "Esta Semana", Valor = "semana", Icone = "fas fa-calendar-week", Descricao = "7 dias" },
                 new() { Nome = "Últimos 15 dias", Valor = "15dias", Icone = "fas fa-calendar-alt", Descricao = "15 dias" },
                 new() { Nome = "Este Mês", Valor = "mes", Icone = "fas fa-calendar", Descricao = "Mês atual" },
-                new() { Nome = "Últimos 30 dias", Valor = "30dias", Icone = "fas fa-calendar-plus", Descricao = "30 dias" }
+                new() { Nome = "Últimos 30 dias", Valor = "30dias", Icone = "fas fa-calendar-plus", Descricao = "30 dias" },
+                new() { Nome = "Mensal", Valor = "mensal", Icone = "fas fa-calendar-days", Descricao = "Visão compacta do mês" }
             };
         }
 
@@ -267,6 +277,7 @@ namespace ProGestao.Pages.Grid
                 "15dias" => $"Últimos 15 dias ({PeriodoInicio:dd/MM} a {PeriodoFim:dd/MM/yyyy})",
                 "30dias" => $"Últimos 30 dias ({PeriodoInicio:dd/MM} a {PeriodoFim:dd/MM/yyyy})",
                 "mes" => $"Mês de {PeriodoInicio:MMMM/yyyy}",
+                "mensal" => $"Visão Mensal — {PeriodoInicio:MMMM/yyyy}",
                 "customizado" => $"Período customizado ({PeriodoInicio:dd/MM} a {PeriodoFim:dd/MM/yyyy})",
                 _ => $"Período de {qtdDias} dias ({PeriodoInicio:dd/MM} a {PeriodoFim:dd/MM/yyyy})"
             };

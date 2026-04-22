@@ -664,6 +664,181 @@
 		}
 
 /* =============================================================
+   COMPACT MONTHLY VIEW (Visão Mensal Compacta)
+   ============================================================= */
+
+/* Grid compact mode — narrower columns */
+.week-grid.grid-compact {
+    min-width: 1200px;
+}
+
+    .week-grid.grid-compact .day-column,
+    .week-grid.grid-compact .day-column-compact {
+        width: 45px !important;
+        min-width: 40px !important;
+        max-width: 55px !important;
+        padding: 0.25rem !important;
+    }
+
+    .week-grid.grid-compact thead th.day-column-compact {
+        padding: 0.5rem 0.25rem;
+    }
+
+/* Compact day header */
+.day-header-compact {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    line-height: 1.1;
+}
+
+    .day-header-compact .day-number {
+        font-size: 0.9rem;
+        font-weight: 700;
+    }
+
+    .day-header-compact .day-abbrev {
+        font-size: 0.6rem;
+        opacity: 0.75;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+/* Compact activity cell */
+.activity-cell-compact {
+    vertical-align: middle !important;
+    padding: 4px 2px !important;
+    min-height: 36px;
+    max-width: 55px;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+    .activity-cell-compact:hover {
+        background-color: rgba(44, 90, 160, 0.08) !important;
+    }
+
+    .activity-cell-compact:focus {
+        outline: 2px solid #2c5aa0;
+        outline-offset: -2px;
+    }
+
+/* Compact cell content layout */
+.compact-cell-content {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    justify-content: center;
+    align-items: center;
+    min-height: 24px;
+}
+
+/* Compact badges */
+.compact-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    border-radius: 9px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+}
+
+.compact-badge-ausencia {
+    min-width: 16px;
+    height: 16px;
+    border-radius: 3px;
+    font-size: 0.55rem;
+}
+
+    .compact-badge-ausencia i {
+        font-size: 0.5rem;
+    }
+
+.compact-empty {
+    color: #ccc;
+    font-size: 0.7rem;
+}
+
+/* Compact popover styles */
+.compact-popover {
+    max-width: 320px;
+    min-width: 220px;
+}
+
+    .compact-popover .popover-header {
+        font-size: 0.8rem;
+        font-weight: 600;
+        background: linear-gradient(135deg, #2c5aa0 0%, #1a4480 100%);
+        color: #fff;
+        border-bottom: none;
+        padding: 0.5rem 0.75rem;
+    }
+
+    .compact-popover .popover-body {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8rem;
+    }
+
+.compact-popover-body .popover-section {
+    margin-bottom: 0.5rem;
+}
+
+    .compact-popover-body .popover-section:last-child {
+        margin-bottom: 0;
+    }
+
+.popover-section-title {
+    display: block;
+    font-size: 0.75rem;
+    color: #495057;
+    margin-bottom: 0.25rem;
+    border-bottom: 1px solid #e9ecef;
+    padding-bottom: 0.2rem;
+}
+
+.popover-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+    .popover-list li {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.2rem 0;
+        font-size: 0.78rem;
+        line-height: 1.3;
+    }
+
+.popover-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.popover-link {
+    color: #2c5aa0;
+    text-decoration: none;
+    word-break: break-word;
+}
+
+    .popover-link:hover {
+        text-decoration: underline;
+        color: #1a4480;
+    }
+
+/* =============================================================
    13. RESPONSIVE DESIGN
    ============================================================= */
 @media (max-width: 1200px) {
@@ -1115,6 +1290,12 @@
             #eee 4px,
             #eee 8px
         ) !important;
+    }
+
+    /* Print — compact view */
+    .compact-badge {
+        box-shadow: none;
+        border: 1px solid currentColor;
     }
 }
 
