@@ -248,13 +248,13 @@
    6. ACTIVITY CELLS
    ============================================================= */
 .activity-cell {
-	padding: 0.5rem;
-	vertical-align: top;
-	border-right: 1px solid #e9ecef;
-	border-bottom: 1px solid #e9ecef;
+	vertical-align: top !important;
+	padding: 8px !important;
+	border-right: 1px solid #e9ecef !important;
+	border-bottom: 1px solid #e9ecef !important;
 	min-height: 80px;
 	max-width: 150px;
-	background: #fafafa;
+	background: #fafbfc !important;
 	position: relative;
 }
 
@@ -263,14 +263,6 @@
 	padding: 4px !important;
 	max-height: 300px !important;
 	overflow-y: auto !important;
-}
-
-.activity-cell {
-	vertical-align: top !important;
-	padding: 8px !important;
-	background: #fafbfc !important;
-	border-right: 1px solid #e9ecef !important;
-	border-bottom: 1px solid #e9ecef !important;
 }
 
 .activity-item {
@@ -602,7 +594,8 @@
 
 	.activity-title {
 		font-size: 0.8rem !important;
-		-webkit-line-clamp: 1;
+		-webkit-line-clamp: 1 !important;
+		max-height: 1.3em !important;
 	}
 	
 	.activity-content {
@@ -617,12 +610,6 @@
 	.activity-project {
 		font-size: 0.7rem !important;
 		display: none !important;
-	}
-
-	.activity-title {
-		font-size: 0.8rem !important;
-		-webkit-line-clamp: 1 !important;
-		max-height: 1.3em !important;
 	}
 
 	.grid-controls {
