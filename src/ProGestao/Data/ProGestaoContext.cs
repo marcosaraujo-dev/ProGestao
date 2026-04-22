@@ -84,6 +84,15 @@ namespace ProGestao.Data
             modelBuilder.Entity<Ausencia>()
                 .ToTable(t => t.HasCheckConstraint("CK_Ausencia_Datas", "[DataInicio] <= [DataFim]"));
 
+            // Seed data: Tipos de Ausência padrão
+            modelBuilder.Entity<TipoAusencia>().HasData(
+                new TipoAusencia { Id = 1, Nome = "Férias", Cor = "#4CAF50", Descricao = "Período de férias do colaborador", Ativo = true },
+                new TipoAusencia { Id = 2, Nome = "Folga", Cor = "#2196F3", Descricao = "Dia de folga compensatória", Ativo = true },
+                new TipoAusencia { Id = 3, Nome = "Afastamento", Cor = "#FF9800", Descricao = "Afastamento por motivos diversos", Ativo = true },
+                new TipoAusencia { Id = 4, Nome = "Day-off", Cor = "#9C27B0", Descricao = "Dia de folga por aniversário ou benefício", Ativo = true },
+                new TipoAusencia { Id = 5, Nome = "Licença Médica", Cor = "#F44336", Descricao = "Afastamento por motivos de saúde", Ativo = true }
+            );
+
             base.OnModelCreating(modelBuilder);
         }
     }
