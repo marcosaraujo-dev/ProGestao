@@ -364,19 +364,15 @@
                                             </td>
                                             <td style="min-width: 150px;">
                                                 <div class="progress" style="height: 20px;">
-                                                    <td style="min-width: 150px;">  
-                                                        <div class="progress" style="height: 20px;">  
-                                                            <div class="progress-bar bg-success"  
-                                                                 style="width: @(performance.TaxaConclusao * 100)%"  
-                                                                 data-bs-toggle="tooltip"  
-                                                                 title="@performance.TaxaConclusao.ToString("P0") taxa de conclusão">  
-                                                                @if ((double)performance.TaxaConclusao > 0.1)  
-                                                                {  
-                                                                    <small>@performance.TaxaConclusao.ToString("P0")</small>  
-                                                                }  
-                                                            </div>  
-                                                        </div>  
-                                                    </td>
+                                                    <div class="progress-bar bg-success"
+                                                         style="width: @(performance.TaxaConclusao * 100)%"
+                                                         data-bs-toggle="tooltip"
+                                                         title="@performance.TaxaConclusao.ToString("P0") taxa de conclusão">
+                                                        @if ((double)performance.TaxaConclusao > 0.1)
+                                                        {
+                                                            <small>@performance.TaxaConclusao.ToString("P0")</small>
+                                                        }
+                                                    </div>
                                                 </div>
                                             </td>
                                         </tr>
