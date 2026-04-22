@@ -1,0 +1,260 @@
+@page
+@model ProGestao.Pages.Gantt.IndexModel
+@{
+    ViewData["Title"] = "Diagrama de Gantt";
+    ViewData["PageDescription"] = "Visualização de atividades e ausências em barras horizontais";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages/gantt.css" asp-append-version="true">
+}
+
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="header-blue">
+        <div class="container">
+            <h2 class="mb-0">
+                <i class="fas fa-chart-gantt me-2"></i>
+                Diagrama de Gantt
+            </h2>
+            <p class="page-subtitle">
+                Visualização de atividades e ausências em barras horizontais
+            </p>
+        </div>
+    </div>
+
+    <!-- Controls Row -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="gantt-controls d-flex justify-content-between align-items-center flex-wrap gap-3">
+
+                <!-- Navegação Temporal -->
+                <div class="gantt-navigation">
+                    <div class="btn-group" role="group" aria-label="Navegação temporal">
+                        <a href="@Url.Page("./Index", new { dataInicio = Model.PeriodoAnterior.ToString("yyyy-MM-dd"), visao = Model.Visao, equipeId = Model.EquipeId, projetoId = Model.ProjetoId })"
+                           class="btn btn-outline-primary"
+                           title="Período anterior">
+                            <i class="fas fa-chevron-left me-1"></i>Anterior
+                        </a>
+                        <button type="button" class="btn btn-primary" disabled>
+                            @Model.TituloPeriodo
+                        </button>
+                        <a href="@Url.Page("./Index", new { dataInicio = Model.ProximoPeriodo.ToString("yyyy-MM-dd"), visao = Model.Visao, equipeId = Model.EquipeId, projetoId = Model.ProjetoId })"
+                           class="btn btn-outline-primary"
+                           title="Próximo período">
+                            Próximo<i class="fas fa-chevron-right ms-1"></i>
+                        </a>
+                    </div>
+                    <a href="@Url.Page("./Index", new { visao = Model.Visao, equipeId = Model.EquipeId, projetoId = Model.ProjetoId })"
+                       class="btn btn-outline-secondary ms-2"
+                       title="Ir para o período atual">
+                        <i class="fas fa-calendar-day me-1"></i>Hoje
+                    </a>
+                </div>
+
+                <!-- Filtros -->
+                <div class="gantt-filters">
+                    <form method="get" class="d-flex align-items-center gap-3 flex-wrap">
+                        <!-- Visão -->
+                        <div class="btn-group" role="group" aria-label="Tipo de visão">
+                            <a href="@Url.Page("./Index", new { visao = "semanal", equipeId = Model.EquipeId, projetoId = Model.ProjetoId })"
+                               class="btn @(Model.Visao == "semanal" ? "btn-primary" : "btn-outline-primary")">
+                                <i class="fas fa-calendar-week me-1"></i>Semanal
+                            </a>
+                            <a href="@Url.Page("./Index", new { visao = "mensal", equipeId = Model.EquipeId, projetoId = Model.ProjetoId })"
+                               class="btn @(Model.Visao == "mensal" ? "btn-primary" : "btn-outline-primary")">
+                                <i class="fas fa-calendar me-1"></i>Mensal
+                            </a>
+                        </div>
+
+                        <!-- Equipe -->
+                        <select name="equipeId" class="form-select" style="min-width: 200px;" onchange="this.form.submit()">
+                            <option value="">Todas as equipes</option>
+                            @foreach (var equipe in Model.Equipes)
+                            {
+                                <option value="@equipe.Id" selected="@(Model.EquipeId == equipe.Id)">
+                                    @equipe.Nome
+                                </option>
+                            }
+                        </select>
+
+                        <!-- Projeto -->
+                        <select name="projetoId" class="form-select" style="min-width: 200px;" onchange="this.form.submit()">
+                            <option value="">Todos os projetos</option>
+                            @foreach (var projeto in Model.Projetos)
+                            {
+                                <option value="@projeto.Id" selected="@(Model.ProjetoId == projeto.Id)">
+                                    @projeto.Nome
+                                </option>
+                            }
+                        </select>
+
+                        <input type="hidden" name="visao" value="@Model.Visao" />
+                        <input type="hidden" name="dataInicio" value="@Model.PeriodoInicio.ToString("yyyy-MM-dd")" />
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Legenda -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="gantt-legenda d-flex align-items-center gap-4 flex-wrap">
+                <span class="text-muted fw-semibold">Legenda:</span>
+                <span class="gantt-legenda-item">
+                    <span class="gantt-legenda-cor gantt-legenda-atividade"></span> Atividade
+                </span>
+                <span class="gantt-legenda-item">
+                    <span class="gantt-legenda-cor gantt-legenda-ausencia"></span> Ausência
+                </span>
+                <span class="gantt-legenda-item">
+                    <span class="gantt-legenda-cor gantt-legenda-atrasada"></span> Atrasada
+                </span>
+                <span class="gantt-legenda-item">
+                    <span class="gantt-legenda-cor gantt-legenda-hoje"></span> Hoje
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gantt Chart -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body p-0">
+                    @if (Model.GanttData.Usuarios.Any())
+                    {
+                        <div class="gantt-scroll-wrapper">
+                            <div class="gantt-container"
+                                 style="--gantt-dias: @Model.GanttData.TotalDias;">
+
+                                <!-- Header: coluna de usuário + colunas de dias -->
+                                <div class="gantt-header gantt-usuario-nome">
+                                    <i class="fas fa-user me-1"></i> Usuário
+                                </div>
+                                @foreach (var dia in Model.GanttData.Dias)
+                                {
+                                    var indice = (dia.Data - Model.PeriodoInicio).Days;
+                                    <div class="gantt-header gantt-header-dia @(dia.EhHoje ? "gantt-hoje" : "") @(dia.EhFimDeSemana ? "gantt-fds" : "")">
+                                        <span class="gantt-dia-semana">@dia.DiaAbreviado</span>
+                                        <span class="gantt-dia-numero">@dia.DiaNumero</span>
+                                    </div>
+                                }
+
+                                <!-- Linhas de usuários com barras -->
+                                @foreach (var usuario in Model.GanttData.Usuarios)
+                                {
+                                    <!-- Nome do usuário -->
+                                    <div class="gantt-usuario-nome">
+                                        <div class="gantt-usuario-info">
+                                            <span class="gantt-usuario-avatar">@usuario.Iniciais</span>
+                                            <span class="gantt-usuario-texto" title="@usuario.Nome">@usuario.Nome</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Área de barras (ocupa todas as colunas de dias) -->
+                                    <div class="gantt-linha-barras"
+                                         style="grid-column: 2 / span @Model.GanttData.TotalDias;">
+
+                                        <!-- Grid interno para posicionar barras -->
+                                        <div class="gantt-barras-grid"
+                                             style="--gantt-dias: @Model.GanttData.TotalDias;">
+
+                                            @* Highlight do dia atual *@
+                                            @if (Model.IndiceHoje >= 0)
+                                            {
+                                                <div class="gantt-hoje-bg"
+                                                     style="--inicio: @Model.IndiceHoje; --duracao: 1;">
+                                                </div>
+                                            }
+
+                                            @* Highlights de fim de semana *@
+                                            @foreach (var dia in Model.GanttData.Dias.Where(d => d.EhFimDeSemana))
+                                            {
+                                                var fdsIdx = (dia.Data - Model.PeriodoInicio).Days;
+                                                <div class="gantt-fds-bg"
+                                                     style="--inicio: @fdsIdx; --duracao: 1;">
+                                                </div>
+                                            }
+
+                                            @foreach (var barra in usuario.Barras)
+                                            {
+                                                var cssClass = barra.Tipo == "ausencia"
+                                                    ? "gantt-barra gantt-barra-ausencia"
+                                                    : "gantt-barra gantt-barra-atividade";
+
+                                                if (barra.EstaAtrasada)
+                                                {
+                                                    cssClass += " gantt-barra-atrasada";
+                                                }
+
+                                                if (barra.Tipo == "atividade")
+                                                {
+                                                    <a href="@barra.Url"
+                                                       class="@cssClass"
+                                                       style="--inicio: @barra.DiaInicioOffset; --duracao: @barra.DuracaoDias; --cor-barra: @barra.Cor;"
+                                                       data-bs-toggle="tooltip"
+                                                       data-bs-placement="top"
+                                                       data-bs-html="true"
+                                                       title="@barra.TooltipHtml">
+                                                        <span class="gantt-barra-texto">@barra.Nome</span>
+                                                    </a>
+                                                }
+                                                else
+                                                {
+                                                    <div class="@cssClass"
+                                                         style="--inicio: @barra.DiaInicioOffset; --duracao: @barra.DuracaoDias; --cor-barra: @barra.Cor;"
+                                                         data-bs-toggle="tooltip"
+                                                         data-bs-placement="top"
+                                                         data-bs-html="true"
+                                                         title="@barra.TooltipHtml">
+                                                        <span class="gantt-barra-texto">@barra.Nome</span>
+                                                    </div>
+                                                }
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <!-- Empty State -->
+                        <div class="text-center p-5">
+                            <i class="fas fa-chart-gantt fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">Nenhum dado encontrado</h5>
+                            <p class="text-muted mb-0">
+                                @if (Model.EquipeId.HasValue || Model.ProjetoId.HasValue)
+                                {
+                                    <text>Tente ajustar os filtros de equipe ou projeto.</text>
+                                }
+                                else
+                                {
+                                    <text>Não há atividades ou ausências cadastradas para este período.</text>
+                                }
+                            </p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Inicializa tooltips com container body
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (el) {
+                return new bootstrap.Tooltip(el, {
+                    html: true,
+                    sanitize: false,
+                    container: 'body'
+                });
+            });
+        });
+    </script>
+}

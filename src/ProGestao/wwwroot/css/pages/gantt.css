@@ -1,0 +1,404 @@
+@charset "UTF-8";
+
+/* ============================================================
+   Diagrama de Gantt — CSS Grid Layout
+   ============================================================ */
+
+/* ---- Scroll wrapper ---- */
+.gantt-scroll-wrapper {
+    overflow-x: auto;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* ---- Container principal (CSS Grid) ---- */
+.gantt-container {
+    display: grid;
+    grid-template-columns: 200px repeat(var(--gantt-dias), minmax(36px, 1fr));
+    min-width: max-content;
+    border: 1px solid var(--border-color, #dee2e6);
+    border-radius: 0.375rem;
+}
+
+/* ---- Headers ---- */
+.gantt-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-secondary, #6c757d);
+    background: var(--bg-light, #f8f9fa);
+    border-bottom: 2px solid var(--border-color, #dee2e6);
+    border-right: 1px solid var(--border-color, #dee2e6);
+    text-align: center;
+    user-select: none;
+}
+
+.gantt-header-dia {
+    flex-direction: column;
+    gap: 0.125rem;
+    min-width: 36px;
+}
+
+.gantt-dia-semana {
+    text-transform: uppercase;
+    font-size: 0.625rem;
+    letter-spacing: 0.05em;
+    opacity: 0.7;
+}
+
+.gantt-dia-numero {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--text-primary, #212529);
+}
+
+/* ---- Coluna de usuário (sticky left) ---- */
+.gantt-usuario-nome {
+    position: sticky;
+    left: 0;
+    z-index: var(--z-sticky, 10);
+    background: #fff;
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--border-color, #dee2e6);
+    border-right: 2px solid var(--border-color, #dee2e6);
+    min-width: 200px;
+    max-width: 200px;
+}
+
+.gantt-header.gantt-usuario-nome {
+    justify-content: flex-start;
+    font-weight: 700;
+}
+
+.gantt-usuario-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    overflow: hidden;
+}
+
+.gantt-usuario-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    border-radius: 50%;
+    background: var(--primary-color, #2c5aa0);
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+.gantt-usuario-texto {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.8125rem;
+    font-weight: 500;
+}
+
+/* ---- Linha de barras ---- */
+.gantt-linha-barras {
+    position: relative;
+    border-bottom: 1px solid var(--border-color, #dee2e6);
+    min-height: 48px;
+}
+
+.gantt-barras-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--gantt-dias), 1fr);
+    align-items: center;
+    height: 100%;
+    padding: 4px 0;
+}
+
+/* ---- Barras base ---- */
+.gantt-barra {
+    grid-column: calc(var(--inicio) + 1) / span var(--duracao);
+    grid-row: 1;
+    display: flex;
+    align-items: center;
+    padding: 0 6px;
+    border-radius: 4px;
+    height: 28px;
+    margin: 2px 2px;
+    overflow: hidden;
+    text-decoration: none;
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: opacity 0.15s ease, box-shadow 0.15s ease;
+    z-index: 2;
+    position: relative;
+}
+
+.gantt-barra:hover {
+    opacity: 0.85;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    z-index: 3;
+}
+
+.gantt-barra-texto {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ---- Barra de atividade (sólida) ---- */
+.gantt-barra-atividade {
+    background-color: var(--cor-barra, #6c757d);
+}
+
+.gantt-barra-atividade:hover {
+    color: #fff;
+}
+
+/* ---- Barra de ausência (hachurado) ---- */
+.gantt-barra-ausencia {
+    background: repeating-linear-gradient(
+        -45deg,
+        var(--cor-barra, #6c757d),
+        var(--cor-barra, #6c757d) 4px,
+        rgba(255, 255, 255, 0.35) 4px,
+        rgba(255, 255, 255, 0.35) 8px
+    );
+    border: 1px solid var(--cor-barra, #6c757d);
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+/* ---- Barra atrasada (borda vermelha) ---- */
+.gantt-barra-atrasada {
+    border: 2px solid #dc3545;
+    box-shadow: 0 0 0 1px rgba(220, 53, 69, 0.3);
+}
+
+.gantt-barra-atrasada::after {
+    content: "⚠";
+    margin-left: 4px;
+    font-size: 0.65rem;
+}
+
+/* ---- Destaque do dia atual ---- */
+.gantt-hoje {
+    background-color: rgba(13, 110, 253, 0.08);
+}
+
+.gantt-hoje .gantt-dia-numero {
+    color: #0d6efd;
+}
+
+.gantt-hoje-bg {
+    grid-column: calc(var(--inicio) + 1) / span var(--duracao);
+    grid-row: 1;
+    background-color: rgba(13, 110, 253, 0.06);
+    border-left: 2px solid rgba(13, 110, 253, 0.4);
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+    position: relative;
+}
+
+/* ---- Fim de semana ---- */
+.gantt-fds {
+    background-color: rgba(0, 0, 0, 0.03);
+}
+
+.gantt-fds-bg {
+    grid-column: calc(var(--inicio) + 1) / span var(--duracao);
+    grid-row: 1;
+    background-color: rgba(0, 0, 0, 0.025);
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+    position: relative;
+}
+
+/* ---- Legenda ---- */
+.gantt-legenda {
+    padding: 0.5rem 1rem;
+    background: #fff;
+    border: 1px solid var(--border-color, #dee2e6);
+    border-radius: 0.375rem;
+    font-size: 0.8125rem;
+}
+
+.gantt-legenda-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.gantt-legenda-cor {
+    display: inline-block;
+    width: 20px;
+    height: 12px;
+    border-radius: 2px;
+}
+
+.gantt-legenda-atividade {
+    background-color: #2c5aa0;
+}
+
+.gantt-legenda-ausencia {
+    background: repeating-linear-gradient(
+        -45deg,
+        #6c757d,
+        #6c757d 3px,
+        rgba(255, 255, 255, 0.4) 3px,
+        rgba(255, 255, 255, 0.4) 6px
+    );
+}
+
+.gantt-legenda-atrasada {
+    background-color: #fff;
+    border: 2px solid #dc3545;
+}
+
+.gantt-legenda-hoje {
+    background-color: rgba(13, 110, 253, 0.15);
+    border-left: 2px solid #0d6efd;
+}
+
+/* ---- Controles ---- */
+.gantt-controls {
+    padding: 0.75rem 0;
+}
+
+/* ============================================================
+   Responsividade
+   ============================================================ */
+
+@media (max-width: 768px) {
+    .gantt-container {
+        grid-template-columns: 140px repeat(var(--gantt-dias), minmax(28px, 1fr));
+    }
+
+    .gantt-usuario-nome {
+        min-width: 140px;
+        max-width: 140px;
+        padding: 0.375rem 0.5rem;
+    }
+
+    .gantt-usuario-avatar {
+        width: 24px;
+        height: 24px;
+        min-width: 24px;
+        font-size: 0.6rem;
+    }
+
+    .gantt-usuario-texto {
+        font-size: 0.75rem;
+    }
+
+    .gantt-barra {
+        height: 22px;
+        font-size: 0.625rem;
+        padding: 0 3px;
+    }
+
+    .gantt-dia-semana {
+        display: none;
+    }
+
+    .gantt-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .gantt-navigation,
+    .gantt-filters {
+        width: 100%;
+    }
+
+    .gantt-filters form {
+        flex-direction: column;
+    }
+
+    .gantt-filters select {
+        min-width: 100% !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .gantt-container {
+        grid-template-columns: 100px repeat(var(--gantt-dias), minmax(22px, 1fr));
+    }
+
+    .gantt-usuario-nome {
+        min-width: 100px;
+        max-width: 100px;
+    }
+
+    .gantt-usuario-avatar {
+        display: none;
+    }
+}
+
+/* ============================================================
+   Print
+   ============================================================ */
+
+@media print {
+    .gantt-controls,
+    .gantt-navigation,
+    .gantt-filters,
+    .gantt-legenda,
+    .header-blue .page-subtitle {
+        display: none;
+    }
+
+    .gantt-scroll-wrapper {
+        overflow: visible;
+    }
+
+    .gantt-container {
+        border: 1px solid #000;
+    }
+
+    .gantt-barra {
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+    }
+
+    .gantt-hoje-bg {
+        border-left-color: #000;
+    }
+}
+
+/* ============================================================
+   Acessibilidade
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    .gantt-barra {
+        transition: none;
+    }
+}
+
+@media (prefers-contrast: more) {
+    .gantt-barra {
+        border: 2px solid #000;
+    }
+
+    .gantt-barra-ausencia {
+        border: 2px solid #000;
+    }
+
+    .gantt-hoje-bg {
+        border-left: 3px solid #0d6efd;
+        background-color: rgba(13, 110, 253, 0.15);
+    }
+
+    .gantt-header {
+        border-color: #000;
+    }
+}
