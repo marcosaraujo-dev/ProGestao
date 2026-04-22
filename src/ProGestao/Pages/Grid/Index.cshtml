@@ -246,14 +246,9 @@
                                                                              style="border-left: 4px solid @(atividade.StatusCor ?? "#6c757d");">
                                                                             
                                                                             <div class="activity-content">
-                                                                                <!-- Título - TEXTO TRUNCADO -->
+                                                                                <!-- Título -->
                                                                                 <div class="activity-title" title="@atividade.Nome">
-                                                                                    @{
-                                                                                        var tituloTruncado = atividade.Nome.Length > 10 
-                                                                                            ? atividade.Nome.Substring(0, 10) + "..." 
-                                                                                            : atividade.Nome;
-                                                                                    }
-                                                                                    @tituloTruncado
+                                                                                    @atividade.Nome
                                                                                     @if (atividade.Prioridade >= 3)
                                                                                     {
                                                                                         <i class="fas fa-exclamation-triangle text-warning ms-1"
@@ -368,23 +363,11 @@
 
 @section Scripts {
     <script>
-        // Força o scroll para o topo ao carregar a página
-        window.scrollTo(0, 0);
-        
         document.addEventListener('DOMContentLoaded', function() {
-            // Garante que o foco fique no topo
-            window.scrollTo(0, 0);
-                    document.querySelectorAll('[autofocus]').forEach(el => {
-                el.removeAttribute('autofocus');
-                el.blur();
-            });
-                // Remove âncoras da URL
+            // Remove âncoras da URL
             if (window.location.hash) {
                 history.replaceState(null, null, window.location.pathname + window.location.search);
             }
-
-            // Mantém foco no topo da página
-            setTimeout(() => window.scrollTo(0, 0), 100);
 
             // Inicializa tooltips com container body para evitar corte pelo overflow do grid-wrapper
             var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
@@ -420,8 +403,6 @@
                 });
             }
 
-            // Removido auto-scroll para coluna 'today' para manter foco no topo
-
             // Debug para desenvolvimento
             if (window.console && '@(Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"))' === 'Development') {
                 console.log('=== GRID CONSOLIDADO DEBUG ===');
@@ -441,22 +422,6 @@
                     }
                 }
                 console.log('================================');
-            }
-        });
-
-        window.addEventListener("load", function () {
-            // Força o scroll para o topo
-            window.scrollTo(0, 0);
-
-            // Remove autofocus que pode centralizar o campo
-            document.querySelectorAll('[autofocus]').forEach(el => {
-                el.removeAttribute('autofocus');
-                el.blur();
-            });
-
-            // Remove âncoras da URL
-            if (window.location.hash) {
-                history.replaceState(null, null, window.location.pathname + window.location.search);
             }
         });
     </script>
