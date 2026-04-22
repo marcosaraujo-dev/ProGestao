@@ -14,6 +14,8 @@ namespace ProGestao.Data
         public DbSet<StatusProjeto> StatusProjetos { get; set; }
         public DbSet<StatusAtividade> StatusAtividades { get; set; }
         public DbSet<TipoAtividade> TiposAtividade { get; set; }
+        public DbSet<TipoAusencia> TiposAusencia { get; set; }
+        public DbSet<Ausencia> Ausencias { get; set; }
 
      
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -50,6 +52,37 @@ namespace ProGestao.Data
 
             modelBuilder.Entity<StatusProjeto>().ToTable("StatusProjeto");
             modelBuilder.Entity<StatusAtividade>().ToTable("StatusAtividade");
+
+            // Configurações de TipoAusencia
+            modelBuilder.Entity<TipoAusencia>()
+                .HasMany(t => t.Ausencias)
+                .WithOne(a => a.TipoAusencia)
+                .HasForeignKey(a => a.TipoAusenciaId);
+
+            // Configurações de Ausencia
+            modelBuilder.Entity<Ausencia>()
+                .HasOne(a => a.Usuario)
+                .WithMany(u => u.Ausencias)
+                .HasForeignKey(a => a.UsuarioId);
+
+            modelBuilder.Entity<Ausencia>()
+                .HasOne(a => a.TipoAusencia)
+                .WithMany(t => t.Ausencias)
+                .HasForeignKey(a => a.TipoAusenciaId);
+
+            // Índices
+            modelBuilder.Entity<Ausencia>()
+                .HasIndex(a => a.UsuarioId);
+
+            modelBuilder.Entity<Ausencia>()
+                .HasIndex(a => a.TipoAusenciaId);
+
+            modelBuilder.Entity<Ausencia>()
+                .HasIndex(a => new { a.DataInicio, a.DataFim });
+
+            // Constraint: DataInicio <= DataFim
+            modelBuilder.Entity<Ausencia>()
+                .ToTable(t => t.HasCheckConstraint("CK_Ausencia_Datas", "[DataInicio] <= [DataFim]"));
 
             base.OnModelCreating(modelBuilder);
         }
