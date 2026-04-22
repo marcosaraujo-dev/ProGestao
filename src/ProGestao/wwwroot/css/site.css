@@ -1,17 +1,18 @@
+@charset "UTF-8";
 /* =============================================================
    PROGESTAO - SITE PRINCIPAL CSS
    Arquivo: wwwroot/css/site.css
-   Vers„o: 2.0 - Refatorado e Otimizado
-   DescriÁ„o: Estilos globais do sistema ProGestao
+   Vers√£o: 2.0 - Refatorado e Otimizado
+   Descri√ß√£o: Estilos globais do sistema ProGestao
    ============================================================= */
 
 /* =============================================================
-   1. IMPORTA«’ES E FONTES
+   1. IMPORTA√á√ïES E FONTES
    ============================================================= */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 /* =============================================================
-   2. VARI¡VEIS CSS GLOBAIS
+   2. VARI√ÅVEIS CSS GLOBAIS
    ============================================================= */
 :root {
     /* =====  CORES PRINCIPAIS  ===== */
@@ -63,7 +64,7 @@
     --line-height-snug: 1.375;
     --line-height-normal: 1.5;
     --line-height-relaxed: 1.625;
-    /* =====  ESPA«AMENTOS  ===== */
+    /* =====  ESPA√áAMENTOS  ===== */
     --spacing-xs: 0.25rem;
     --spacing-sm: 0.5rem;
     --spacing-md: 1rem;
@@ -84,7 +85,7 @@
     --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
     --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-    /* =====  TRANSI«’ES  ===== */
+    /* =====  TRANSI√á√ïES  ===== */
     --transition-fast: 0.15s ease-in-out;
     --transition-normal: 0.3s ease-in-out;
     --transition-slow: 0.5s ease-in-out;
@@ -139,7 +140,7 @@ body {
 }
 
 /* =============================================================
-   4. NAVBAR E NAVEGA«√O
+   4. NAVBAR E NAVEGA√á√ÉO
    ============================================================= */
 
 /* Navbar principal */
@@ -186,7 +187,7 @@ body {
     }
 
 /* =============================================================
-   5. FIX ESPECÕFICO PARA DROPDOWN DO NAVBAR
+   5. FIX ESPEC√çFICO PARA DROPDOWN DO NAVBAR
    ============================================================= */
 
 /* Dropdown container do navbar */
@@ -215,7 +216,7 @@ body {
     transition: all var(--transition-normal);
 }
 
-/* Dropdown quando est· aberto */
+/* Dropdown quando est√° aberto */
 .navbar .nav-item.dropdown.show {
     z-index: calc(var(--z-navbar-dropdown) + 5) !important;
 }
@@ -227,7 +228,7 @@ body {
     transform: translateY(0);
 }
 
-/* Dropdown do usu·rio (direita) */
+/* Dropdown do usu√°rio (direita) */
 .navbar .dropdown-menu-end {
     right: 0 !important;
     left: auto !important;
@@ -285,7 +286,7 @@ body {
     }
 
 /* =============================================================
-   6. HEADERS DE P¡GINA
+   6. HEADERS DE P√ÅGINA
    ============================================================= */
 
 .header-blue {
@@ -464,7 +465,7 @@ body {
     align-items: stretch;
 }
 
-/* Para qualquer card que precise ter bot„o alinhado embaixo */
+/* Para qualquer card que precise ter bot√£o alinhado embaixo */
 .card.equal-height-card {
     display: flex !important;
     flex-direction: column !important;
@@ -488,7 +489,7 @@ body {
 }
 
 /* =============================================================
-   8. BOT’ES
+   8. BOT√ïES
    ============================================================= */
 
 .btn {
@@ -511,7 +512,7 @@ body {
         box-shadow: 0 0 0 3px rgba(44, 90, 160, 0.25);
     }
 
-/* Bot„o prim·rio */
+/* Bot√£o prim√°rio */
 .btn-primary {
     background: var(--gradient-primary);
     border-color: var(--primary-color);
@@ -526,7 +527,7 @@ body {
         box-shadow: var(--shadow-lg);
     }
 
-/* Bot„o secund·rio */
+/* Bot√£o secund√°rio */
 .btn-secondary {
     background: var(--white);
     border-color: var(--gray-300);
@@ -540,7 +541,7 @@ body {
         transform: translateY(-1px);
     }
 
-/* Bot„o sucesso */
+/* Bot√£o sucesso */
 .btn-success {
     background: var(--gradient-success);
     border-color: var(--success-color);
@@ -554,7 +555,7 @@ body {
         transform: translateY(-1px);
     }
 
-/* Bot„o perigo */
+/* Bot√£o perigo */
 .btn-danger {
     background: var(--gradient-danger);
     border-color: var(--danger-color);
@@ -568,7 +569,7 @@ body {
         transform: translateY(-1px);
     }
 
-/* Bot„o warning */
+/* Bot√£o warning */
 .btn-warning {
     background: var(--gradient-warning);
     border-color: var(--warning-color);
@@ -582,7 +583,7 @@ body {
         transform: translateY(-1px);
     }
 
-/* Bot„o info */
+/* Bot√£o info */
 .btn-info {
     background: linear-gradient(135deg, var(--info-color) 0%, var(--info-dark) 100%);
     border-color: var(--info-color);
@@ -596,7 +597,7 @@ body {
         transform: translateY(-1px);
     }
 
-/* Botıes outline */
+/* Bot√µes outline */
 .btn-outline-primary {
     background: transparent;
     border-color: var(--primary-color);
@@ -609,7 +610,7 @@ body {
         color: var(--white);
     }
 
-/* Tamanhos de bot„o */
+/* Tamanhos de bot√£o */
 .btn-sm {
     padding: 0.5rem 1rem;
     font-size: var(--font-size-sm);
@@ -620,7 +621,7 @@ body {
     font-size: var(--font-size-lg);
 }
 
-/* Botıes especiais */
+/* Bot√µes especiais */
 .btn-search {
     background: var(--gradient-primary);
     border-color: var(--primary-color);
@@ -649,7 +650,7 @@ body {
     letter-spacing: 0.025em;
 }
 
-/* Status especÌficos do ProGestao */
+/* Status espec√≠ficos do ProGestao */
 .status-pendente {
     background: var(--warning-light);
     color: var(--warning-dark);
@@ -750,7 +751,7 @@ body {
     }
 
 /* =============================================================
-   11. FORMUL¡RIOS
+   11. FORMUL√ÅRIOS
    ============================================================= */
 
 .form-control {
@@ -803,7 +804,7 @@ body {
     margin-top: 0.25rem;
 }
 
-/* ValidaÁ„o */
+/* Valida√ß√£o */
 .invalid-feedback {
     display: block;
     color: var(--danger-color);
@@ -821,7 +822,7 @@ body {
 }
 
 /* =============================================================
-   12. ATIVIDADES E PROJETOS ESPECÕFICOS
+   12. ATIVIDADES E PROJETOS ESPEC√çFICOS
    ============================================================= */
 
 /* Cards de atividade */
@@ -892,7 +893,7 @@ body {
         border-radius: 2px;
     }
 
-/* Meta informaÁıes */
+/* Meta informa√ß√µes */
 .atividade-meta {
     font-size: var(--font-size-sm);
     color: var(--gray-600);
@@ -909,7 +910,7 @@ body {
     }
 
 /* =============================================================
-   13. ALERTAS E NOTIFICA«’ES
+   13. ALERTAS E NOTIFICA√á√ïES
    ============================================================= */
 
 .alert {
@@ -946,7 +947,7 @@ body {
 }
 
 /* =============================================================
-   14. VALIDA«√O SUMMARY
+   14. VALIDA√á√ÉO SUMMARY
    ============================================================= */
 
 .validation-summary {
@@ -1103,7 +1104,7 @@ body {
     box-shadow: var(--shadow-xl);
 }
 
-/* Display utilities especÌficas */
+/* Display utilities espec√≠ficas */
 .d-flex-center {
     display: flex;
     align-items: center;
@@ -1116,7 +1117,7 @@ body {
     justify-content: space-between;
 }
 
-/* Force z-index utility para emergÍncias */
+/* Force z-index utility para emerg√™ncias */
 .force-dropdown-top {
     z-index: 9999 !important;
 }
@@ -1248,7 +1249,7 @@ body {
     }
 }
 
-/* Foco visÌvel para navegaÁ„o por teclado */
+/* Foco vis√≠vel para navega√ß√£o por teclado */
 .btn:focus-visible,
 .form-control:focus-visible,
 .form-select:focus-visible,
@@ -1258,7 +1259,7 @@ body {
 }
 
 /* =============================================================
-   19. IMPRESS√O
+   19. IMPRESS√ÉO
    ============================================================= */
 
 @media print {
