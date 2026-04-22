@@ -30,5 +30,6 @@ namespace ProGestao.Models
 
         public ICollection<Atividade> Atividades { get; set; } = new List<Atividade>();
         public ICollection<Projeto> ProjetosResponsavel { get; set; } = new List<Projeto>();
+        public ICollection<Ausencia> Ausencias { get; set; } = new List<Ausencia>();
     }
 }
